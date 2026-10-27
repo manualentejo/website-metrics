@@ -1,4 +1,4 @@
-const MODEL = "gemini-3.8-flash";
+const MODEL = "gemini-3.1-flash-lite";
 const MAX_ATTEMPTS = 3;
 
 function sleep(ms: number) {
