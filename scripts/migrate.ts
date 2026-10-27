@@ -1,16 +1,19 @@
-import { neon } from "@neondatabase/serverless";
+import postgres from "postgres";
 import { readFileSync } from "fs";
 import { join } from "path";
 
 async function main() {
-  const sql = neon(process.env.DATABASE_URL!);
+  const connectionString =
+    process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL ?? process.env.DATABASE_URL!;
+  const sql = postgres(connectionString, { ssl: "require", max: 1 });
+
   const migration = readFileSync(join(__dirname, "../drizzle/0000_init.sql"), "utf-8");
   const statements = migration
     .split(";")
     .map((s) => s.trim())
     .filter(Boolean);
   for (const statement of statements) {
-    await sql(statement);
+    await sql.unsafe(statement);
   }
   console.log("Migration applied.");
 
@@ -22,18 +25,22 @@ async function main() {
   ];
 
   for (const site of seedSites) {
-    const existing = await sql("SELECT id FROM sites WHERE url = $1", [site.url]);
+    const existing = await sql`SELECT id FROM sites WHERE url = ${site.url}`;
     if (existing.length === 0) {
-      await sql(
-        "INSERT INTO sites (name, url, status, sort_order) VALUES ($1, $2, 'em_andamento', $3)",
-        [site.name, site.url, site.sortOrder]
-      );
+      await sql`
+        INSERT INTO sites (name, url, status, sort_order)
+        VALUES (${site.name}, ${site.url}, 'em_andamento', ${site.sortOrder})
+      `;
       console.log(`Seeded site: ${site.name}`);
     }
   }
+
+  await sql.end();
 }
 
-main().then(() => process.exit(0)).catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
