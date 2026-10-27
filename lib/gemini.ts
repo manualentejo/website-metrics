@@ -1,4 +1,4 @@
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3.8-flash";
 
 export async function askGemini(systemContext: string, question: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
