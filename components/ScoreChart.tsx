@@ -3,10 +3,10 @@
 import type { ReportRow } from "@/lib/types";
 
 const METRICS: { key: keyof ReportRow; label: string; color: string }[] = [
-  { key: "performanceScore", label: "Performance", color: "#818cf8" },
-  { key: "accessibilityScore", label: "Acessibilidade", color: "#34d399" },
-  { key: "bestPracticesScore", label: "Boas Práticas", color: "#fbbf24" },
-  { key: "seoScore", label: "SEO", color: "#f472b6" },
+  { key: "performanceScore", label: "Performance", color: "#4f46e5" },
+  { key: "accessibilityScore", label: "Acessibilidade", color: "#059669" },
+  { key: "bestPracticesScore", label: "Boas Práticas", color: "#d97706" },
+  { key: "seoScore", label: "SEO", color: "#db2777" },
 ];
 
 export default function ScoreChart({ reports }: { reports: ReportRow[] }) {
@@ -36,7 +36,7 @@ export default function ScoreChart({ reports }: { reports: ReportRow[] }) {
             x2={width}
             y1={y(tick)}
             y2={y(tick)}
-            stroke="#1f2937"
+            stroke="#e5e7eb"
             strokeWidth={1}
           />
         ))}
@@ -72,8 +72,8 @@ export default function ScoreChart({ reports }: { reports: ReportRow[] }) {
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: metric.color }}
               />
-              <span className="text-slate-400">{metric.label}</span>
-              <span className="font-medium text-slate-200">
+              <span className="text-slate-500">{metric.label}</span>
+              <span className="font-medium text-slate-800">
                 {typeof latest === "number" ? Math.round(latest) : "—"}
               </span>
             </div>

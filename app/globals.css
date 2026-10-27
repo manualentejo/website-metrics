@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background-image: radial-gradient(circle at top, rgba(99, 102, 241, 0.08), transparent 55%);
+  background-color: #f7f8fa;
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(79, 70, 229, 0.18);
 }

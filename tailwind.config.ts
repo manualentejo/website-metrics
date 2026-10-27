@@ -9,9 +9,10 @@ const config: Config = {
       },
       colors: {
         surface: {
-          DEFAULT: "#0b0f17",
-          raised: "#111827",
-          border: "#1f2937",
+          DEFAULT: "#f7f8fa",
+          raised: "#ffffff",
+          border: "#e5e7eb",
+          sidebar: "#ffffff",
         },
       },
     },

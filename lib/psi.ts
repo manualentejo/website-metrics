@@ -11,6 +11,8 @@ export interface PsiResult {
   cls: number | null;
   speedIndexMs: number | null;
   failedSeoAudits: { id: string; title: string; weight: number; score: number | null }[];
+  finalScreenshot: string | null;
+  thumbnails: { timing: number; data: string }[];
 }
 
 const CATEGORY_KEYS = ["performance", "accessibility", "best-practices", "seo"] as const;
@@ -55,6 +57,14 @@ export async function runPsi(url: string, strategy: Strategy, apiKey: string): P
     })
     .filter((x): x is { id: string; title: string; weight: number; score: number | null } => x !== null);
 
+  const finalScreenshot: string | null = audits["final-screenshot"]?.details?.data ?? null;
+
+  const thumbnails: { timing: number; data: string }[] =
+    audits["screenshot-thumbnails"]?.details?.items?.map((item: { timing: number; data: string }) => ({
+      timing: item.timing,
+      data: item.data,
+    })) ?? [];
+
   return {
     performanceScore: toScore100(categories.performance?.score),
     accessibilityScore: toScore100(categories.accessibility?.score),
@@ -66,5 +76,7 @@ export async function runPsi(url: string, strategy: Strategy, apiKey: string): P
     cls: audits["cumulative-layout-shift"]?.numericValue ?? null,
     speedIndexMs: audits["speed-index"]?.numericValue ?? null,
     failedSeoAudits,
+    finalScreenshot,
+    thumbnails,
   };
 }

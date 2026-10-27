@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
-import { reports, sites } from "@/db/schema";
+import { reports, sites, snapshots } from "@/db/schema";
 import { runPsi, type Strategy } from "@/lib/psi";
 import { and, eq, lt } from "drizzle-orm";
 
@@ -42,6 +42,15 @@ export async function GET(req: NextRequest) {
           speedIndexMs: psi.speedIndexMs,
           failedSeoAudits: psi.failedSeoAudits,
         });
+
+        await db.delete(snapshots).where(and(eq(snapshots.siteId, site.id), eq(snapshots.strategy, strategy)));
+        await db.insert(snapshots).values({
+          siteId: site.id,
+          strategy,
+          finalScreenshot: psi.finalScreenshot,
+          thumbnails: psi.thumbnails,
+        });
+
         results.push({ site: site.name, strategy, ok: true });
       } catch (err) {
         await db.insert(reports).values({

@@ -42,3 +42,15 @@ export const reports = pgTable("reports", {
 
   error: text("error"),
 });
+
+// Keeps only the latest screenshot/filmstrip per site+strategy so storage
+// doesn't grow with 52 weeks of history — overwritten on every cron run.
+export const snapshots = pgTable("snapshots", {
+  siteId: uuid("site_id")
+    .notNull()
+    .references(() => sites.id, { onDelete: "cascade" }),
+  strategy: text("strategy").notNull(), // "mobile" | "desktop"
+  finalScreenshot: text("final_screenshot"),
+  thumbnails: jsonb("thumbnails").$type<{ timing: number; data: string }[]>(),
+  capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow().notNull(),
+});
