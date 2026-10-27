@@ -7,7 +7,12 @@ async function main() {
     process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL ?? process.env.DATABASE_URL!;
   const sql = postgres(connectionString, { ssl: "require", max: 1 });
 
-  const migrationFiles = ["0000_init.sql", "0001_snapshots.sql", "0002_folders_sharing.sql"];
+  const migrationFiles = [
+    "0000_init.sql",
+    "0001_snapshots.sql",
+    "0002_folders_sharing.sql",
+    "0003_snapshot_analysis.sql",
+  ];
   for (const file of migrationFiles) {
     const migration = readFileSync(join(__dirname, `../drizzle/${file}`), "utf-8");
     const statements = migration

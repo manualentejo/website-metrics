@@ -1,10 +1,17 @@
+import { NextResponse } from "next/server";
 import withAuth from "next-auth/middleware";
 
-export default withAuth({
-  pages: {
-    signIn: "/login",
-  },
-});
+export default withAuth(
+  () => NextResponse.next(),
+  {
+    pages: { signIn: "/login" },
+    callbacks: {
+      // Para as APIs, deixamos a requisição seguir e cada rota responde 401 em JSON
+      // (redirecionar um fetch para a página de login quebraria o cliente).
+      authorized: ({ token, req }) => Boolean(token) || req.nextUrl.pathname.startsWith("/api/"),
+    },
+  }
+);
 
 export const config = {
   matcher: [

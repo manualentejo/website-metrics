@@ -39,7 +39,7 @@ export default function ScoreGauge({
           {score === null ? "—" : Math.round(score)}
         </div>
       </div>
-      <span className="text-sm text-slate-600 text-center">{label}</span>
+      {label && <span className="text-sm text-slate-600 text-center">{label}</span>}
     </div>
   );
 }

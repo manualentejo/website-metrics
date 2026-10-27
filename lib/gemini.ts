@@ -5,7 +5,12 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function askGemini(systemContext: string, question: string): Promise<string> {
+export interface ChatTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
+export async function askGemini(systemContext: string, question: string, history: ChatTurn[] = []): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY not configured");
@@ -21,7 +26,10 @@ export async function askGemini(systemContext: string, question: string): Promis
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemContext }] },
-        contents: [{ role: "user", parts: [{ text: question }] }],
+        contents: [
+          ...history.map((turn) => ({ role: turn.role === "user" ? "user" : "model", parts: [{ text: turn.text }] })),
+          { role: "user", parts: [{ text: question }] },
+        ],
       }),
     });
 

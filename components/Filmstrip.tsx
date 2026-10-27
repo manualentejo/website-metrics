@@ -1,3 +1,6 @@
+import { Card, CardHeader } from "@/components/ui/Card";
+import InfoTip from "@/components/ui/InfoTip";
+
 export default function Filmstrip({
   finalScreenshot,
   thumbnails,
@@ -5,35 +8,46 @@ export default function Filmstrip({
   finalScreenshot: string | null;
   thumbnails: { timing: number; data: string }[];
 }) {
-  if (!finalScreenshot && thumbnails.length === 0) {
-    return null;
-  }
+  if (!finalScreenshot && thumbnails.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-surface-border bg-surface-raised p-6">
-      <h3 className="mb-4 text-sm font-semibold text-slate-700">Navegação da página (última análise)</h3>
-      <div className="flex gap-3 overflow-x-auto pb-1">
-        {finalScreenshot && (
-          <div className="flex-shrink-0">
-            <img
-              src={finalScreenshot}
-              alt="Captura final da página"
-              className="h-40 rounded-lg border border-surface-border object-cover object-top"
-            />
-            <p className="mt-1 text-center text-xs text-slate-400">Final</p>
-          </div>
-        )}
+    <Card>
+      <CardHeader
+        title="Carregamento quadro a quadro"
+        description="Como a página aparece para a pessoa visitante ao longo do tempo."
+        info={
+          <InfoTip
+            title="Filmstrip"
+            text="Capturas da tela feitas durante o carregamento. Se os primeiros quadros ficam em branco por muito tempo, a pessoa vê uma tela vazia antes do site aparecer."
+          />
+        }
+      />
+      <div className="flex gap-3 overflow-x-auto px-6 pb-6 pt-4">
         {thumbnails.map((t, i) => (
-          <div key={i} className="flex-shrink-0">
+          <figure key={i} className="flex-shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={t.data}
-              alt={`Captura em ${t.timing}ms`}
-              className="h-40 rounded-lg border border-surface-border object-cover object-top"
+              alt={`Tela aos ${(t.timing / 1000).toFixed(1)} segundos`}
+              className="h-36 rounded-lg border border-surface-border object-cover object-top"
             />
-            <p className="mt-1 text-center text-xs text-slate-400">{(t.timing / 1000).toFixed(1)}s</p>
-          </div>
+            <figcaption className="mt-1 text-center text-[11px] text-slate-400">
+              {(t.timing / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} s
+            </figcaption>
+          </figure>
         ))}
+        {finalScreenshot && (
+          <figure className="flex-shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={finalScreenshot}
+              alt="Tela final carregada"
+              className="h-36 rounded-lg border-2 border-slate-900 object-cover object-top"
+            />
+            <figcaption className="mt-1 text-center text-[11px] font-medium text-slate-600">Final</figcaption>
+          </figure>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }

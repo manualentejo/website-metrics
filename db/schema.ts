@@ -7,6 +7,7 @@ import {
   real,
   jsonb,
 } from "drizzle-orm/pg-core";
+import type { Analysis } from "@/lib/analysis";
 
 export const folders = pgTable("folders", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -71,5 +72,6 @@ export const snapshots = pgTable("snapshots", {
   strategy: text("strategy").notNull(), // "mobile" | "desktop"
   finalScreenshot: text("final_screenshot"),
   thumbnails: jsonb("thumbnails").$type<{ timing: number; data: string }[]>(),
+  analysis: jsonb("analysis").$type<Analysis>(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow().notNull(),
 });

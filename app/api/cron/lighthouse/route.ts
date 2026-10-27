@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
           strategy,
           finalScreenshot: psi.finalScreenshot,
           thumbnails: psi.thumbnails,
+          analysis: psi.analysis,
         });
 
         results.push({ site: site.name, strategy, ok: true });
