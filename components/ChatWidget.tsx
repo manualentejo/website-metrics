@@ -53,7 +53,7 @@ export default function ChatWidget({ siteId, siteName }: { siteId: string; siteN
           <div
             key={i}
             className={`rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
-              m.role === "user" ? "ml-auto max-w-[85%] bg-indigo-50 text-indigo-900" : "max-w-[85%] bg-slate-50 text-slate-700"
+              m.role === "user" ? "ml-auto max-w-[85%] bg-slate-900 text-white" : "max-w-[85%] bg-slate-100 text-slate-700"
             }`}
           >
             {m.text}
@@ -68,12 +68,12 @@ export default function ChatWidget({ siteId, siteName }: { siteId: string; siteN
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Digite sua pergunta..."
-          className="flex-1 rounded-lg border border-surface-border bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="flex-1 rounded-lg border border-surface-border bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
         />
         <button
           onClick={handleSend}
           disabled={loading}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
         >
           Enviar
         </button>

@@ -11,8 +11,9 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",
-    "postgres": "^3.4.9",
     "next": "16.4.3",
+    "next-auth": "^4.24.15",
+    "postgres": "^3.4.9",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -20,11 +21,11 @@
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
-    "drizzle-kit": "^0.31.11",
-    "tailwindcss": "^3.4.14",
-    "postcss": "^8.4.47",
     "autoprefixer": "^10.4.20",
-    "typescript": "^5.6.3",
-    "tsx": "^4.19.2"
+    "drizzle-kit": "^0.31.11",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
   }
 }

@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { sites, reports } from "@/db/schema";
+import { sites, reports, folders } from "@/db/schema";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import Sidebar from "@/components/Sidebar";
 import SiteSummaryCard from "@/components/SiteSummaryCard";
+import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import type { Status } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +16,18 @@ export default async function HomePage({
 }) {
   const { status: statusFilter } = await searchParams;
 
-  const allSites = await db.select().from(sites).orderBy(asc(sites.sortOrder));
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+
+  const accessibleSiteIds = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
+
+  const allSitesRaw = await db.select().from(sites).orderBy(asc(sites.sortOrder));
+  const allFolders = await db.select().from(folders).orderBy(asc(folders.sortOrder));
+
+  const visibleSites = allSitesRaw.filter((s) => canViewSite(viewer, s, accessibleSiteIds, s.id));
 
   const sitesWithLatest = await Promise.all(
-    allSites.map(async (site) => {
+    visibleSites.map(async (site) => {
       const [latest] = await db
         .select()
         .from(reports)
@@ -33,8 +43,16 @@ export default async function HomePage({
   return (
     <div className="flex">
       <Sidebar
-        sites={allSites.map((s) => ({ id: s.id, name: s.name, status: s.status as Status }))}
+        sites={visibleSites.map((s) => ({
+          id: s.id,
+          name: s.name,
+          status: s.status as Status,
+          folderId: s.folderId,
+        }))}
+        folders={allFolders}
         statusFilter={statusFilter}
+        userEmail={viewer.email}
+        isOwner={viewer.owner}
       />
 
       <main className="min-h-screen flex-1 overflow-y-auto p-8">
@@ -55,6 +73,7 @@ export default async function HomePage({
               url={site.url}
               status={site.status as Status}
               latest={site.latest}
+              readOnly={!viewer.owner}
             />
           ))}
         </div>

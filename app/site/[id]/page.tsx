@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { sites, reports, snapshots } from "@/db/schema";
+import { sites, reports, snapshots, folders, siteAccess } from "@/db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
 import Sidebar from "@/components/Sidebar";
 import ScoreGauge from "@/components/ScoreGauge";
@@ -10,7 +10,9 @@ import Filmstrip from "@/components/Filmstrip";
 import ScoreChart from "@/components/ScoreChart";
 import StatusSelect from "@/components/StatusSelect";
 import ChatWidget from "@/components/ChatWidget";
+import SharingPanel from "@/components/SharingPanel";
 import { categoryExplanations } from "@/lib/metricExplanations";
+import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import type { ReportRow, Status, Strategy } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +28,18 @@ export default async function SiteDetailPage({
   const { strategy: strategyParam, status: statusFilter } = await searchParams;
   const strategy: Strategy = strategyParam === "desktop" ? "desktop" : "mobile";
 
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+
+  const accessibleSiteIds = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
+
   const allSites = await db.select().from(sites).orderBy(asc(sites.sortOrder));
+  const allFolders = await db.select().from(folders).orderBy(asc(folders.sortOrder));
   const site = allSites.find((s) => s.id === id);
   if (!site) notFound();
+  if (!canViewSite(viewer, site, accessibleSiteIds, site.id)) notFound();
+
+  const visibleSites = allSites.filter((s) => canViewSite(viewer, s, accessibleSiteIds, s.id));
 
   const history = await db
     .select()
@@ -45,19 +56,29 @@ export default async function SiteDetailPage({
     .from(snapshots)
     .where(and(eq(snapshots.siteId, id), eq(snapshots.strategy, strategy)));
 
+  const accessRows = viewer.owner ? await db.select().from(siteAccess).where(eq(siteAccess.siteId, id)) : [];
+
   return (
     <div className="flex">
       <Sidebar
-        sites={allSites.map((s) => ({ id: s.id, name: s.name, status: s.status as Status }))}
+        sites={visibleSites.map((s) => ({
+          id: s.id,
+          name: s.name,
+          status: s.status as Status,
+          folderId: s.folderId,
+        }))}
+        folders={allFolders}
         activeSiteId={id}
         statusFilter={statusFilter}
+        userEmail={viewer.email}
+        isOwner={viewer.owner}
       />
 
       <main className="min-h-screen flex-1 overflow-y-auto p-8">
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">{site.name}</h1>
-            <a href={site.url} target="_blank" rel="noreferrer" className="text-sm text-indigo-600 hover:text-indigo-700">
+            <a href={site.url} target="_blank" rel="noreferrer" className="text-sm text-slate-500 hover:text-slate-700">
               {site.url}
             </a>
           </div>
@@ -69,14 +90,14 @@ export default async function SiteDetailPage({
                   key={s}
                   href={`/site/${id}?strategy=${s}${statusFilter ? `&status=${statusFilter}` : ""}`}
                   className={`rounded-md px-3 py-1 transition-colors ${
-                    strategy === s ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:text-slate-700"
+                    strategy === s ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   {s === "mobile" ? "Mobile" : "Desktop"}
                 </a>
               ))}
             </div>
-            <StatusSelect siteId={site.id} status={site.status as Status} />
+            <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!viewer.owner} />
           </div>
         </header>
 
@@ -123,6 +144,16 @@ export default async function SiteDetailPage({
             </div>
 
             <ChatWidget siteId={site.id} siteName={site.name} />
+
+            {viewer.owner && (
+              <SharingPanel
+                siteId={site.id}
+                visibility={site.visibility as "private" | "shared"}
+                initialEmails={accessRows.map((r) => r.email)}
+                folders={allFolders}
+                currentFolderId={site.folderId}
+              />
+            )}
           </div>
         )}
       </main>

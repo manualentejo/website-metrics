@@ -9,6 +9,7 @@ export default function SiteSummaryCard({
   url,
   status,
   latest,
+  readOnly,
 }: {
   id: string;
   name: string;
@@ -20,15 +21,16 @@ export default function SiteSummaryCard({
     bestPracticesScore: number | null;
     seoScore: number | null;
   } | null;
+  readOnly?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-surface-border bg-surface-raised p-6 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <Link href={`/site/${id}`} className="block min-w-0">
-          <h2 className="truncate text-lg font-semibold text-slate-900 hover:text-indigo-700">{name}</h2>
+          <h2 className="truncate text-lg font-semibold text-slate-900 hover:text-slate-600">{name}</h2>
           <p className="truncate text-sm text-slate-500">{url}</p>
         </Link>
-        <StatusSelect siteId={id} status={status} />
+        <StatusSelect siteId={id} status={status} readOnly={readOnly} />
       </div>
 
       <Link href={`/site/${id}`} className="mt-5 flex justify-around">

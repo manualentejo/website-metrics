@@ -8,12 +8,31 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
+export const folders = pgTable("folders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const sites = pgTable("sites", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   url: text("url").notNull(),
   status: text("status").notNull().default("em_andamento"), // "no_ar" | "em_andamento"
   sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  folderId: uuid("folder_id").references(() => folders.id, { onDelete: "set null" }),
+  visibility: text("visibility").notNull().default("private"), // "private" | "shared"
+});
+
+// E-mails com permissão de ver um site cuja visibilidade é "shared".
+export const siteAccess = pgTable("site_access", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  siteId: uuid("site_id")
+    .notNull()
+    .references(() => sites.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

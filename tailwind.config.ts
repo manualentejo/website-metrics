@@ -9,11 +9,14 @@ const config: Config = {
       },
       colors: {
         surface: {
-          DEFAULT: "#f7f8fa",
+          DEFAULT: "#f4f4f5",
           raised: "#ffffff",
-          border: "#e5e7eb",
+          border: "#e4e4e7",
           sidebar: "#ffffff",
         },
+      },
+      borderRadius: {
+        xl: "0.875rem",
       },
     },
   },

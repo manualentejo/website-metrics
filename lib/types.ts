@@ -26,5 +26,7 @@ export interface SiteRow {
   status: Status;
   sortOrder: number;
   createdAt: string | Date;
+  folderId: string | null;
+  visibility: "private" | "shared";
   reports: ReportRow[];
 }

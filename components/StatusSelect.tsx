@@ -9,7 +9,15 @@ const STATUS_LABEL: Record<Status, string> = {
   em_andamento: "Em andamento",
 };
 
-export default function StatusSelect({ siteId, status }: { siteId: string; status: Status }) {
+export default function StatusSelect({
+  siteId,
+  status,
+  readOnly,
+}: {
+  siteId: string;
+  status: Status;
+  readOnly?: boolean;
+}) {
   const [saving, setSaving] = useState(false);
   const [current, setCurrent] = useState(status);
   const router = useRouter();
@@ -27,6 +35,18 @@ export default function StatusSelect({ siteId, status }: { siteId: string; statu
     } finally {
       setSaving(false);
     }
+  }
+
+  if (readOnly) {
+    return (
+      <span
+        className={`rounded-lg border border-surface-border px-3 py-1.5 text-sm font-medium ${
+          current === "no_ar" ? "text-emerald-600" : "text-amber-600"
+        }`}
+      >
+        {STATUS_LABEL[current]}
+      </span>
+    );
   }
 
   return (
