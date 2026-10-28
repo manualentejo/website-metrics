@@ -7,7 +7,7 @@ export function Page({
   subtitle,
   actions,
   children,
-  width = "max-w-6xl",
+  width = "max-w-none",
 }: {
   title: ReactNode;
   subtitle?: ReactNode;

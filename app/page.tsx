@@ -9,6 +9,7 @@ import MetricCard from "@/components/charts/MetricCard";
 import TrendIndicator from "@/components/charts/TrendIndicator";
 import TimeSeriesChart from "@/components/charts/TimeSeriesChart";
 import ChartEmptyState from "@/components/charts/ChartEmptyState";
+import ComparisonChart from "@/components/charts/ComparisonChart";
 import HealthDistributionChart from "@/components/charts/HealthDistributionChart";
 import SiteFilter from "@/components/overview/SiteFilter";
 import RunAuditButton from "@/components/overview/RunAuditButton";
@@ -81,7 +82,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   return (
     <AppShell active="home">
       <Page
-        width="max-w-7xl"
         title="Visão geral"
         subtitle="Todos os seus sites em um só lugar."
         actions={
@@ -137,12 +137,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               />
               <MetricCard
                 label="AI Visibility"
-                href={geoSite ? `/site/${geoSite}/geo` : "/sites"}
-                connected={false}
-                setupText="Conta menções em prompts que você monitora, não toda a atividade das IAs. Nenhum prompt configurado."
+                href={href({ m: "ai" })}
+                connected={!!p.geo}
+                value={p.geo?.rate == null ? "—" : `${Math.round(p.geo.rate)}%`}
+                trend={<TrendIndicator current={p.geo?.rate ?? null} delta={p.geo?.delta ?? null} suffix={`vs ${days} dias antes`} />}
+                spark={p.geo?.series.current.map((x) => x.value)}
+                hint={p.geo ? `${p.geo.sites.length} site(s) · só Gemini, prompts cadastrados` : undefined}
+                setupText="Conta menções em prompts que você monitora, não toda a atividade das IAs. Configure na aba GEO de um site."
                 info={{
                   title: "AI Visibility",
-                  text: "Observações de menções e citações nos prompts monitorados por você, por mecanismo de IA. Não representa toda a atividade das plataformas de IA nem é o GEO Technical Score.",
+                  text: "Média, entre os sites verificados, da % de respostas do Gemini aos prompts monitorados que citam a marca. Não representa toda a atividade das plataformas de IA nem é o GEO Technical Score.",
                 }}
               />
               <MetricCard
@@ -182,9 +186,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   <ChartEmptyState kind="setup" title="Search Console não conectado" className="h-72">
                     Cliques e impressões só aparecem com dados autorizados do Google Search Console. Até lá, usamos apenas dados que existem de verdade.
                   </ChartEmptyState>
+                ) : metric === "ai" && p.geo ? (
+                  <TimeSeriesChart current={p.geo.series.current} previous={p.geo.series.previous} unit="score" label="AI Visibility (%)" height={300} />
                 ) : metric === "ai" ? (
-                  <ChartEmptyState kind="setup" title="Nenhum prompt monitorado" className="h-72">
-                    AI Visibility mede menções e citações em prompts que você cadastra. O módulo GEO ainda não coleta isso.
+                  <ChartEmptyState kind="setup" title="Nenhum prompt monitorado" className="h-72" action={geoSite ? { href: `/site/${geoSite}/geo`, label: "Configurar no GEO do site" } : undefined}>
+                    AI Visibility mede menções em prompts que você cadastra na aba GEO de cada site.
                   </ChartEmptyState>
                 ) : metric === "visits" && p.visitsError ? (
                   <ChartEmptyState kind="error" title="Não foi possível carregar as visitas" className="h-72">
@@ -230,11 +236,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     )
                   }
                 />
-                <div className="flex flex-1 flex-col p-5">
-                  <ChartEmptyState kind="setup" title="Monitoramento de IA ainda não configurado" className="min-h-[22rem] flex-1">
-                    Aqui entram a evolução de menções, a comparação por mecanismo de IA e as citações verificadas, sempre a partir de prompts que você cadastrar. O
-                    GEO Technical Score (preparo técnico do site) é outra coisa e não substitui esta medição.
-                  </ChartEmptyState>
+                <div className="flex flex-1 flex-col gap-5 p-5">
+                  {p.geo ? (
+                    <>
+                      <TimeSeriesChart current={p.geo.series.current} previous={p.geo.series.previous} unit="score" label="Menções (%)" height={180} />
+                      <div>
+                        <p className="mb-2 text-label-xs uppercase tracking-wide text-text-soft-400">Por site (Gemini)</p>
+                        <ComparisonChart items={p.geo.sites.slice(0, 5).map((x) => ({ label: x.name, value: x.rate }))} />
+                      </div>
+                      <p className="text-paragraph-xs text-text-sub-600">
+                        Citações verificadas: {p.geo.verifiable ? `${p.geo.cited} de ${p.geo.verifiable} respostas trouxeram o domínio entre as fontes.` : "busca do Google indisponível."} Outros
+                        mecanismos (ChatGPT, Perplexity) não estão conectados.
+                      </p>
+                    </>
+                  ) : (
+                    <ChartEmptyState kind="setup" title="Monitoramento de IA ainda não configurado" className="min-h-[22rem] flex-1" action={geoSite ? { href: `/site/${geoSite}/geo`, label: "Configurar no GEO do site" } : undefined}>
+                      Cadastre a marca e os prompts na aba GEO de um site e rode a verificação. Aqui aparecem a evolução, a comparação entre sites e as citações. O GEO Technical Score é outra coisa.
+                    </ChartEmptyState>
+                  )}
                 </div>
               </Card>
             </div>

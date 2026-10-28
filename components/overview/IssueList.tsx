@@ -1,56 +1,101 @@
 import Link from "next/link";
-import { RiArrowRightSLine, RiCheckboxCircleLine } from "@remixicon/react";
+import { RiAlertFill, RiArrowRightLine, RiCheckboxCircleFill, RiErrorWarningFill } from "@remixicon/react";
 import Badge from "@/components/ui/Badge";
-import { formatDateTime } from "@/lib/format";
 import type { Alert } from "@/lib/insights";
 
-const SEVERITY = { critical: { label: "Crítico", tone: "destructive" }, warning: { label: "Atenção", tone: "warning" }, good: { label: "Melhorou", tone: "success" } } as const;
+const SEVERITY = {
+  critical: { label: "Crítico", tone: "destructive", icon: RiErrorWarningFill, tile: "bg-error-lighter text-error-base" },
+  warning: { label: "Atenção", tone: "warning", icon: RiAlertFill, tile: "bg-warning-lighter text-warning-base" },
+  good: { label: "Melhorou", tone: "success", icon: RiCheckboxCircleFill, tile: "bg-success-lighter text-success-base" },
+} as const;
+
+const day = (d: Date) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: "America/Sao_Paulo" }).replace(".", "");
+
+interface Group {
+  key: string;
+  first: Alert;
+  devices: string[];
+}
+
+/** Junta o mesmo problema medido no celular e no computador numa linha só. */
+function group(issues: Alert[]): Group[] {
+  const map = new Map<string, Group>();
+  for (const a of issues) {
+    const key = `${a.siteId}|${a.title}`;
+    const dev = a.strategy === "mobile" ? "Celular" : "Computador";
+    const g = map.get(key);
+    if (!g) map.set(key, { key, first: a, devices: [dev] });
+    else if (!g.devices.includes(dev)) g.devices.push(dev);
+  }
+  return [...map.values()];
+}
 
 /**
- * Problemas prioritários de vários sites. Cada linha leva direto à aba do site em que o
- * problema aparece, com o dispositivo e a origem (?from=overview) preservados na URL.
- * "Estado" é "Aberto" enquanto o problema continua na última auditoria; ainda não há registro de correção manual.
+ * Problemas prioritários de vários sites. Cada linha abre a aba do site em que o problema aparece
+ * (dispositivo e origem preservados na URL). "Aberto" = ainda presente na última auditoria; o painel
+ * ainda não registra correções manuais.
  */
 export default function IssueList({ issues, showSite = true }: { issues: Alert[]; showSite?: boolean }) {
   if (!issues.length)
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-bg-weak-50 px-4 py-6 text-paragraph-sm text-text-sub-600">
-        <RiCheckboxCircleLine className="size-5 text-success-base" />
+      <div className="flex items-center gap-3 rounded-xl bg-success-lighter px-4 py-5 text-paragraph-sm text-text-strong-950">
+        <RiCheckboxCircleFill className="size-5 text-success-base" />
         Nenhum problema aberto nas últimas auditorias.
       </div>
     );
+  const groups = group(issues);
+  const critical = groups.filter((g) => g.first.severity === "critical").length;
+
   return (
-    <ul className="divide-y divide-stroke-soft-200">
-      {issues.map((a, i) => {
-        const sev = SEVERITY[a.severity];
-        return (
-          <li key={`${a.siteId}-${a.title}-${a.strategy}-${i}`}>
-            <Link href={a.href} className="group flex items-center gap-3 px-1 py-3 transition duration-200 hover:bg-bg-weak-50 sm:px-2">
-              <span className={`size-2 flex-shrink-0 rounded-full ${a.severity === "critical" ? "bg-error-base" : "bg-warning-base"}`} aria-hidden />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-label-sm text-text-strong-950">
-                  {showSite && <>{a.siteName} · </>}
-                  {a.title}
+    <div>
+      <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-paragraph-xs text-text-sub-600">
+        <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-error-base" />{critical} crítico{critical === 1 ? "" : "s"}</span>
+        <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-warning-base" />{groups.length - critical} em atenção</span>
+      </p>
+      <ul className="grid gap-2">
+        {groups.map(({ key, first: a, devices }) => {
+          const sev = SEVERITY[a.severity];
+          const Icon = sev.icon;
+          return (
+            <li key={key}>
+              <Link
+                href={a.href}
+                className="group flex items-center gap-3 rounded-xl bg-bg-white-0 p-3 ring-1 ring-inset ring-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50 hover:ring-stroke-sub-300 sm:gap-4 sm:p-4"
+              >
+                <span className={`flex size-10 flex-shrink-0 items-center justify-center rounded-xl ${sev.tile}`}>
+                  <Icon className="size-5" aria-hidden />
                 </span>
-                <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-paragraph-xs text-text-sub-600">
-                  <span>{a.category} · {a.strategy === "mobile" ? "celular" : "computador"}</span>
-                  <span aria-hidden>·</span>
-                  <span>Detectado em {formatDateTime(a.at).split(",")[0]}</span>
-                  <span aria-hidden>·</span>
-                  <span>Estado: aberto</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-label-md text-text-strong-950 sm:truncate">{a.title}</span>
+                  <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-paragraph-xs text-text-sub-600">
+                    {showSite && (
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-bg-weak-50 py-0.5 pl-0.5 pr-2 text-label-xs text-text-strong-950">
+                        <span className="flex size-4 items-center justify-center rounded bg-bg-white-0 text-[10px] uppercase ring-1 ring-inset ring-stroke-soft-200">
+                          {a.siteName.slice(0, 1)}
+                        </span>
+                        {a.siteName}
+                      </span>
+                    )}
+                    <span>{a.category}</span>
+                    <span aria-hidden className="text-text-soft-400">•</span>
+                    <span>{devices.join(" e ")}</span>
+                    <span aria-hidden className="text-text-soft-400">•</span>
+                    <span>Detectado em {day(a.at)}</span>
+                  </span>
                 </span>
-              </span>
-              <span className="hidden flex-shrink-0 sm:block">
-                <Badge tone={sev.tone}>{sev.label}</Badge>
-              </span>
-              <span className="flex flex-shrink-0 items-center gap-0.5 text-label-xs text-text-sub-600 group-hover:text-text-strong-950">
-                <span className="hidden md:inline">Ver análise</span>
-                <RiArrowRightSLine className="size-4" />
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+                <span className="hidden flex-shrink-0 flex-col items-end gap-1 sm:flex">
+                  <Badge tone={sev.tone}>{sev.label}</Badge>
+                  <span className="text-paragraph-xs text-text-soft-400">Aberto</span>
+                </span>
+                <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 group-hover:bg-bg-strong-950 group-hover:text-text-white-0">
+                  <RiArrowRightLine className="size-4" aria-hidden />
+                  <span className="sr-only">Abrir análise</span>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

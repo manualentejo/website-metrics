@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
   return (
-    <section className={`rounded-2xl bg-bg-white-0 text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 ${className}`}>
+    <section id={id} className={`rounded-2xl bg-bg-white-0 text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 ${className}`}>
       {children}
     </section>
   );

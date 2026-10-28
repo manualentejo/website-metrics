@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { reports } from "@/db/schema";
 import { ensureAnalyticsTable } from "@/lib/analytics";
+import { ensureGeoTables } from "@/lib/geo";
 import { loadAlerts, visibleSites, type Alert } from "@/lib/insights";
 import type { Viewer } from "@/lib/access";
 import type { Status } from "@/lib/types";
@@ -124,6 +125,48 @@ async function loadVisits(ids: string[], days: number, endKey: string) {
   };
 }
 
+/** Visibilidade em IA (% de respostas com a marca) por verificação, só de sites que já verificaram. */
+async function loadGeo(ids: string[], days: number, endKey: string, names: Map<string, string>) {
+  if (!ids.length) return null;
+  await ensureGeoTables();
+  const list = sql.join(ids.map((i) => sql`${i}::uuid`), sql`, `);
+  const res = (await db.execute(sql`SELECT site_id::text AS id, run_id, min(ran_at) AS at, count(*)::int AS total,
+      sum(mentioned::int)::int AS m, sum(CASE WHEN cited THEN 1 ELSE 0 END)::int AS c, count(cited)::int AS v
+    FROM geo_runs WHERE site_id IN (${list}) GROUP BY 1, 2 ORDER BY 3`)) as unknown as { id: string; at: string; total: number; m: number; c: number; v: number }[];
+  if (!res.length) return null;
+  const bySite = new Map<string, { day: string; rate: number; cited: number; verifiable: number }[]>();
+  for (const r of res) {
+    const arr = bySite.get(String(r.id)) ?? [];
+    arr.push({ day: dayKey(new Date(String(r.at))), rate: (Number(r.m) / Number(r.total)) * 100, cited: Number(r.c), verifiable: Number(r.v) });
+    bySite.set(String(r.id), arr);
+  }
+  const series = (end: string): Point[] =>
+    Array.from({ length: days }, (_, i) => {
+      const day = addDays(end, -(days - 1 - i));
+      const vals: number[] = [];
+      for (const arr of bySite.values()) {
+        let v: number | null = null;
+        for (const b of arr) {
+          if (b.day > day) break;
+          v = b.rate;
+        }
+        if (v !== null) vals.push(v);
+      }
+      return { date: day, value: mean(vals) };
+    });
+  const cur = series(endKey);
+  const prev = series(addDays(endKey, -days));
+  const latest = [...bySite.entries()].map(([id, arr]) => ({ id, name: names.get(id) ?? "", ...arr[arr.length - 1] }));
+  return {
+    rate: lastValue(cur),
+    delta: lastValue(cur) !== null && lastValue(prev) !== null ? lastValue(cur)! - lastValue(prev)! : null,
+    cited: latest.reduce((a, b) => a + b.cited, 0),
+    verifiable: latest.reduce((a, b) => a + b.verifiable, 0),
+    sites: latest.sort((a, b) => b.rate - a.rate),
+    series: { current: cur, previous: prev } as SeriesPair,
+  };
+}
+
 export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteIds?: string[] | null }) {
   const { days } = opts;
   const all = await visibleSites(viewer);
@@ -155,6 +198,12 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
     visitsError = e instanceof Error ? e.message : String(e);
   }
   const trackedIds = new Set(visits?.perSite.keys() ?? []);
+  let geo: Awaited<ReturnType<typeof loadGeo>> = null;
+  try {
+    geo = await loadGeo(ids, days, endKey, new Map(selected.map((s) => [s.id, s.name])));
+  } catch {
+    geo = null; // sem GEO não derruba o Overview
+  }
 
   const rows: SiteSummary[] = selected.map((s) => {
     const list = bySite.get(s.id) ?? [];
@@ -324,6 +373,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
       visits: hasVisitData ? ({ current: visits!.cur, previous: visits!.prev } as SeriesPair) : null,
     },
     visitsError,
+    geo,
     trackedSites: trackedIds.size,
     rows,
     distribution,

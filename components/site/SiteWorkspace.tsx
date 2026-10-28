@@ -75,7 +75,7 @@ export default async function SiteWorkspace({
 
   return (
     <AppShell activeSiteId={siteId}>
-      <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-8">
+      <div className="px-4 pt-6 sm:px-8">
         <Link href="/" className="mb-3 inline-flex items-center gap-0.5 text-paragraph-xs text-text-sub-600 hover:text-text-strong-950">
           <RiArrowLeftSLine className="size-4" />
           Visão geral
@@ -126,7 +126,7 @@ export default async function SiteWorkspace({
         </nav>
       </div>
 
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-8">{children}</div>
+      <div className="space-y-6 px-4 py-6 sm:px-8">{children}</div>
       <GeminiDrawer siteId={site.id} siteName={site.name} />
     </AppShell>
   );
