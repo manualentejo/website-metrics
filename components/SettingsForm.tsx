@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import * as Switch from "@/components/align/switch";
+import { notification } from "@/hooks/use-notification";
 import Select from "@/components/ui/Select";
 import type { AppSettings } from "@/lib/settings";
 
@@ -21,7 +23,6 @@ function Row({ title, description, children }: { title: string; description: str
 
 export default function SettingsForm({ initial }: { initial: AppSettings }) {
   const [s, setS] = useState(initial);
-  const [msg, setMsg] = useState<string | null>(null);
 
   async function save(patch: Partial<AppSettings>) {
     setS((p) => ({ ...p, ...patch }));
@@ -30,8 +31,11 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
-    setMsg(res.ok ? "Alterações salvas." : "Não foi possível salvar.");
-    setTimeout(() => setMsg(null), 2500);
+    notification(
+      res.ok
+        ? { status: "success", variant: "filled", title: "Alterações salvas" }
+        : { status: "error", variant: "filled", title: "Não foi possível salvar" }
+    );
   }
 
   return (
@@ -39,16 +43,8 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
       <Card>
         <Row title="Relatório semanal" description="Liga ou desliga a análise semanal de todos os sites e a geração do relatório em PDF.">
           <label className="flex cursor-pointer items-center gap-3">
-            <span className="text-sm text-text-sub-600">{s.enabled ? "Ligada" : "Desligada"}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={s.enabled}
-              onClick={() => save({ enabled: !s.enabled })}
-              className={`relative h-6 w-11 rounded-full transition-colors ${s.enabled ? "bg-bg-strong-950" : "bg-border"}`}
-            >
-              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-bg-white-0 shadow transition-all ${s.enabled ? "left-[22px]" : "left-0.5"}`} />
-            </button>
+            <span className="text-paragraph-sm text-text-sub-600">{s.enabled ? "Ligada" : "Desligada"}</span>
+            <Switch.Root checked={s.enabled} onCheckedChange={(v) => save({ enabled: v })} aria-label="Relatório semanal" />
           </label>
         </Row>
         <Row title="Dia da semana" description="Dia em que o relatório da semana fica disponível em Relatórios.">
@@ -66,7 +62,6 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
           </Select>
         </Row>
       </Card>
-      {msg && <p role="status" className="text-sm text-text-sub-600">{msg}</p>}
     </div>
   );
 }

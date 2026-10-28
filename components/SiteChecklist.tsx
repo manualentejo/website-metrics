@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RiSearchLine } from "@remixicon/react";
 import { inputClass } from "@/components/ui/fields";
+import * as Checkbox from "@/components/align/checkbox";
 
 export interface PickableSite {
   id: string;
@@ -26,7 +27,7 @@ export default function SiteChecklist({
   const [q, setQ] = useState("");
   const shown = sites.filter((s) => `${s.name} ${s.url}`.toLowerCase().includes(q.toLowerCase()));
 
-  if (sites.length === 0) return <p className="rounded-md border border-dashed border-stroke-soft-200 px-3 py-4 text-center text-paragraph-xs text-text-sub-600">{emptyText}</p>;
+  if (sites.length === 0) return <p className="rounded-lg border border-dashed border-stroke-soft-200 px-3 py-4 text-center text-paragraph-xs text-text-sub-600">{emptyText}</p>;
 
   return (
     <div>
@@ -36,15 +37,13 @@ export default function SiteChecklist({
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar site" aria-label="Buscar site" className={`${inputClass} w-full pl-8`} />
         </div>
       )}
-      <ul className="max-h-56 divide-y divide-stroke-soft-200 overflow-y-auto rounded-md border border-stroke-soft-200">
+      <ul className="max-h-56 divide-y divide-stroke-soft-200 overflow-y-auto rounded-xl border border-stroke-soft-200">
         {shown.map((s) => (
           <li key={s.id}>
             <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-bg-weak-50">
-              <input
-                type="checkbox"
+              <Checkbox.Root
                 checked={selected.includes(s.id)}
-                onChange={(e) => onChange(e.target.checked ? [...selected, s.id] : selected.filter((x) => x !== s.id))}
-                className="h-4 w-4 rounded border-stroke-soft-200 accent-[hsl(var(--primary))]"
+                onCheckedChange={(v) => onChange(v === true ? [...selected, s.id] : selected.filter((x) => x !== s.id))}
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-paragraph-sm font-medium text-text-strong-950">{s.name}</span>

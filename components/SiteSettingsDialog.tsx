@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Modal, { Field } from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 import CopyBox from "@/components/CopyBox";
+import { notification } from "@/hooks/use-notification";
 import { inputClass } from "@/components/ui/fields";
 
 interface Props {
@@ -53,6 +54,7 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
     const data = await res.json().catch(() => null);
     setBusy(null);
     if (!res.ok) return setError(data?.error ?? "Não foi possível salvar.");
+    notification({ status: "success", variant: "filled", title: "Site atualizado" });
     setOpen(false);
     router.replace(`/site/${site.id}`);
     router.refresh();
@@ -68,6 +70,7 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
     });
     setBusy(null);
     if (!res.ok) return setError("A análise falhou. Tente de novo em instantes.");
+    notification({ status: "success", variant: "filled", title: "Análise concluída" });
     setOpen(false);
     router.replace(`/site/${site.id}`);
     router.refresh();
@@ -78,6 +81,7 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
     const res = await fetch(`/api/sites?id=${site.id}`, { method: "DELETE" });
     setBusy(null);
     if (!res.ok) return setError("Não foi possível excluir o site.");
+    notification({ status: "success", variant: "filled", title: "Site excluído" });
     router.push("/sites");
     router.refresh();
   }

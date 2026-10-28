@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Status } from "@/lib/types";
+import { notification } from "@/hooks/use-notification";
 
 const LABEL: Record<Status, string> = { no_ar: "No ar", em_andamento: "Em andamento" };
 const DOT: Record<Status, string> = { no_ar: "bg-success-base", em_andamento: "bg-warning-base" };
@@ -31,6 +32,7 @@ export default function StatusSelect({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: siteId, status: next }),
       });
+      notification({ status: "success", variant: "filled", title: `Status alterado para ${LABEL[next]}` });
       router.refresh();
     } finally {
       setSaving(false);
