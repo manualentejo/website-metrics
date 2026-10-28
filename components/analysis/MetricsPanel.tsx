@@ -12,12 +12,12 @@ const METRIC_IDS = [
 ];
 
 const VALUE_COLOR = {
-  fail: "text-rose-600",
-  average: "text-amber-600",
-  pass: "text-emerald-600",
-  info: "text-slate-700",
-  manual: "text-slate-700",
-  na: "text-slate-700",
+  fail: "text-destructive",
+  average: "text-warning",
+  pass: "text-success",
+  info: "text-foreground/80",
+  manual: "text-foreground/80",
+  na: "text-foreground/80",
 };
 
 export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
@@ -25,19 +25,19 @@ export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
   if (metrics.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-px bg-surface-border sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2">
       {metrics.map(({ id, audit }) => {
         const status = auditStatus(audit);
         const ref = analysis.categories.performance.auditRefs.find((r) => r.id === id);
         return (
-          <div key={id} className="flex gap-3 bg-white px-6 py-4">
+          <div key={id} className="flex gap-3 bg-card px-6 py-4">
             <span className="mt-1.5">
               <StatusIcon status={status} />
             </span>
             <div>
-              <p className="flex items-center gap-1.5 text-sm text-slate-700">
+              <p className="flex items-center gap-1.5 text-sm text-foreground/80">
                 {audit.title}
-                {ref?.acronym && <span className="text-xs text-slate-400">({ref.acronym})</span>}
+                {ref?.acronym && <span className="text-xs text-muted-foreground">({ref.acronym})</span>}
                 <InfoTip term={id} align="start" />
               </p>
               <p className={`mt-0.5 text-2xl font-semibold tracking-tight ${VALUE_COLOR[status]}`}>
@@ -47,7 +47,7 @@ export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
           </div>
         );
       })}
-      {metrics.length % 2 === 1 && <div className="hidden bg-white sm:block" />}
+      {metrics.length % 2 === 1 && <div className="hidden bg-card sm:block" />}
     </div>
   );
 }

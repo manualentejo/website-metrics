@@ -40,8 +40,8 @@ export default function StatusSelect({
   if (readOnly) {
     return (
       <span
-        className={`rounded-lg border border-surface-border px-3 py-1.5 text-sm font-medium ${
-          current === "no_ar" ? "text-emerald-600" : "text-amber-600"
+        className={`rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium ${
+          current === "no_ar" ? "text-success" : "text-warning"
         }`}
       >
         {STATUS_LABEL[current]}
@@ -54,8 +54,8 @@ export default function StatusSelect({
       value={current}
       disabled={saving}
       onChange={(e) => handleChange(e.target.value as Status)}
-      className={`rounded-lg border border-surface-border bg-white px-3 py-1.5 text-sm font-medium outline-none ${
-        current === "no_ar" ? "text-emerald-600" : "text-amber-600"
+      className={`h-8 rounded-full border border-input bg-card pl-3 pr-2 text-xs font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20 ${
+        current === "no_ar" ? "text-success" : "text-warning"
       }`}
     >
       <option value="no_ar">{STATUS_LABEL.no_ar}</option>

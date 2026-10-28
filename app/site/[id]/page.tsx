@@ -77,8 +77,8 @@ export default async function SiteDetailPage({
 
       <main className="h-screen flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-8 py-8">
-          <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-xs text-slate-400">
-            <Link href="/" className="hover:text-slate-700">Sites</Link>
+          <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
+            <Link href="/" className="hover:text-foreground/80">Sites</Link>
             {folder && (
               <>
                 <ChevronRight className="h-3 w-3" />
@@ -86,23 +86,23 @@ export default async function SiteDetailPage({
               </>
             )}
             <ChevronRight className="h-3 w-3" />
-            <span className="text-slate-600">{site.name}</span>
+            <span className="text-muted-foreground">{site.name}</span>
           </nav>
 
           <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{site.name}</h1>
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">{site.name}</h1>
               <a
                 href={site.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-1 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+                className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
               >
                 {site.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </a>
               {analyzedAt && (
-                <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-slate-400">
+                <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                   Analisado em {formatDateTime(analyzedAt)}
                   {analysis?.meta.lighthouseVersion && <> · Lighthouse {analysis.meta.lighthouseVersion}</>}
                   <InfoTip term="lab-data" align="start" />
@@ -111,14 +111,14 @@ export default async function SiteDetailPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center rounded-lg border border-surface-border bg-white p-0.5 text-sm shadow-sm">
+              <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-sm shadow-sm">
                 {(["mobile", "desktop"] as Strategy[]).map((s) => (
                   <Link
                     key={s}
                     href={strategyHref(s)}
                     aria-current={strategy === s ? "page" : undefined}
                     className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
-                      strategy === s ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900"
+                      strategy === s ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {s === "mobile" ? "Celular" : "Computador"}
@@ -150,12 +150,12 @@ export default async function SiteDetailPage({
                 <ScoreGauge score={latest.bestPracticesScore} label="Boas práticas" size={90} />
                 <ScoreGauge score={latest.seoScore} label="SEO" size={90} />
               </div>
-              <p className="mt-6 text-center text-sm text-slate-500">
+              <p className="mt-6 text-center text-sm text-muted-foreground">
                 A análise detalhada (Insights, Diagnóstico e auditorias) aparece a partir da próxima execução.
               </p>
             </Card>
           ) : (
-            <Card className="p-10 text-center text-sm text-slate-500">
+            <Card className="p-10 text-center text-sm text-muted-foreground">
               Ainda não há dados para este site no {strategyLabel}. A primeira análise roda na próxima sexta-feira
               às 15h (horário de Brasília).
             </Card>

@@ -4,15 +4,15 @@ import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface">
-      <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-surface-raised p-8 text-center shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">MINO</p>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">Métricas de Sites</h1>
-        <p className="mt-2 text-sm text-slate-500">Entre com sua conta Google para continuar.</p>
+    <main className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-surface-raised p-8 text-center shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">MINO</p>
+        <h1 className="mt-1 text-xl font-semibold text-foreground">Métricas de Sites</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Entre com sua conta Google para continuar.</p>
 
         <button
           onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-surface-border bg-white px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50"
+          className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground text-sm font-medium"
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
             <path

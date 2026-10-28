@@ -2,14 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-}
+/* Design system — tokens no padrão shadcn/ui (HSL). Primária: preto; fundo: cinza claro. */
+@layer base {
+  :root {
+    --background: 60 5% 94%;
+    --foreground: 240 6% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 6% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 6% 10%;
+    --primary: 240 6% 10%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 5% 95%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 60 5% 95%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 60 5% 93%;
+    --accent-foreground: 240 6% 10%;
+    --border: 60 5% 88%;
+    --input: 60 5% 88%;
+    --ring: 240 5% 34%;
+    --success: 152 60% 32%;
+    --warning: 32 90% 40%;
+    --destructive: 347 77% 50%;
+    --radius: 0.875rem;
+    color-scheme: light;
+  }
 
-body {
-  background-color: #f7f8fa;
-}
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
 
-::selection {
-  background: rgba(79, 70, 229, 0.18);
+  ::selection {
+    background: hsl(var(--primary) / 0.15);
+  }
 }

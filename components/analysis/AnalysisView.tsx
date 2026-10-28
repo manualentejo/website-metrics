@@ -55,7 +55,7 @@ export default function AnalysisView({
         <div
           role="tablist"
           aria-label="Categorias da análise"
-          className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-surface-border sm:grid-cols-4"
+          className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-4"
         >
           {(["performance", "accessibility", "best-practices", "seo"] as CategoryKey[]).map((key) => (
             <button
@@ -64,15 +64,15 @@ export default function AnalysisView({
               role="tab"
               onClick={() => setTab(key)}
               aria-selected={tab === key}
-              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-slate-50 ${
-                tab === key ? "bg-slate-50" : "bg-white"
+              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-secondary ${
+                tab === key ? "bg-secondary" : "bg-card"
               }`}
             >
               <ScoreGauge score={pct(analysis.categories[key].score)} label="" size={76} />
-              <span className={`text-sm font-medium ${tab === key ? "text-slate-900" : "text-slate-500"}`}>
+              <span className={`text-sm font-medium ${tab === key ? "text-foreground" : "text-muted-foreground"}`}>
                 {GLOSSARY[key]?.title ?? analysis.categories[key].title}
               </span>
-              <span className={`mt-1 h-0.5 w-10 rounded-full ${tab === key ? "bg-slate-900" : "bg-transparent"}`} />
+              <span className={`mt-1 h-0.5 w-10 rounded-full ${tab === key ? "bg-primary" : "bg-transparent"}`} />
             </button>
           ))}
         </div>
@@ -108,14 +108,14 @@ function CategoryIntro({ category, score }: { category: CategoryKey; score: numb
   const verdict =
     score === null ? null : score >= 90 ? "Bom" : score >= 50 ? "Precisa melhorar" : "Ruim";
   const verdictClass =
-    score === null ? "" : score >= 90 ? "bg-emerald-50 text-emerald-700" : score >= 50 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700";
+    score === null ? "" : score >= 90 ? "bg-success/10 text-success" : score >= 50 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive";
   return (
     <div className="px-6 py-5">
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-slate-900">{g?.title}</h2>
+        <h2 className="text-lg font-semibold text-foreground">{g?.title}</h2>
         {verdict && <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${verdictClass}`}>{verdict}</span>}
       </div>
-      <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-500">{g?.text}</p>
+      <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">{g?.text}</p>
     </div>
   );
 }
@@ -146,10 +146,10 @@ function PerformanceTab({
     <div className="space-y-6">
       <Card>
         <CategoryIntro category="performance" score={pct(analysis.categories.performance.score)} />
-        <div className="flex flex-wrap justify-center gap-5 border-t border-surface-border px-6 py-3 text-xs text-slate-500">
+        <div className="flex flex-wrap justify-center gap-5 border-t border-border px-6 py-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><svg viewBox="0 0 12 12" className="h-3 w-3"><path d="M6 1 11.5 11H.5z" fill="#e11d48" /></svg>0–49 ruim</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 bg-amber-500" />50–89 precisa melhorar</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />90–100 bom</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 bg-warning/100" />50–89 precisa melhorar</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-success/100" />90–100 bom</span>
         </div>
       </Card>
 
@@ -159,7 +159,7 @@ function PerformanceTab({
           description="Os 5 tempos que formam a nota de desempenho."
           info={<InfoTip term="lab-data" />}
         />
-        <div className="mt-4 overflow-hidden rounded-b-2xl border-t border-surface-border">
+        <div className="mt-4 overflow-hidden rounded-b-2xl border-t border-border">
           <MetricsPanel analysis={analysis} />
         </div>
       </Card>
@@ -223,7 +223,7 @@ function CategoryTab({
 
       <Card className="overflow-hidden">
         {failing.length === 0 && (
-          <p className="px-6 py-5 text-sm text-emerald-700">Nenhum problema encontrado nesta categoria.</p>
+          <p className="px-6 py-5 text-sm text-success">Nenhum problema encontrado nesta categoria.</p>
         )}
         {groupOrder.map((g) => (
           <AuditSection

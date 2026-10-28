@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { inputClass } from "@/components/ui/fields";
 
 export default function NewFolderForm() {
   const [open, setOpen] = useState(false);
@@ -30,33 +32,29 @@ export default function NewFolderForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
       >
-        + Nova pasta
+        <Plus className="h-4 w-4" />
+        Novo workspace
       </button>
     );
   }
 
   return (
-    <div className="flex gap-1 px-1">
+    <div className="px-1">
       <input
         autoFocus
         value={name}
+        disabled={saving}
         onChange={(e) => setName(e.target.value)}
+        onBlur={() => !name && setOpen(false)}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleCreate();
           if (e.key === "Escape") setOpen(false);
         }}
-        placeholder="Nome da pasta"
-        className="min-w-0 flex-1 rounded-md border border-surface-border px-2 py-1 text-xs outline-none focus:border-slate-400"
+        placeholder="Nome e Enter"
+        className={`${inputClass} h-8 w-full text-xs`}
       />
-      <button
-        onClick={handleCreate}
-        disabled={saving}
-        className="rounded-md bg-slate-900 px-2 text-xs font-medium text-white disabled:opacity-50"
-      >
-        OK
-      </button>
     </div>
   );
 }

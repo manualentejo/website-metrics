@@ -29,9 +29,9 @@ export default function Filmstrip({
             <img
               src={t.data}
               alt={`Tela aos ${(t.timing / 1000).toFixed(1)} segundos`}
-              className="h-36 rounded-lg border border-surface-border object-cover object-top"
+              className="h-36 rounded-lg border border-border object-cover object-top"
             />
-            <figcaption className="mt-1 text-center text-[11px] text-slate-400">
+            <figcaption className="mt-1 text-center text-[11px] text-muted-foreground">
               {(t.timing / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} s
             </figcaption>
           </figure>
@@ -42,9 +42,9 @@ export default function Filmstrip({
             <img
               src={finalScreenshot}
               alt="Tela final carregada"
-              className="h-36 rounded-lg border-2 border-slate-900 object-cover object-top"
+              className="h-36 rounded-lg border-2 border-primary object-cover object-top"
             />
-            <figcaption className="mt-1 text-center text-[11px] font-medium text-slate-600">Final</figcaption>
+            <figcaption className="mt-1 text-center text-[11px] font-medium text-muted-foreground">Final</figcaption>
           </figure>
         )}
       </div>

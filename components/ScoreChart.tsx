@@ -12,7 +12,7 @@ const METRICS: { key: keyof ReportRow; label: string; color: string }[] = [
 export default function ScoreChart({ reports }: { reports: ReportRow[] }) {
   if (reports.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center text-sm text-slate-500">
+      <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
         Sem dados ainda. A primeira análise roda na próxima sexta-feira.
       </div>
     );
@@ -72,8 +72,8 @@ export default function ScoreChart({ reports }: { reports: ReportRow[] }) {
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: metric.color }}
               />
-              <span className="text-slate-500">{metric.label}</span>
-              <span className="font-medium text-slate-800">
+              <span className="text-muted-foreground">{metric.label}</span>
+              <span className="font-medium text-foreground">
                 {typeof latest === "number" ? Math.round(latest) : "—"}
               </span>
             </div>

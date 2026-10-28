@@ -1,8 +1,8 @@
 function colorFor(score: number | null) {
-  if (score === null) return { stroke: "#d1d5db", text: "text-slate-400", bg: "#f3f4f6" };
-  if (score >= 90) return { stroke: "#16a34a", text: "text-emerald-600", bg: "#ecfdf5" };
-  if (score >= 50) return { stroke: "#d97706", text: "text-amber-600", bg: "#fffbeb" };
-  return { stroke: "#dc2626", text: "text-rose-600", bg: "#fef2f2" };
+  if (score === null) return { stroke: "#d1d5db", text: "text-muted-foreground", bg: "#f3f4f6" };
+  if (score >= 90) return { stroke: "#16a34a", text: "text-success", bg: "#ecfdf5" };
+  if (score >= 50) return { stroke: "#d97706", text: "text-warning", bg: "#fffbeb" };
+  return { stroke: "#dc2626", text: "text-destructive", bg: "#fef2f2" };
 }
 
 export default function ScoreGauge({
@@ -39,7 +39,7 @@ export default function ScoreGauge({
           {score === null ? "—" : Math.round(score)}
         </div>
       </div>
-      {label && <span className="text-sm text-slate-600 text-center">{label}</span>}
+      {label && <span className="text-sm text-muted-foreground text-center">{label}</span>}
     </div>
   );
 }
