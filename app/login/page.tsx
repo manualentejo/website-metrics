@@ -1,14 +1,15 @@
 "use client";
+import { RiBarChartLine, RiFileTextLine, RiSpeedUpLine } from "@remixicon/react";
 
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { BarChart3, FileText, Gauge } from "lucide-react";
+
 import { buttonClass } from "@/components/ui/Button";
 
 const FEATURES = [
-  { icon: Gauge, title: "Notas do Lighthouse", text: "Desempenho, acessibilidade, boas práticas e SEO de cada site, no computador e no celular." },
-  { icon: BarChart3, title: "Visitas por página e aparelho", text: "Quantas pessoas visitam, quais páginas e de que aparelho, sem cookies." },
-  { icon: FileText, title: "Relatório semanal em PDF", text: "Todos os sites em um arquivo, com o que fazer no Framer para melhorar." },
+  { icon: RiSpeedUpLine, title: "Notas do Lighthouse", text: "Desempenho, acessibilidade, boas práticas e SEO de cada site, no computador e no celular." },
+  { icon: RiBarChartLine, title: "Visitas por página e aparelho", text: "Quantas pessoas visitam, quais páginas e de que aparelho, sem cookies." },
+  { icon: RiFileTextLine, title: "Relatório semanal em PDF", text: "Todos os sites em um arquivo, com o que fazer no Framer para melhorar." },
 ];
 
 function GoogleIcon() {

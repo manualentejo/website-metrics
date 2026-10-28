@@ -1,7 +1,8 @@
 "use client";
+import { RiCheckLine, RiFileCopyLine } from "@remixicon/react";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+
 import Button from "@/components/ui/Button";
 
 export default function CopyBox({ text }: { text: string }) {
@@ -20,7 +21,7 @@ export default function CopyBox({ text }: { text: string }) {
           } catch {}
         }}
       >
-        {done ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        {done ? <RiCheckLine className="h-3.5 w-3.5" /> : <RiFileCopyLine className="h-3.5 w-3.5" />}
         {done ? "Copiado" : "Copiar"}
       </Button>
     </div>

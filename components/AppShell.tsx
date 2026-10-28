@@ -36,7 +36,7 @@ export default async function AppShell({
   return (
     <div className="flex h-screen bg-background">
       <Sidebar
-        sites={visible.map((s) => ({ id: s.id, name: s.name, status: s.status as Status, folderId: s.folderId }))}
+        sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}
         folders={allFolders}
         active={active}
         activeSiteId={activeSiteId}

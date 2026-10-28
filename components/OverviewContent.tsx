@@ -4,6 +4,8 @@ import StatusSelect from "@/components/StatusSelect";
 import AddSiteBar from "@/components/AddSiteBar";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Page, Segmented, EmptyState } from "@/components/ui/Page";
+import type { ReactNode } from "react";
+import { RiSettings3Line } from "@remixicon/react";
 import { formatDateTime } from "@/lib/format";
 import type { OverviewRow } from "@/lib/overview";
 import type { Status } from "@/lib/types";
@@ -101,8 +103,20 @@ export function SitesTable({
                 <td className="px-3 py-2.5"><Bar value={site.desktop?.bestPracticesScore ?? null} /></td>
                 <td className="px-3 py-2.5"><Bar value={site.desktop?.seoScore ?? null} /></td>
                 <td className="px-3 py-2.5"><Bar value={site.mobile?.performanceScore ?? null} /></td>
-                <td className="px-5 py-2.5 text-right">
-                  <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!owner} />
+                <td className="px-5 py-2.5">
+                  <div className="flex items-center justify-end gap-2">
+                    <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!owner} />
+                    {owner && (
+                      <Link
+                        href={`/site/${site.id}?config=1`}
+                        aria-label={`Configurar ${site.name}`}
+                        title="Configurar site"
+                        className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                      >
+                        <RiSettings3Line className="h-4 w-4" />
+                      </Link>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -131,6 +145,7 @@ export default function OverviewContent({
   statusFilter,
   folderNames,
   basePath = "/",
+  actions,
 }: {
   title: string;
   subtitle: string;
@@ -142,6 +157,7 @@ export default function OverviewContent({
   statusFilter?: string;
   folderNames: Record<string, string>;
   basePath?: string;
+  actions?: ReactNode;
 }) {
   const live = rows.filter((r) => r.status === "no_ar").length;
   const vals = rows
@@ -150,7 +166,7 @@ export default function OverviewContent({
   const overall = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
 
   return (
-    <Page title={title} subtitle={subtitle}>
+    <Page title={title} subtitle={subtitle} actions={actions}>
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Sites monitorados" value={rows.length} hint={`${live} no ar · ${rows.length - live} em andamento`} />
         <Stat label="Nota média (computador)" value={overall ?? "—"} hint="Média das 4 categorias" />

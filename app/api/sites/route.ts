@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import { sites, reports } from "@/db/schema";
 import { asc, desc, eq } from "drizzle-orm";
 import { analyzeSite } from "@/lib/runAnalysis";
+import { nameFromHost, normalizeSiteUrl } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -38,19 +39,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const { url, folderId } = (await req.json()) as { url?: string; folderId?: string | null };
-  let parsed: URL;
-  try {
-    parsed = new URL(/^https?:\/\//i.test(url ?? "") ? url! : `https://${url}`);
-    if (!parsed.hostname.includes(".")) throw new Error();
-  } catch {
-    return NextResponse.json({ error: "Endereço inválido." }, { status: 400 });
-  }
-  const normalized = `${parsed.origin}/`;
+  const n = normalizeSiteUrl(url);
+  if (!n) return NextResponse.json({ error: "Endereço inválido." }, { status: 400 });
+  const normalized = n.url;
   const existing = await db.select().from(sites).where(eq(sites.url, normalized));
   if (existing.length) return NextResponse.json({ error: "Esse site já está no painel." }, { status: 409 });
 
-  const host = parsed.hostname.replace(/^www\./, "");
-  const name = host.split(".")[0].replace(/^./, (c) => c.toUpperCase());
+  const name = nameFromHost(n.host);
   const all = await db.select().from(sites);
   const [site] = await db
     .insert(sites)
@@ -70,8 +65,10 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, status, visibility, folderId } = body as {
+  const { id, status, visibility, folderId, name, url } = body as {
     id: string;
+    name?: string;
+    url?: string;
     status?: string;
     visibility?: string;
     folderId?: string | null;
@@ -97,11 +94,42 @@ export async function PATCH(req: NextRequest) {
   if (folderId !== undefined) {
     update.folderId = folderId;
   }
+  if (name !== undefined) {
+    const trimmed = name.trim().slice(0, 80);
+    if (!trimmed) return NextResponse.json({ error: "Dê um nome ao site." }, { status: 400 });
+    update.name = trimmed;
+  }
+  let urlChanged = false;
+  if (url !== undefined) {
+    const n = normalizeSiteUrl(url);
+    if (!n) return NextResponse.json({ error: "Endereço inválido." }, { status: 400 });
+    const clash = await db.select().from(sites).where(eq(sites.url, n.url));
+    if (clash.some((c) => c.id !== id)) return NextResponse.json({ error: "Esse endereço já está em outro site." }, { status: 409 });
+    update.url = n.url;
+    urlChanged = true;
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "Nada para atualizar" }, { status: 400 });
   }
 
-  await db.update(sites).set(update).where(eq(sites.id, id));
+  const [site] = await db.update(sites).set(update).where(eq(sites.id, id)).returning();
+  if (!site) return NextResponse.json({ error: "Site não encontrado." }, { status: 404 });
+
+  // Endereço novo: analisa na hora para o site já aparecer com as notas do domínio novo.
+  const apiKey = process.env.PAGESPEED_API_KEY;
+  const analysis = urlChanged && apiKey ? await analyzeSite(site, apiKey) : [];
+  return NextResponse.json({ ok: true, analysis });
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!isOwner(session?.user?.email)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  // Análises, instantâneos, acessos e visitas saem junto (ON DELETE CASCADE).
+  await db.delete(sites).where(eq(sites.id, id));
   return NextResponse.json({ ok: true });
 }

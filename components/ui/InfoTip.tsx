@@ -1,8 +1,9 @@
 "use client";
+import { RiInformationLine } from "@remixicon/react";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Info } from "lucide-react";
+
 import { GLOSSARY } from "@/lib/glossary";
 
 const WIDTH = 288;
@@ -93,7 +94,7 @@ export default function InfoTip({
         }}
         className="inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Info className="h-3.5 w-3.5" strokeWidth={2} />
+        <RiInformationLine className="h-3.5 w-3.5" strokeWidth={2} />
       </button>
       {open &&
         createPortal(

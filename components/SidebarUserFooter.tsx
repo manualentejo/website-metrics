@@ -1,5 +1,6 @@
+import { RiExpandUpDownLine } from "@remixicon/react";
 import Link from "next/link";
-import { ChevronsUpDown } from "lucide-react";
+
 import Avatar from "./ui/Avatar";
 
 // Cartão do perfil no pé da barra lateral. Configurações ficam dentro do perfil.
@@ -21,7 +22,7 @@ export default function SidebarUserFooter({
         <span className="block truncate text-[13px] font-medium text-foreground">{user.name}</span>
         <span className="block truncate text-[11px] text-muted-foreground">{user.email}</span>
       </span>
-      <ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+      <RiExpandUpDownLine className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
     </Link>
   );
 }

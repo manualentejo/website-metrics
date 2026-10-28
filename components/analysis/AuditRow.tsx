@@ -1,7 +1,8 @@
 "use client";
+import { RiArrowDownSLine, RiSparklingLine } from "@remixicon/react";
 
 import { useState } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
+
 import type { AuditStatus, StoredAudit } from "@/lib/analysis";
 import { auditStatus } from "@/lib/analysis";
 import { AUDIT_PLAIN } from "@/lib/glossary";
@@ -94,7 +95,7 @@ export default function AuditRow({
             <span className={`ml-1.5 ${VALUE_COLOR[status]}`}>— {audit.displayValue}</span>
           )}
         </span>
-        <ChevronDown className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+        <RiArrowDownSLine className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
@@ -162,7 +163,7 @@ export default function AuditRow({
               }
               className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-foreground/80 ring-1 ring-border transition-colors hover:bg-secondary"
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <RiSparklingLine className="h-3.5 w-3.5" />
               Como corrigir no Framer?
             </button>
           )}

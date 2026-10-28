@@ -1,14 +1,7 @@
+import { RiDashboardLine, RiGlobalLine, RiFileList3Line, RiNotification3Line, RiScalesLine, RiToolsLine, RiCalendarLine } from "@remixicon/react";
+import type { ComponentType } from "react";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Globe,
-  ClipboardList,
-  Bell,
-  GitCompareArrows,
-  Wrench,
-  CalendarDays,
-  type LucideIcon,
-} from "lucide-react";
+
 import type { Status } from "@/lib/types";
 import SidebarUserFooter from "./SidebarUserFooter";
 import NewFolderForm from "./NewFolderForm";
@@ -16,19 +9,20 @@ import WorkspaceTree from "./WorkspaceTree";
 
 export type NavKey = "home" | "sites" | "analises" | "alertas" | "comparativo" | "correcoes" | "relatorios" | "perfil";
 
-const NAV: { key: NavKey; href: string; label: string; icon: LucideIcon }[] = [
-  { key: "home", href: "/", label: "Visão geral", icon: LayoutDashboard },
-  { key: "sites", href: "/sites", label: "Sites", icon: Globe },
-  { key: "analises", href: "/analises", label: "Análises", icon: ClipboardList },
-  { key: "alertas", href: "/alertas", label: "Alertas", icon: Bell },
-  { key: "comparativo", href: "/comparativo", label: "Comparativo", icon: GitCompareArrows },
-  { key: "correcoes", href: "/correcoes", label: "Fila de correções", icon: Wrench },
-  { key: "relatorios", href: "/relatorios", label: "Relatórios", icon: CalendarDays },
+const NAV: { key: NavKey; href: string; label: string; icon: ComponentType<{ className?: string }> }[] = [
+  { key: "home", href: "/", label: "Visão geral", icon: RiDashboardLine },
+  { key: "sites", href: "/sites", label: "Sites", icon: RiGlobalLine },
+  { key: "analises", href: "/analises", label: "Análises", icon: RiFileList3Line },
+  { key: "alertas", href: "/alertas", label: "Alertas", icon: RiNotification3Line },
+  { key: "comparativo", href: "/comparativo", label: "Comparativo", icon: RiScalesLine },
+  { key: "correcoes", href: "/correcoes", label: "Fila de correções", icon: RiToolsLine },
+  { key: "relatorios", href: "/relatorios", label: "Relatórios", icon: RiCalendarLine },
 ];
 
 interface SiteNavItem {
   id: string;
   name: string;
+  url: string;
   status: Status;
   folderId: string | null;
 }
@@ -84,7 +78,11 @@ export default function Sidebar({
 
         <p className="px-2.5 pb-1 pt-5 text-[11px] font-medium text-muted-foreground">Workspaces</p>
         <WorkspaceTree groups={groups} loose={loose} activeSiteId={activeSiteId} activeFolderId={activeFolderId} />
-        {isOwner && <NewFolderForm />}
+        {isOwner && (
+          <NewFolderForm
+            sites={sites.map((x) => ({ id: x.id, name: x.name, url: x.url, folderName: folders.find((fo) => fo.id === x.folderId)?.name ?? null }))}
+          />
+        )}
       </nav>
 
       <SidebarUserFooter user={user} active={active === "perfil"} />

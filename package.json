@@ -10,6 +10,7 @@
     "db:migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
+    "@remixicon/react": "^4.9.0",
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.62.0",
     "next": "16.4.3",

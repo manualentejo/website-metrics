@@ -1,6 +1,7 @@
+import { RiAlertLine, RiCheckboxCircleLine, RiErrorWarningLine } from "@remixicon/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, CheckCircle2, OctagonAlert } from "lucide-react";
+
 import AppShell from "@/components/AppShell";
 import { Card } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -11,10 +12,10 @@ import { formatDateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-const META: Record<Severity, { label: string; tone: "destructive" | "warning" | "success"; icon: typeof OctagonAlert; color: string }> = {
-  critical: { label: "Crítico", tone: "destructive", icon: OctagonAlert, color: "text-destructive" },
-  warning: { label: "Atenção", tone: "warning", icon: AlertTriangle, color: "text-warning" },
-  good: { label: "Melhorou", tone: "success", icon: CheckCircle2, color: "text-success" },
+const META: Record<Severity, { label: string; tone: "destructive" | "warning" | "success"; icon: typeof RiErrorWarningLine; color: string }> = {
+  critical: { label: "Crítico", tone: "destructive", icon: RiErrorWarningLine, color: "text-destructive" },
+  warning: { label: "Atenção", tone: "warning", icon: RiAlertLine, color: "text-warning" },
+  good: { label: "Melhorou", tone: "success", icon: RiCheckboxCircleLine, color: "text-success" },
 };
 
 export default async function AlertsPage() {

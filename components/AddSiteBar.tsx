@@ -1,8 +1,9 @@
 "use client";
+import { RiAddLine, RiSparklingLine } from "@remixicon/react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Sparkles } from "lucide-react";
+
 import Button from "@/components/ui/Button";
 import { inputClass } from "@/components/ui/fields";
 import Select from "@/components/ui/Select";
@@ -40,7 +41,7 @@ export default function AddSiteBar({
   return (
     <div className="rounded-lg border border-border bg-secondary/60 p-4">
       <p className="mb-2.5 flex items-center gap-2 text-[13px] text-muted-foreground">
-        <Sparkles className="h-3.5 w-3.5" />
+        <RiSparklingLine className="h-3.5 w-3.5" />
         Comece a monitorar um novo site: cole o endereço abaixo.
       </p>
       <div className="flex flex-wrap gap-2">
@@ -59,7 +60,7 @@ export default function AddSiteBar({
           ))}
         </Select>
         <Button onClick={add} disabled={busy || !url.trim()}>
-          <Plus className="h-4 w-4" />
+          <RiAddLine className="h-4 w-4" />
           {busy ? "Analisando…" : "Adicionar site"}
         </Button>
       </div>

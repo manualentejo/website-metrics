@@ -70,3 +70,14 @@ export async function loadAnalytics(siteId: string, days: number) {
     months: rows(months).map((r) => ({ month: String(r.month), visitors: Number(r.visitors), views: Number(r.views) })),
   };
 }
+
+/** O site já recebeu alguma visita pelo código de rastreio? */
+export async function hasVisits(siteId: string): Promise<boolean> {
+  try {
+    await ensureAnalyticsTable();
+    const r = await db.execute(sql`SELECT 1 FROM pageviews WHERE site_id = ${siteId} LIMIT 1`);
+    return rows(r).length > 0;
+  } catch {
+    return false;
+  }
+}

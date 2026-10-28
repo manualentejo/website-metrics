@@ -1,8 +1,9 @@
 "use client";
+import { RiArrowDownSLine } from "@remixicon/react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+
 import type { Status } from "@/lib/types";
 
 const LABEL: Record<Status, string> = { no_ar: "No ar", em_andamento: "Em andamento" };
@@ -62,7 +63,7 @@ export default function StatusSelect({
         <option value="no_ar">{LABEL.no_ar}</option>
         <option value="em_andamento">{LABEL.em_andamento}</option>
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2 h-3.5 w-3.5 text-muted-foreground" />
+      <RiArrowDownSLine className="pointer-events-none absolute right-2 h-3.5 w-3.5 text-muted-foreground" />
     </label>
   );
 }

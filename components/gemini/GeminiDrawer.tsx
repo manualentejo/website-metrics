@@ -1,7 +1,8 @@
 "use client";
+import { RiArrowUpLine, RiSparklingLine, RiCloseLine } from "@remixicon/react";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, Sparkles, X } from "lucide-react";
+
 import { OPEN_GEMINI_EVENT } from "@/lib/openGemini";
 import Markdown from "./Markdown";
 
@@ -97,7 +98,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
         <header className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
+              <RiSparklingLine className="h-4 w-4" />
             </span>
             <div>
               <p className="text-sm font-semibold text-foreground">Pergunte ao Gemini</p>
@@ -109,7 +110,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
             aria-label="Fechar"
             className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground/80"
           >
-            <X className="h-4 w-4" />
+            <RiCloseLine className="h-4 w-4" />
           </button>
         </header>
 
@@ -183,7 +184,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
               aria-label="Enviar pergunta"
               className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-30"
             >
-              <ArrowUp className="h-4 w-4" />
+              <RiArrowUpLine className="h-4 w-4" />
             </button>
           </div>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">A IA pode errar. Confira antes de aplicar mudanças.</p>

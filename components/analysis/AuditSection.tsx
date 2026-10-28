@@ -1,7 +1,8 @@
 "use client";
+import { RiArrowDownSLine } from "@remixicon/react";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+
 import type { StoredAudit } from "@/lib/analysis";
 import InfoTip from "@/components/ui/InfoTip";
 import AuditRow from "./AuditRow";
@@ -56,7 +57,7 @@ export default function AuditSection({
             className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
             {open ? "Ocultar" : "Mostrar"}
-            <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+            <RiArrowDownSLine className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
           </button>
         </div>
       ) : (

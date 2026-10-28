@@ -1,6 +1,7 @@
+import { RiArrowLeftSLine, RiArrowRightSLine, RiDownloadLine } from "@remixicon/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+
 import AppShell from "@/components/AppShell";
 import { Card } from "@/components/ui/Card";
 import { buttonClass } from "@/components/ui/Button";
@@ -47,11 +48,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         actions={
           <div className="flex items-center gap-1">
             <Link href={`/relatorios?m=${prev}`} aria-label="Mês anterior" className={buttonClass("outline", "icon")}>
-              <ChevronLeft className="h-4 w-4" />
+              <RiArrowLeftSLine className="h-4 w-4" />
             </Link>
             <span className="w-36 text-center text-[13px] font-medium">{MONTHS[month - 1]} de {year}</span>
             <Link href={`/relatorios?m=${next}`} aria-label="Próximo mês" className={buttonClass("outline", "icon")}>
-              <ChevronRight className="h-4 w-4" />
+              <RiArrowRightSLine className="h-4 w-4" />
             </Link>
           </div>
         }
@@ -78,7 +79,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   {isReportDay &&
                     (ready ? (
                       <a href={`/api/reports/pdf?date=${date}`} className={buttonClass("primary", "sm", "w-full")}>
-                        <Download className="h-3.5 w-3.5" />
+                        <RiDownloadLine className="h-3.5 w-3.5" />
                         PDF
                       </a>
                     ) : date > today ? (
@@ -86,7 +87,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                         <span className="text-[11px] text-muted-foreground">Agendado</span>
                         {available(today) && new Date(date).getTime() - new Date(today).getTime() <= 7 * DAY && (
                           <a href={`/api/reports/pdf?date=${today}`} className={buttonClass("outline", "sm", "w-full")}>
-                            <Download className="h-3.5 w-3.5" />
+                            <RiDownloadLine className="h-3.5 w-3.5" />
                             Prévia
                           </a>
                         )}

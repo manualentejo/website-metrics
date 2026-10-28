@@ -1,6 +1,7 @@
+import { RiExternalLinkLine, RiArrowRightSLine, RiBarChartLine } from "@remixicon/react";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+
 import { db } from "@/db/client";
 import { sites, reports, snapshots, folders, siteAccess } from "@/db/schema";
 import { and, asc, eq } from "drizzle-orm";
@@ -16,6 +17,9 @@ import { Card } from "@/components/ui/Card";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { formatDateTime } from "@/lib/format";
 import { Segmented } from "@/components/ui/Page";
+import SiteSettingsDialog from "@/components/SiteSettingsDialog";
+import { hasVisits } from "@/lib/analytics";
+import { headers } from "next/headers";
 import { buttonClass } from "@/components/ui/Button";
 import type { ReportRow, Status, Strategy } from "@/lib/types";
 
@@ -26,10 +30,10 @@ export default async function SiteDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ strategy?: string; status?: string }>;
+  searchParams: Promise<{ strategy?: string; status?: string; config?: string }>;
 }) {
   const { id } = await params;
-  const { strategy: strategyParam, status: statusFilter } = await searchParams;
+  const { strategy: strategyParam, status: statusFilter, config } = await searchParams;
   const strategy: Strategy = strategyParam === "mobile" ? "mobile" : "desktop";
   const strategyLabel = strategy === "mobile" ? "celular" : "computador";
 
@@ -64,6 +68,10 @@ export default async function SiteDetailPage({
   const analysis = snapshot?.analysis ?? null;
   const analyzedAt = analysis?.meta.fetchTime ?? latest?.ranAt;
 
+  const visitsOn = await hasVisits(id);
+  const host = (await headers()).get("x-forwarded-host") ?? (await headers()).get("host") ?? "";
+  const snippet = `<script defer src="https://${host}/t.js" data-site="${id}"></script>`;
+
   const strategyHref = (s: Strategy) => `/site/${id}?strategy=${s}${statusFilter ? `&status=${statusFilter}` : ""}`;
 
   return (
@@ -73,11 +81,11 @@ export default async function SiteDetailPage({
             <Link href="/sites" className="hover:text-foreground/80">Sites</Link>
             {folder && (
               <>
-                <ChevronRight className="h-3 w-3" />
+                <RiArrowRightSLine className="h-3 w-3" />
                 <span>{folder.name}</span>
               </>
             )}
-            <ChevronRight className="h-3 w-3" />
+            <RiArrowRightSLine className="h-3 w-3" />
             <span className="text-muted-foreground">{site.name}</span>
           </nav>
 
@@ -91,7 +99,7 @@ export default async function SiteDetailPage({
                 className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
               >
                 {site.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                <ArrowUpRight className="h-3.5 w-3.5" />
+                <RiExternalLinkLine className="h-3.5 w-3.5" />
               </a>
               {analyzedAt && (
                 <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
@@ -112,7 +120,20 @@ export default async function SiteDetailPage({
                 }))}
               />
               <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!viewer.owner} />
-              <Link href={`/site/${id}/analytics`} className={buttonClass("outline", "md")}>Visitas</Link>
+              {visitsOn && (
+                <Link href={`/site/${id}/analytics`} className={buttonClass("outline", "md")}>
+                  <RiBarChartLine className="h-4 w-4" />
+                  Visitas
+                </Link>
+              )}
+              {viewer.owner && (
+                <SiteSettingsDialog
+                  site={{ id: site.id, name: site.name, url: site.url, folderId: site.folderId }}
+                  folders={allFolders.map((f) => ({ id: f.id, name: f.name }))}
+                  snippet={snippet}
+                  defaultOpen={config === "1"}
+                />
+              )}
               <AskGeminiButton />
             </div>
           </header>

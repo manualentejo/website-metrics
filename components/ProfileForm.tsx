@@ -1,8 +1,9 @@
 "use client";
+import { RiLogoutBoxLine, RiUploadLine } from "@remixicon/react";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Upload } from "lucide-react";
+
 import { signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
@@ -95,7 +96,7 @@ export default function ProfileForm({
             <div className="flex gap-2">
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
               <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                <Upload className="h-3.5 w-3.5" />
+                <RiUploadLine className="h-3.5 w-3.5" />
                 Enviar foto
               </Button>
               {image && (
@@ -111,7 +112,7 @@ export default function ProfileForm({
         </Row>
         <Row title="Sessão" description="Sai deste dispositivo. Você entra de novo com a conta Google.">
           <Button variant="outline" size="sm" onClick={() => signOut({ callbackUrl: "/login" })}>
-            <LogOut className="h-3.5 w-3.5" />
+            <RiLogoutBoxLine className="h-3.5 w-3.5" />
             Sair da conta
           </Button>
         </Row>

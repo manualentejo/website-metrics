@@ -2,59 +2,87 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { RiFolderAddLine } from "@remixicon/react";
+import Button from "@/components/ui/Button";
+import Modal, { Field } from "@/components/ui/Modal";
 import { inputClass } from "@/components/ui/fields";
+import SiteChecklist, { type PickableSite } from "@/components/SiteChecklist";
 
-export default function NewFolderForm() {
+// "Novo workspace": cria um grupo (pasta), dá um nome e já escolhe quais sites entram nele.
+export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  async function handleCreate() {
-    if (!name.trim() || saving) return;
-    setSaving(true);
-    try {
-      await fetch("/api/folders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-      setName("");
-      setOpen(false);
-      router.refresh();
-    } finally {
-      setSaving(false);
-    }
+  function close() {
+    setOpen(false);
+    setName("");
+    setPicked([]);
+    setError(null);
   }
 
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-md px-2.5 h-8 text-[13px] text-muted-foreground hover:bg-accent hover:text-foreground"
-      >
-        <Plus className="h-4 w-4" />
-        Novo workspace
-      </button>
-    );
+  async function create() {
+    if (!name.trim() || saving) return;
+    setSaving(true);
+    setError(null);
+    const res = await fetch("/api/folders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim(), siteIds: picked }),
+    });
+    const data = await res.json().catch(() => null);
+    setSaving(false);
+    if (!res.ok) return setError(data?.error ?? "Não foi possível criar o workspace.");
+    close();
+    router.push(`/workspace/${data.id}`);
+    router.refresh();
   }
 
   return (
-    <div className="px-1">
-      <input
-        autoFocus
-        value={name}
-        disabled={saving}
-        onChange={(e) => setName(e.target.value)}
-        onBlur={() => !name && setOpen(false)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleCreate();
-          if (e.key === "Escape") setOpen(false);
-        }}
-        placeholder="Nome do workspace"
-        className={`${inputClass} h-8 w-full text-xs`}
-      />
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+      >
+        <RiFolderAddLine className="h-4 w-4" />
+        Novo workspace
+      </button>
+      <Modal
+        open={open}
+        onClose={close}
+        title="Novo workspace"
+        description="Um workspace é um grupo de sites, como uma pasta."
+        footer={
+          <>
+            <Button variant="outline" onClick={close}>Cancelar</Button>
+            <Button onClick={create} disabled={!name.trim() || saving}>{saving ? "Criando…" : "Criar workspace"}</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Field label="Nome do workspace">
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && create()}
+              placeholder="Ex.: Clientes de investimento"
+              maxLength={60}
+              className={`${inputClass} w-full`}
+            />
+          </Field>
+          <div>
+            <p className="mb-1 text-xs font-medium text-foreground">Sites do grupo (opcional)</p>
+            <SiteChecklist sites={sites} selected={picked} onChange={setPicked} emptyText="Adicione um site primeiro para poder agrupá-lo." />
+            <p className="mt-1 text-xs text-muted-foreground">Um site fica em um workspace só: ao escolher, ele sai do anterior.</p>
+          </div>
+          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+        </div>
+      </Modal>
+    </>
   );
 }

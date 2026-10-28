@@ -1,8 +1,9 @@
 "use client";
+import { RiArrowDownSLine, RiFolderLine, RiFolderOpenLine, RiGlobalLine } from "@remixicon/react";
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, FolderClosed, FolderOpen, Globe } from "lucide-react";
+
 
 interface Item {
   id: string;
@@ -24,7 +25,7 @@ const row = (active: boolean) =>
 function SiteLink({ site, active }: { site: Item; active: boolean }) {
   return (
     <Link href={`/site/${site.id}`} className={row(active)}>
-      <Globe className="h-4 w-4 flex-shrink-0" />
+      <RiGlobalLine className="h-4 w-4 flex-shrink-0" />
       <span className="flex-1 truncate">{site.name}</span>
       <span
         className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success" : "bg-warning"}`}
@@ -37,7 +38,7 @@ function SiteLink({ site, active }: { site: Item; active: boolean }) {
 function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; activeSiteId?: string; activeFolderId?: string }) {
   const containsActive = group.id === activeFolderId || group.sites.some((s) => s.id === activeSiteId);
   const [open, setOpen] = useState(containsActive);
-  const Icon = open ? FolderOpen : FolderClosed;
+  const Icon = open ? RiFolderOpenLine : RiFolderLine;
 
   return (
     <div>
@@ -53,7 +54,7 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
           aria-label={`${open ? "Recolher" : "Expandir"} ${group.name}`}
           className="mr-1 rounded-md p-1.5 hover:bg-accent"
         >
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "" : "-rotate-90"}`} />
+          <RiArrowDownSLine className={`h-3.5 w-3.5 transition-transform ${open ? "" : "-rotate-90"}`} />
         </button>
       </div>
       {open && (

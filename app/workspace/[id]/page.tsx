@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import OverviewContent from "@/components/OverviewContent";
+import WorkspaceActions from "@/components/WorkspaceActions";
 import { getViewer } from "@/lib/access";
 import { loadOverview } from "@/lib/overview";
 
@@ -36,6 +37,17 @@ export default async function WorkspacePage({
         statusFilter={statusFilter}
         folderNames={{}}
         basePath={`/workspace/${id}`}
+        actions={
+          viewer.owner && (
+            <WorkspaceActions
+              folder={{ id, name: folder.name }}
+              siteCount={rows.length}
+              candidates={o.rows
+                .filter((r) => r.folderId !== id)
+                .map((r) => ({ id: r.id, name: r.name, url: r.url, folderName: o.folders.find((fo) => fo.id === r.folderId)?.name ?? null }))}
+            />
+          )
+        }
       />
     </AppShell>
   );
