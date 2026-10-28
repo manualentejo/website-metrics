@@ -92,7 +92,7 @@ export default function GeoManager({ siteId, initial, configured, prompts }: Pro
           <input value={competitors} onChange={(e) => setCompetitors(e.target.value)} placeholder="Marca A, Marca B" className={`${inputClass} w-full`} />
         </Field>
         <div className="sm:col-span-2">
-          <Field label="O que o site oferece (opcional)" hint="Uma frase. Ajuda o Gemini a sugerir prompts que fazem sentido.">
+          <Field label="O que o site oferece" hint="Uma frase (obrigatória para sugerir prompts). Sem isso o Gemini não sabe o que sugerir.">
             <input value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder="Ex.: escritório de arquitetura residencial em São Paulo" className={`${inputClass} w-full`} />
           </Field>
         </div>
@@ -106,7 +106,7 @@ export default function GeoManager({ siteId, initial, configured, prompts }: Pro
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-label-md text-text-strong-950">Prompts monitorados ({prompts.length}/20)</h3>
-          <Button variant="outline" size="sm" onClick={suggest} disabled={!brand.trim() || busy !== null}>
+          <Button variant="outline" size="sm" onClick={suggest} disabled={!brand.trim() || description.trim().length < 10 || busy !== null}>
             {busy === "suggest" ? <RiLoader4Line className="size-4 animate-spin" /> : <RiSparklingLine className="size-4" />}
             {busy === "suggest" ? "Pedindo ao Gemini…" : "Sugerir com Gemini"}
           </Button>

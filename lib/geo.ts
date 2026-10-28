@@ -156,6 +156,7 @@ export async function removePrompt(siteId: string, id: string) {
 
 /** O Gemini sugere perguntas que um cliente real faria; o usuário revisa. São ponto de partida, não resultado. */
 export async function suggestPrompts(brand: string, domain: string, description: string): Promise<string[]> {
+  if (description.trim().length < 10) throw new Error("Descreva em uma frase o que o site oferece, para os prompts fazerem sentido.");
   const text = await askGemini(
     "Você ajuda a montar prompts para medir a presença de uma marca em respostas de IA. Responda SOMENTE com um array JSON de strings.",
     `Marca: ${brand}\nSite: ${domain}\nO que oferece: ${description || "(não informado; deduza só do nome e do domínio, sem inventar detalhes)"}\n\nCrie 8 perguntas em português que um possível cliente faria a um assistente de IA ao procurar esse tipo de serviço ou produto, SEM citar o nome da marca (ex.: "qual a melhor agência de X em São Paulo?"). Misture perguntas de pesquisa, comparação e recomendação.`
@@ -163,7 +164,8 @@ export async function suggestPrompts(brand: string, domain: string, description:
   const m = text.match(/\[[\s\S]*\]/);
   if (!m) throw new Error("O Gemini não devolveu uma lista de prompts.");
   const arr = JSON.parse(m[0]);
-  return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
+  // Prompt que já cita a marca inflaria a medição: descartamos.
+  return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string" && !mentions(x, brand) && !x.toLowerCase().includes(domain.toLowerCase())) : [];
 }
 
 /** Roda todos os prompts do site (4 em paralelo) e grava uma verificação. */
