@@ -27,6 +27,13 @@ export interface StoredCategory {
   auditRefs: { id: string; weight: number; group: string | null; acronym: string | null }[];
 }
 
+/** Dados de usuários reais (Chrome UX Report, últimos 28 dias), quando o Google tem tráfego suficiente. */
+export interface FieldData {
+  scope: "page" | "origin";
+  overall: "FAST" | "AVERAGE" | "SLOW" | null;
+  metrics: { id: "lcp" | "inp" | "cls" | "fcp" | "ttfb"; value: number; category: "FAST" | "AVERAGE" | "SLOW" | null }[];
+}
+
 export interface Analysis {
   meta: {
     fetchTime: string;
@@ -37,6 +44,7 @@ export interface Analysis {
   categories: Record<CategoryKey, StoredCategory>;
   groups: Record<string, { title: string; description: string | null }>;
   audits: Record<string, StoredAudit>;
+  field?: FieldData | null;
 }
 
 export type AuditStatus = "fail" | "average" | "pass" | "info" | "manual" | "na";

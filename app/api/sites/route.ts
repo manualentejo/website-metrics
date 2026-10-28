@@ -65,8 +65,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, status, visibility, folderId, name, url } = body as {
+  const { id, status, visibility, folderId, name, url, reanalyze } = body as {
     id: string;
+    reanalyze?: boolean;
     name?: string;
     url?: string;
     status?: string;
@@ -109,16 +110,19 @@ export async function PATCH(req: NextRequest) {
     urlChanged = true;
   }
 
-  if (Object.keys(update).length === 0) {
+  if (Object.keys(update).length === 0 && !reanalyze) {
     return NextResponse.json({ error: "Nada para atualizar" }, { status: 400 });
   }
 
-  const [site] = await db.update(sites).set(update).where(eq(sites.id, id)).returning();
+  const [site] =
+    Object.keys(update).length > 0
+      ? await db.update(sites).set(update).where(eq(sites.id, id)).returning()
+      : await db.select().from(sites).where(eq(sites.id, id));
   if (!site) return NextResponse.json({ error: "Site não encontrado." }, { status: 404 });
 
   // Endereço novo: analisa na hora para o site já aparecer com as notas do domínio novo.
   const apiKey = process.env.PAGESPEED_API_KEY;
-  const analysis = urlChanged && apiKey ? await analyzeSite(site, apiKey) : [];
+  const analysis = (urlChanged || reanalyze) && apiKey ? await analyzeSite(site, apiKey) : [];
   return NextResponse.json({ ok: true, analysis });
 }
 

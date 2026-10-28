@@ -60,6 +60,32 @@ function trimDetails(details: any): DetailsTable | null {
   return { headings, items, totalItems: allItems.length };
 }
 
+const FIELD_IDS = {
+  LARGEST_CONTENTFUL_PAINT_MS: "lcp",
+  INTERACTION_TO_NEXT_PAINT: "inp",
+  CUMULATIVE_LAYOUT_SHIFT_SCORE: "cls",
+  FIRST_CONTENTFUL_PAINT_MS: "fcp",
+  EXPERIMENTAL_TIME_TO_FIRST_BYTE: "ttfb",
+} as const;
+
+/** Extrai os dados de usuários reais (CrUX) da resposta; prefere a página, senão o domínio inteiro. */
+export function buildField(data: any): Analysis["field"] {
+  for (const [scope, exp] of [["page", data?.loadingExperience], ["origin", data?.originLoadingExperience]] as const) {
+    const m = exp?.metrics;
+    if (!m) continue;
+    const metrics = Object.entries(FIELD_IDS)
+      .filter(([k]) => typeof m[k]?.percentile === "number")
+      .map(([k, id]) => ({
+        id,
+        // O percentil do CLS vem multiplicado por 100.
+        value: id === "cls" ? m[k].percentile / 100 : m[k].percentile,
+        category: (m[k].category ?? null) as "FAST" | "AVERAGE" | "SLOW" | null,
+      }));
+    if (metrics.length) return { scope, overall: exp.overall_category ?? null, metrics };
+  }
+  return null;
+}
+
 export function buildAnalysis(lr: any): Analysis {
   const categories = {} as Analysis["categories"];
   const usedAuditIds = new Set<string>();
@@ -158,7 +184,7 @@ export async function runPsi(url: string, strategy: Strategy, apiKey: string): P
     })) ?? [];
 
   return {
-    analysis: buildAnalysis(data.lighthouseResult ?? {}),
+    analysis: { ...buildAnalysis(data.lighthouseResult ?? {}), field: buildField(data) },
     performanceScore: toScore100(categories.performance?.score),
     accessibilityScore: toScore100(categories.accessibility?.score),
     bestPracticesScore: toScore100(categories["best-practices"]?.score),

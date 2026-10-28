@@ -12,6 +12,7 @@ import InfoTip from "@/components/ui/InfoTip";
 import { Card, CardHeader } from "@/components/ui/Card";
 import AuditSection from "./AuditSection";
 import MetricsPanel from "./MetricsPanel";
+import FieldDataCard from "./FieldDataCard";
 
 const STATUS_ORDER: Record<AuditStatus, number> = { fail: 0, average: 1, info: 2, manual: 3, pass: 4, na: 5 };
 
@@ -77,6 +78,8 @@ export default function AnalysisView({
           ))}
         </div>
       </Card>
+
+      {tab === "performance" && <FieldDataCard field={analysis.field} />}
 
       {tab === "performance" ? (
         <PerformanceTab analysis={analysis} finalScreenshot={finalScreenshot} thumbnails={thumbnails} {...common} />

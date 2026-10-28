@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { RiDeleteBinLine, RiSettings3Line } from "@remixicon/react";
+import { RiDeleteBinLine, RiRefreshLine, RiSettings3Line } from "@remixicon/react";
 import Button from "@/components/ui/Button";
 import Modal, { Field } from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
@@ -25,7 +25,7 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
   const [url, setUrl] = useState(bare(site.url));
   const [folderId, setFolderId] = useState(site.folderId ?? "");
   const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState<null | "save" | "delete">(null);
+  const [busy, setBusy] = useState<null | "save" | "delete" | "analyze">(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -53,6 +53,21 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
     const data = await res.json().catch(() => null);
     setBusy(null);
     if (!res.ok) return setError(data?.error ?? "Não foi possível salvar.");
+    setOpen(false);
+    router.replace(`/site/${site.id}`);
+    router.refresh();
+  }
+
+  async function reanalyze() {
+    setBusy("analyze");
+    setError(null);
+    const res = await fetch("/api/sites", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: site.id, reanalyze: true }),
+    });
+    setBusy(null);
+    if (!res.ok) return setError("A análise falhou. Tente de novo em instantes.");
     setOpen(false);
     router.replace(`/site/${site.id}`);
     router.refresh();
@@ -133,7 +148,11 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
 
             {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
 
-            <div className="border-t border-border pt-3">
+            <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+              <Button variant="outline" size="sm" onClick={reanalyze} disabled={busy !== null}>
+                <RiRefreshLine className="h-3.5 w-3.5" />
+                {busy === "analyze" ? "Analisando… (cerca de 1 min)" : "Analisar de novo"}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setConfirming(true)} className="text-destructive hover:text-destructive">
                 <RiDeleteBinLine className="h-3.5 w-3.5" />
                 Excluir site
