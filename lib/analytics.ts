@@ -31,25 +31,25 @@ export function deviceFromWidth(w: number): "desktop" | "mobile" | "tablet" {
   return w < 768 ? "mobile" : w < 1100 ? "tablet" : "desktop";
 }
 
-const TZ = "America/Sao_Paulo";
+const TZ = sql.raw("'America/Sao_Paulo'");
 type Row = Record<string, unknown>;
 const rows = (r: unknown) => r as Row[];
 
 export async function loadAnalytics(siteId: string, days: number) {
   await ensureAnalyticsTable();
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
   const [daily, pages, devices, referrers, countries, months] = await Promise.all([
     db.execute(sql`SELECT to_char((at AT TIME ZONE ${TZ})::date, 'YYYY-MM-DD') AS d, count(*)::int AS views, count(DISTINCT visitor)::int AS visitors
-      FROM pageviews WHERE site_id = ${siteId} AND at >= ${since} GROUP BY 1 ORDER BY 1`),
+      FROM pageviews WHERE site_id = ${siteId} AND at >= ${since}::timestamptz GROUP BY 1 ORDER BY 1`),
     db.execute(sql`SELECT path AS label, count(DISTINCT visitor)::int AS n FROM pageviews
-      WHERE site_id = ${siteId} AND at >= ${since} GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
+      WHERE site_id = ${siteId} AND at >= ${since}::timestamptz GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
     db.execute(sql`SELECT device AS label, count(DISTINCT visitor)::int AS n FROM pageviews
-      WHERE site_id = ${siteId} AND at >= ${since} GROUP BY 1 ORDER BY 2 DESC`),
+      WHERE site_id = ${siteId} AND at >= ${since}::timestamptz GROUP BY 1 ORDER BY 2 DESC`),
     db.execute(sql`SELECT COALESCE(referrer, 'Direto') AS label, count(DISTINCT visitor)::int AS n FROM pageviews
-      WHERE site_id = ${siteId} AND at >= ${since} GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
+      WHERE site_id = ${siteId} AND at >= ${since}::timestamptz GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
     db.execute(sql`SELECT COALESCE(country, '??') AS label, count(DISTINCT visitor)::int AS n FROM pageviews
-      WHERE site_id = ${siteId} AND at >= ${since} GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
+      WHERE site_id = ${siteId} AND at >= ${since}::timestamptz GROUP BY 1 ORDER BY 2 DESC LIMIT 10`),
     db.execute(sql`SELECT to_char(m, 'YYYY-MM') AS month, sum(v)::int AS visitors, sum(views)::int AS views FROM (
         SELECT date_trunc('month', at AT TIME ZONE ${TZ}) AS m, (at AT TIME ZONE ${TZ})::date AS d,
                count(DISTINCT visitor) AS v, count(*) AS views
