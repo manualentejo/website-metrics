@@ -33,6 +33,24 @@ function path(points: ChartPoint[], x: (i: number) => number, y: (v: number) => 
   return d.trim();
 }
 
+/** Área sob a linha, uma por trecho contínuo (não preenche onde não há dado). */
+function area(points: ChartPoint[], x: (i: number) => number, y: (v: number) => number, base: number) {
+  let d = "";
+  let start = -1;
+  const close = (end: number) => {
+    if (start < 0) return;
+    d += `L${x(end).toFixed(1)},${y(base).toFixed(1)} L${x(start).toFixed(1)},${y(base).toFixed(1)} Z `;
+    start = -1;
+  };
+  points.forEach((p, i) => {
+    if (p.value === null) return close(i - 1);
+    d += `${start < 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.value).toFixed(1)} `;
+    if (start < 0) start = i;
+  });
+  close(points.length - 1);
+  return d.trim();
+}
+
 export default function TimeSeriesChart({
   current,
   previous,
@@ -146,7 +164,7 @@ export default function TimeSeriesChart({
         )}
         {previous && <path d={path(previous, x, y)} fill="none" className="stroke-stroke-sub-300" strokeWidth={1.5} strokeDasharray="4 4" />}
         <path
-          d={`${path(current, x, y)} L${x(n - 1)},${y(scale.lo)} L${x(0)},${y(scale.lo)} Z`}
+          d={area(current, x, y, scale.lo)}
           className="fill-text-strong-950"
           fillOpacity={0.05}
           stroke="none"
