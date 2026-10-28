@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import type { Status } from "@/lib/types";
 
-const STATUS_LABEL: Record<Status, string> = {
-  no_ar: "No ar",
-  em_andamento: "Em andamento",
+const LABEL: Record<Status, string> = { no_ar: "No ar", em_andamento: "Em andamento" };
+const TONE: Record<Status, string> = {
+  no_ar: "text-success",
+  em_andamento: "text-warning",
 };
 
 export default function StatusSelect({
@@ -37,29 +39,32 @@ export default function StatusSelect({
     }
   }
 
+  const base = `inline-flex h-8 w-[132px] items-center rounded-full border border-input bg-card text-xs font-medium shadow-sm ${TONE[current]}`;
+  const dot = <span className="ml-3 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />;
+
   if (readOnly) {
     return (
-      <span
-        className={`rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium ${
-          current === "no_ar" ? "text-success" : "text-warning"
-        }`}
-      >
-        {STATUS_LABEL[current]}
+      <span className={base}>
+        {dot}
+        {LABEL[current]}
       </span>
     );
   }
 
   return (
-    <select
-      value={current}
-      disabled={saving}
-      onChange={(e) => handleChange(e.target.value as Status)}
-      className={`h-8 rounded-full border border-input bg-card pl-3 pr-2 text-xs font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/20 ${
-        current === "no_ar" ? "text-success" : "text-warning"
-      }`}
-    >
-      <option value="no_ar">{STATUS_LABEL.no_ar}</option>
-      <option value="em_andamento">{STATUS_LABEL.em_andamento}</option>
-    </select>
+    <label className={`relative ${base} focus-within:ring-2 focus-within:ring-ring/20`}>
+      {dot}
+      <select
+        value={current}
+        disabled={saving}
+        onChange={(e) => handleChange(e.target.value as Status)}
+        aria-label="Status do site"
+        className="h-full w-full cursor-pointer appearance-none bg-transparent pr-7 outline-none"
+      >
+        <option value="no_ar">{LABEL.no_ar}</option>
+        <option value="em_andamento">{LABEL.em_andamento}</option>
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-muted-foreground" />
+    </label>
   );
 }

@@ -29,6 +29,8 @@
     color-scheme: light;
   }
 
+  html { font-size: 15px; }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01";

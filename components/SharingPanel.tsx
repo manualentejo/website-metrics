@@ -99,14 +99,14 @@ export default function SharingPanel({
         </div>
 
         <div>
-          <label className="block text-xs text-muted-foreground">Pasta</label>
+          <label className="block text-xs text-muted-foreground">Workspace</label>
           <select
             value={folderId}
             disabled={saving}
             onChange={(e) => handleFolderChange(e.target.value)}
             className="mt-1 h-9 rounded-full border border-input bg-card px-3.5 text-sm shadow-sm"
           >
-            <option value="">Sem pasta</option>
+            <option value="">Sem workspace</option>
             {folders.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}

@@ -30,6 +30,33 @@ export async function GET() {
   return NextResponse.json(withLatest);
 }
 
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!isOwner(session?.user?.email)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+  const { url, folderId } = (await req.json()) as { url?: string; folderId?: string | null };
+  let parsed: URL;
+  try {
+    parsed = new URL(/^https?:\/\//i.test(url ?? "") ? url! : `https://${url}`);
+    if (!parsed.hostname.includes(".")) throw new Error();
+  } catch {
+    return NextResponse.json({ error: "Endereço inválido." }, { status: 400 });
+  }
+  const normalized = `${parsed.origin}/`;
+  const existing = await db.select().from(sites).where(eq(sites.url, normalized));
+  if (existing.length) return NextResponse.json({ error: "Esse site já está no painel." }, { status: 409 });
+
+  const host = parsed.hostname.replace(/^www\./, "");
+  const name = host.split(".")[0].replace(/^./, (c) => c.toUpperCase());
+  const all = await db.select().from(sites);
+  const [site] = await db
+    .insert(sites)
+    .values({ name, url: normalized, folderId: folderId || null, sortOrder: all.length + 1 })
+    .returning();
+  return NextResponse.json(site);
+}
+
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!isOwner(session?.user?.email)) {

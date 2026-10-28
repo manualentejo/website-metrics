@@ -32,7 +32,7 @@ export default function NewFolderForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[13px] text-muted-foreground hover:bg-accent hover:text-foreground"
       >
         <Plus className="h-4 w-4" />
         Novo workspace
@@ -52,7 +52,7 @@ export default function NewFolderForm() {
           if (e.key === "Enter") handleCreate();
           if (e.key === "Escape") setOpen(false);
         }}
-        placeholder="Nome e Enter"
+        placeholder="Nome do workspace"
         className={`${inputClass} h-8 w-full text-xs`}
       />
     </div>
