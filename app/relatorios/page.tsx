@@ -82,7 +82,15 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                         PDF
                       </a>
                     ) : date > today ? (
-                      <span className="text-[11px] text-muted-foreground">Agendado</span>
+                      <>
+                        <span className="text-[11px] text-muted-foreground">Agendado</span>
+                        {available(today) && new Date(date).getTime() - new Date(today).getTime() <= 7 * DAY && (
+                          <a href={`/api/reports/pdf?date=${today}`} className={buttonClass("outline", "sm", "w-full")}>
+                            <Download className="h-3.5 w-3.5" />
+                            Prévia
+                          </a>
+                        )}
+                      </>
                     ) : (
                       <span className="text-[11px] text-muted-foreground">Sem dados</span>
                     ))}
