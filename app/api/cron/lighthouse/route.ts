@@ -1,76 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/client";
-import { reports, sites, snapshots } from "@/db/schema";
-import { runPsi, type Strategy } from "@/lib/psi";
-import { and, eq, lt } from "drizzle-orm";
+import { runAnalysis } from "@/lib/runAnalysis";
+import { getSettings, isScheduledNow } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const RETENTION_WEEKS = 52;
-
+// Chamado de hora em hora por um agendador externo (GitHub Actions). Só executa
+// quando dia/hora (Brasília) batem com a configuração; ?force=1 ignora o horário.
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const apiKey = process.env.PAGESPEED_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "PAGESPEED_API_KEY not configured" }, { status: 500 });
+  if (!apiKey) return NextResponse.json({ error: "PAGESPEED_API_KEY not configured" }, { status: 500 });
+
+  const force = req.nextUrl.searchParams.get("force") === "1";
+  if (!force && !isScheduledNow(await getSettings())) {
+    return NextResponse.json({ skipped: true });
   }
-
-  const allSites = await db.select().from(sites);
-  const strategies: Strategy[] = ["mobile", "desktop"];
-  const results: { site: string; strategy: Strategy; ok: boolean; error?: string }[] = [];
-
-  for (const site of allSites) {
-    for (const strategy of strategies) {
-      try {
-        const psi = await runPsi(site.url, strategy, apiKey);
-        await db.insert(reports).values({
-          siteId: site.id,
-          strategy,
-          performanceScore: psi.performanceScore,
-          accessibilityScore: psi.accessibilityScore,
-          bestPracticesScore: psi.bestPracticesScore,
-          seoScore: psi.seoScore,
-          fcpMs: psi.fcpMs,
-          lcpMs: psi.lcpMs,
-          tbtMs: psi.tbtMs,
-          cls: psi.cls,
-          speedIndexMs: psi.speedIndexMs,
-          failedSeoAudits: psi.failedSeoAudits,
-        });
-
-        await db.delete(snapshots).where(and(eq(snapshots.siteId, site.id), eq(snapshots.strategy, strategy)));
-        await db.insert(snapshots).values({
-          siteId: site.id,
-          strategy,
-          finalScreenshot: psi.finalScreenshot,
-          thumbnails: psi.thumbnails,
-          analysis: psi.analysis,
-        });
-
-        results.push({ site: site.name, strategy, ok: true });
-      } catch (err) {
-        await db.insert(reports).values({
-          siteId: site.id,
-          strategy,
-          error: err instanceof Error ? err.message : String(err),
-        });
-        results.push({
-          site: site.name,
-          strategy,
-          ok: false,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
-
-    const cutoff = new Date(Date.now() - RETENTION_WEEKS * 7 * 24 * 60 * 60 * 1000);
-    await db.delete(reports).where(and(eq(reports.siteId, site.id), lt(reports.ranAt, cutoff)));
-  }
-
-  return NextResponse.json({ ranAt: new Date().toISOString(), results });
+  return NextResponse.json(await runAnalysis(apiKey));
 }

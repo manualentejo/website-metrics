@@ -1,0 +1,104 @@
+"use client";
+
+import { useState } from "react";
+import { Play } from "lucide-react";
+import Button from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { inputClass } from "@/components/ui/fields";
+import type { AppSettings } from "@/lib/settings";
+
+const DAYS = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+
+function Row({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+  return (
+    <div className="grid gap-3 border-b border-border px-6 py-5 last:border-b-0 md:grid-cols-[1fr_320px] md:gap-8">
+      <div>
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="flex items-center md:justify-end">{children}</div>
+    </div>
+  );
+}
+
+export default function SettingsForm({ initial }: { initial: AppSettings }) {
+  const [s, setS] = useState(initial);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+
+  async function save(patch: Partial<AppSettings>) {
+    setS((p) => ({ ...p, ...patch }));
+    const res = await fetch("/api/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    setMsg(res.ok ? "Alterações salvas." : "Não foi possível salvar.");
+    setTimeout(() => setMsg(null), 2500);
+  }
+
+  async function runNow() {
+    setRunning(true);
+    setMsg("Analisando os sites… leva alguns minutos, pode continuar usando o painel.");
+    try {
+      const res = await fetch("/api/settings", { method: "POST" });
+      const data = await res.json().catch(() => null);
+      const failed = data?.results?.filter((r: { ok: boolean }) => !r.ok).length ?? 0;
+      setMsg(res.ok ? `Análise concluída${failed ? ` (${failed} falha(s))` : ""}. Atualize a página para ver.` : "A análise falhou.");
+      if (res.ok) setS((p) => ({ ...p, lastRunAt: new Date().toISOString() }));
+    } catch {
+      setMsg("A análise demorou demais; confira em alguns minutos.");
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <Row title="Análise automática" description="Liga ou desliga a execução semanal do Lighthouse em todos os sites.">
+          <label className="flex cursor-pointer items-center gap-3">
+            <span className="text-sm text-muted-foreground">{s.enabled ? "Ligada" : "Desligada"}</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={s.enabled}
+              onClick={() => save({ enabled: !s.enabled })}
+              className={`relative h-6 w-11 rounded-full transition-colors ${s.enabled ? "bg-primary" : "bg-border"}`}
+            >
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-card shadow transition-all ${s.enabled ? "left-[22px]" : "left-0.5"}`} />
+            </button>
+          </label>
+        </Row>
+        <Row title="Dia da semana" description="Em que dia a análise e o relatório semanal são gerados.">
+          <select value={s.weekday} onChange={(e) => save({ weekday: Number(e.target.value) })} className={`${inputClass} w-full`}>
+            {DAYS.map((d, i) => (
+              <option key={d} value={i}>{d}</option>
+            ))}
+          </select>
+        </Row>
+        <Row title="Horário" description="Horário de Brasília. A execução ocorre na hora cheia escolhida.">
+          <select value={s.hour} onChange={(e) => save({ hour: Number(e.target.value) })} className={`${inputClass} w-full`}>
+            {Array.from({ length: 24 }, (_, h) => (
+              <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
+            ))}
+          </select>
+        </Row>
+        <Row
+          title="Analisar agora"
+          description={
+            s.lastRunAt
+              ? `Última execução: ${new Date(s.lastRunAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
+              : "Roda a análise de todos os sites imediatamente, sem esperar o horário."
+          }
+        >
+          <Button variant="outline" onClick={runNow} disabled={running}>
+            <Play className="h-3.5 w-3.5" />
+            {running ? "Analisando…" : "Analisar agora"}
+          </Button>
+        </Row>
+      </Card>
+      {msg && <p role="status" className="text-sm text-muted-foreground">{msg}</p>}
+    </div>
+  );
+}

@@ -1,0 +1,11 @@
+name: Análise agendada
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar o endpoint (só executa no dia/hora configurados)
+        run: curl -sS --max-time 330 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" https://website-metrics.vercel.app/api/cron/lighthouse

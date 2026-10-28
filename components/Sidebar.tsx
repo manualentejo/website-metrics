@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolderClosed, Globe, LayoutDashboard } from "lucide-react";
+import { FolderClosed, Globe, LayoutDashboard, Settings } from "lucide-react";
 import type { Status } from "@/lib/types";
 import SidebarUserFooter from "./SidebarUserFooter";
 import NewFolderForm from "./NewFolderForm";
@@ -29,6 +29,7 @@ export default function Sidebar({
   statusFilter,
   userEmail,
   isOwner,
+  settingsActive,
 }: {
   sites: SiteNavItem[];
   folders: { id: string; name: string }[];
@@ -36,6 +37,7 @@ export default function Sidebar({
   statusFilter?: string;
   userEmail?: string;
   isOwner?: boolean;
+  settingsActive?: boolean;
 }) {
   const filtered = statusFilter ? sites.filter((s) => s.status === statusFilter) : sites;
   const groups = [
@@ -59,10 +61,16 @@ export default function Sidebar({
 
       <nav className="flex-1 overflow-y-auto px-3 pb-4">
         <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">Principal</p>
-        <Link href="/" className={itemClass(!activeSiteId)}>
+        <Link href="/" className={itemClass(!activeSiteId && !settingsActive)}>
           <LayoutDashboard className="h-4 w-4" />
           Visão geral
         </Link>
+        {isOwner && (
+          <Link href="/settings" className={itemClass(Boolean(settingsActive))}>
+            <Settings className="h-4 w-4" />
+            Configurações
+          </Link>
+        )}
 
         <div className="mt-5 flex flex-wrap gap-1 px-1">
           {FILTERS.map((f) => (
