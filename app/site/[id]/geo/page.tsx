@@ -61,7 +61,7 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
       {geo && latest ? (
         <>
           <p className="text-paragraph-xs text-text-sub-600">
-            Última verificação: {formatDateTime(latest.ranAt)} · {latest.total} prompts no Gemini com busca do Google. Mede só os prompts cadastrados, não toda a atividade
+            Última verificação: {formatDateTime(latest.ranAt)} · {latest.total} prompts no Gemini{latest.verifiable ? " com busca do Google" : " (sem busca do Google: citações não verificáveis)"}. Mede só os prompts cadastrados, não toda a atividade
             das IAs.
           </p>
 
@@ -128,8 +128,8 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
             <CardHeader title="Por mecanismo de IA" description="Cada mecanismo só aparece quando existe coleta real." />
             <ul className="divide-y divide-stroke-soft-200 px-5 pb-3 pt-2 text-paragraph-sm">
               <li className="flex items-center justify-between py-2.5">
-                <span className="text-text-strong-950">Gemini (com busca do Google)</span>
-                <span className="tabular-nums text-text-strong-950">{Math.round(rate!)}% · {latest.cited} citações</span>
+                <span className="text-text-strong-950">Gemini{latest.verifiable ? " (com busca do Google)" : ""}</span>
+                <span className="tabular-nums text-text-strong-950">{Math.round(rate!)}%{latest.verifiable ? ` · ${latest.cited} citações` : ""}</span>
               </li>
               {["ChatGPT", "Perplexity", "Claude"].map((n) => (
                 <li key={n} className="flex items-center justify-between py-2.5 text-text-sub-600">
