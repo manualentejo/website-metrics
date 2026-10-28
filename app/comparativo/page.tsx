@@ -78,7 +78,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                       const isBest = v !== null && v === best[c.key] && rows.length > 1;
                       return (
                         <td key={c.key} className="px-3 py-2.5 tabular-nums">
-                          <span className={isBest ? "rounded-sm bg-success-base-lighter px-1.5 py-0.5 font-medium text-success-base" : "text-text-strong-950"}>
+                          <span className={isBest ? "rounded-sm bg-success-lighter px-1.5 py-0.5 font-medium text-success-base" : "text-text-strong-950"}>
                             {v === null ? "—" : Math.round(v)}
                           </span>
                         </td>

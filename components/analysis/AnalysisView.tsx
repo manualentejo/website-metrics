@@ -111,7 +111,7 @@ function CategoryIntro({ category, score }: { category: CategoryKey; score: numb
   const verdict =
     score === null ? null : score >= 90 ? "Bom" : score >= 50 ? "Precisa melhorar" : "Ruim";
   const verdictClass =
-    score === null ? "" : score >= 90 ? "bg-success-base-lighter text-success-base" : score >= 50 ? "bg-warning-base-lighter text-warning-base" : "bg-error-lighter text-error-base";
+    score === null ? "" : score >= 90 ? "bg-success-lighter text-success-base" : score >= 50 ? "bg-warning-lighter text-warning-base" : "bg-error-lighter text-error-base";
   return (
     <div className="px-6 py-5">
       <div className="flex items-center gap-2">
