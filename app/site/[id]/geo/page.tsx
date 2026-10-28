@@ -78,7 +78,7 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
               label="Citações verificadas"
               href="#prompts"
               value={latest.verifiable ? latest.cited : "—"}
-              hint={latest.verifiable ? `Seu domínio entre as fontes em ${latest.cited} de ${latest.verifiable}` : "Busca do Google indisponível"}
+              hint={latest.verifiable ? `Seu domínio entre as fontes em ${latest.cited} de ${latest.verifiable}` : "Busca do Google indisponível no plano atual do Gemini"}
               info={{ title: "Citações verificadas", text: "Respostas em que o seu domínio aparece entre as fontes que o Gemini consultou na busca. É diferente de só mencionar o nome." }}
             />
             <MetricCard

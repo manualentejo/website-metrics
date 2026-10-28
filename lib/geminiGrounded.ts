@@ -43,7 +43,7 @@ export async function askGeminiGrounded(prompt: string): Promise<GroundedAnswer>
         };
       }
       const body = await res.text();
-      if (res.status === 400 && grounded) break; // ferramenta não aceita: tenta sem busca
+      if ((res.status === 400 || res.status === 429) && grounded) break; // busca recusada ou sem cota no plano: tenta sem ela
       if ((res.status === 503 || res.status === 429) && attempt < MAX_ATTEMPTS) {
         await sleep(attempt * 1500);
         continue;
