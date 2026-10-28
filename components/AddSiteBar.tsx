@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Sparkles } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { inputClass } from "@/components/ui/fields";
+import Select from "@/components/ui/Select";
 
 export default function AddSiteBar({
   folders,
@@ -32,12 +33,12 @@ export default function AddSiteBar({
     setBusy(false);
     if (!res.ok) return setMsg(data?.error ?? "Não foi possível adicionar.");
     setUrl("");
-    setMsg("Site adicionado. A primeira análise roda no próximo horário agendado, ou use “Analisar agora” em Configurações.");
+    setMsg("Site adicionado. A primeira análise roda no próximo horário agendado, ou use “Analisar agora” em Perfil › Análises.");
     router.refresh();
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-secondary/70 p-4">
+    <div className="rounded-lg border border-border bg-secondary/60 p-4">
       <p className="mb-2.5 flex items-center gap-2 text-[13px] text-muted-foreground">
         <Sparkles className="h-3.5 w-3.5" />
         Comece a monitorar um novo site: cole o endereço abaixo.
@@ -51,12 +52,12 @@ export default function AddSiteBar({
           aria-label="Endereço do site"
           className={`${inputClass} min-w-[220px] flex-1`}
         />
-        <select value={folderId} onChange={(e) => setFolderId(e.target.value)} aria-label="Workspace" className={`${inputClass} pr-8`}>
+        <Select value={folderId} onChange={(e) => setFolderId(e.target.value)} aria-label="Workspace" wrapperClassName="w-48">
           <option value="">Sem workspace</option>
           {folders.map((f) => (
             <option key={f.id} value={f.id}>{f.name}</option>
           ))}
-        </select>
+        </Select>
         <Button onClick={add} disabled={busy || !url.trim()}>
           <Plus className="h-4 w-4" />
           {busy ? "Adicionando…" : "Adicionar site"}

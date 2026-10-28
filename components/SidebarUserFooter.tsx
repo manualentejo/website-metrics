@@ -1,25 +1,27 @@
-"use client";
+import Link from "next/link";
+import { ChevronsUpDown } from "lucide-react";
+import Avatar from "./ui/Avatar";
 
-import { LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
-
-export default function SidebarUserFooter({ email }: { email: string }) {
+// Cartão do perfil no pé da barra lateral. Configurações ficam dentro do perfil.
+export default function SidebarUserFooter({
+  user,
+  active,
+}: {
+  user: { email: string; name: string; image: string | null };
+  active?: boolean;
+}) {
   return (
-    <div className="m-3 flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-sm ring-1 ring-border">
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold uppercase text-primary-foreground">
-        {email[0]}
+    <Link
+      href="/perfil"
+      aria-label="Abrir meu perfil"
+      className={`m-2 flex items-center gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/60 ${active ? "bg-accent" : ""}`}
+    >
+      <Avatar name={user.name} image={user.image} size={32} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-foreground">{user.name}</span>
+        <span className="block truncate text-[11px] text-muted-foreground">{user.email}</span>
       </span>
-      <span className="flex-1 truncate text-xs text-muted-foreground" title={email}>
-        {email}
-      </span>
-      <button
-        onClick={() => signOut({ callbackUrl: "/login" })}
-        aria-label="Sair"
-        title="Sair"
-        className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-      >
-        <LogOut className="h-4 w-4" />
-      </button>
-    </div>
+      <ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+    </Link>
   );
 }

@@ -91,7 +91,7 @@ export default function SharingPanel({
             value={vis}
             disabled={saving}
             onChange={(e) => handleVisibilityChange(e.target.value as "private" | "shared")}
-            className="mt-1 h-9 rounded-full border border-input bg-card px-3.5 text-sm shadow-sm"
+            className="mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm"
           >
             <option value="private">Privado (só eu)</option>
             <option value="shared">Compartilhado</option>
@@ -104,7 +104,7 @@ export default function SharingPanel({
             value={folderId}
             disabled={saving}
             onChange={(e) => handleFolderChange(e.target.value)}
-            className="mt-1 h-9 rounded-full border border-input bg-card px-3.5 text-sm shadow-sm"
+            className="mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm"
           >
             <option value="">Sem workspace</option>
             {folders.map((f) => (
@@ -127,12 +127,12 @@ export default function SharingPanel({
               onChange={(e) => setNewEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addEmail()}
               placeholder="nome@exemplo.com"
-              className="flex-1 h-9 rounded-full border border-input bg-card px-3.5 text-sm shadow-sm outline-none focus:border-ring"
+              className="flex-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm outline-none focus:border-ring"
             />
             <button
               onClick={addEmail}
               disabled={saving}
-              className="h-9 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
+              className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
             >
               Adicionar
             </button>

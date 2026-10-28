@@ -7,13 +7,15 @@ import { eq } from "drizzle-orm";
 export interface Viewer {
   email: string;
   owner: boolean;
+  name?: string | null;
+  image?: string | null;
 }
 
 export async function getViewer(): Promise<Viewer | null> {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
   if (!email) return null;
-  return { email, owner: isOwner(email) };
+  return { email, owner: isOwner(email), name: session?.user?.name, image: session?.user?.image };
 }
 
 /** E-mails com acesso a sites "shared", indexado por site_id. */

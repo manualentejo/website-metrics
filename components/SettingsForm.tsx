@@ -4,17 +4,17 @@ import { useState } from "react";
 import { Play } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { inputClass } from "@/components/ui/fields";
+import Select from "@/components/ui/Select";
 import type { AppSettings } from "@/lib/settings";
 
 const DAYS = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
 function Row({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-3 border-b border-border px-6 py-5 last:border-b-0 md:grid-cols-[1fr_320px] md:gap-8">
+    <div className="grid gap-3 border-b border-border px-5 py-4 last:border-b-0 md:grid-cols-[1fr_340px] md:gap-8">
       <div>
-        <p className="text-sm font-medium text-foreground">{title}</p>
-        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+        <p className="text-[13px] font-medium text-foreground">{title}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
       </div>
       <div className="flex items-center md:justify-end">{children}</div>
     </div>
@@ -71,18 +71,18 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
           </label>
         </Row>
         <Row title="Dia da semana" description="Em que dia a análise e o relatório semanal são gerados.">
-          <select value={s.weekday} onChange={(e) => save({ weekday: Number(e.target.value) })} className={`${inputClass} w-full`}>
+          <Select value={s.weekday} onChange={(e) => save({ weekday: Number(e.target.value) })} wrapperClassName="w-full">
             {DAYS.map((d, i) => (
               <option key={d} value={i}>{d}</option>
             ))}
-          </select>
+          </Select>
         </Row>
         <Row title="Horário" description="Horário de Brasília. A execução ocorre na hora cheia escolhida.">
-          <select value={s.hour} onChange={(e) => save({ hour: Number(e.target.value) })} className={`${inputClass} w-full`}>
+          <Select value={s.hour} onChange={(e) => save({ hour: Number(e.target.value) })} wrapperClassName="w-full">
             {Array.from({ length: 24 }, (_, h) => (
               <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
             ))}
-          </select>
+          </Select>
         </Row>
         <Row
           title="Analisar agora"
@@ -92,7 +92,7 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
               : "Roda a análise de todos os sites imediatamente, sem esperar o horário."
           }
         >
-          <Button variant="outline" onClick={runNow} disabled={running}>
+          <Button variant="outline" size="sm" onClick={runNow} disabled={running}>
             <Play className="h-3.5 w-3.5" />
             {running ? "Analisando…" : "Analisar agora"}
           </Button>

@@ -2,34 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design system — tokens no padrão shadcn/ui (HSL). Primária: preto; fundo: cinza claro. */
+/*
+  Design system — tokens no padrão shadcn/ui (HSL).
+  Primária: preto. Fundo: cinza claro. Cantos levemente arredondados (--radius).
+  Documentação viva em /perfil?aba=design.
+*/
 @layer base {
   :root {
-    --background: 60 5% 94%;
-    --foreground: 240 6% 10%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 6% 10%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 6% 10%;
-    --primary: 240 6% 10%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 60 5% 95%;
-    --secondary-foreground: 240 6% 10%;
-    --muted: 60 5% 95%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 60 5% 93%;
-    --accent-foreground: 240 6% 10%;
-    --border: 60 5% 88%;
-    --input: 60 5% 88%;
-    --ring: 240 5% 34%;
-    --success: 152 60% 32%;
-    --warning: 32 90% 40%;
-    --destructive: 347 77% 50%;
-    --radius: 0.875rem;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 9%;
+    --border: 0 0% 90%;
+    --input: 0 0% 86%;
+    --ring: 0 0% 30%;
+    --success: 152 55% 36%;
+    --warning: 36 90% 44%;
+    --destructive: 0 68% 50%;
+    --info: 217 70% 50%;
+    --sidebar: 0 0% 98%;
+    --radius: 0.5rem;
     color-scheme: light;
   }
 
-  html { font-size: 15px; }
+  html { font-size: 14px; }
 
   body {
     @apply bg-background text-foreground antialiased;

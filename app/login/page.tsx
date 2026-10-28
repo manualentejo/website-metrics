@@ -12,7 +12,7 @@ export default function LoginPage() {
 
         <button
           onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground text-sm font-medium"
+          className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground text-sm font-medium"
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
             <path

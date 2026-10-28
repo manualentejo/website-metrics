@@ -4,7 +4,7 @@ import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { db } from "@/db/client";
 import { sites, reports, snapshots, folders, siteAccess } from "@/db/schema";
 import { and, asc, eq } from "drizzle-orm";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/AppShell";
 import ScoreGauge from "@/components/ScoreGauge";
 import StatusSelect from "@/components/StatusSelect";
 import SharingPanel from "@/components/SharingPanel";
@@ -15,6 +15,7 @@ import InfoTip from "@/components/ui/InfoTip";
 import { Card } from "@/components/ui/Card";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { formatDateTime } from "@/lib/format";
+import { Segmented } from "@/components/ui/Page";
 import type { ReportRow, Status, Strategy } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -65,20 +66,10 @@ export default async function SiteDetailPage({
   const strategyHref = (s: Strategy) => `/site/${id}?strategy=${s}${statusFilter ? `&status=${statusFilter}` : ""}`;
 
   return (
-    <div className="flex">
-      <Sidebar
-        sites={visibleSites.map((s) => ({ id: s.id, name: s.name, status: s.status as Status, folderId: s.folderId }))}
-        folders={allFolders}
-        activeSiteId={id}
-        statusFilter={statusFilter}
-        userEmail={viewer.email}
-        isOwner={viewer.owner}
-      />
-
-      <main className="h-screen flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-8 py-8">
+    <AppShell activeSiteId={id} activeFolderId={undefined}>
+        <div className="mx-auto max-w-5xl px-8 py-6">
           <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
-            <Link href="/" className="hover:text-foreground/80">Sites</Link>
+            <Link href="/sites" className="hover:text-foreground/80">Sites</Link>
             {folder && (
               <>
                 <ChevronRight className="h-3 w-3" />
@@ -89,9 +80,9 @@ export default async function SiteDetailPage({
             <span className="text-muted-foreground">{site.name}</span>
           </nav>
 
-          <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">{site.name}</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">{site.name}</h1>
               <a
                 href={site.url}
                 target="_blank"
@@ -111,23 +102,14 @@ export default async function SiteDetailPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-sm shadow-sm">
-                {(["mobile", "desktop"] as Strategy[]).map((s) => (
-                  <Link
-                    key={s}
-                    href={strategyHref(s)}
-                    aria-current={strategy === s ? "page" : undefined}
-                    className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
-                      strategy === s ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {s === "mobile" ? "Celular" : "Computador"}
-                  </Link>
-                ))}
-                <span className="px-1.5">
-                  <InfoTip term={strategy} align="end" />
-                </span>
-              </div>
+              <Segmented
+                label="Dispositivo"
+                items={(["mobile", "desktop"] as Strategy[]).map((x) => ({
+                  label: x === "mobile" ? "Celular" : "Computador",
+                  href: strategyHref(x),
+                  active: strategy === x,
+                }))}
+              />
               <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!viewer.owner} />
               <AskGeminiButton />
             </div>
@@ -173,9 +155,7 @@ export default async function SiteDetailPage({
             </div>
           )}
         </div>
-      </main>
-
       <GeminiDrawer siteId={site.id} siteName={site.name} />
-    </div>
+    </AppShell>
   );
 }

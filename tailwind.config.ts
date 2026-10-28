@@ -24,18 +24,22 @@ const config: Config = {
         success: hsl("success"),
         warning: hsl("warning"),
         destructive: hsl("destructive"),
+        info: hsl("info"),
         // Aliases antigos, mantidos para os componentes ainda não migrados.
         surface: {
           DEFAULT: hsl("background"),
           raised: hsl("card"),
           border: hsl("border"),
-          sidebar: "hsl(60 5% 96%)",
+          sidebar: hsl("sidebar"),
         },
       },
+      // Cantos levemente arredondados: controles 6px, cartões 8px. Nada de pílulas.
       borderRadius: {
-        lg: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 2px)",
+        lg: "var(--radius)",
         xl: "var(--radius)",
-        "2xl": "calc(var(--radius) + 4px)",
+        "2xl": "var(--radius)",
       },
     },
   },

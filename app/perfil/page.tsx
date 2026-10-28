@@ -1,0 +1,63 @@
+import { redirect } from "next/navigation";
+import AppShell from "@/components/AppShell";
+import ProfileForm from "@/components/ProfileForm";
+import SettingsForm from "@/components/SettingsForm";
+import DesignSystemDoc from "@/components/DesignSystemDoc";
+import { Page, Segmented } from "@/components/ui/Page";
+import Avatar from "@/components/ui/Avatar";
+import { getViewer } from "@/lib/access";
+import { getProfile } from "@/lib/profile";
+import { getSettings } from "@/lib/settings";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ aba?: string }> }) {
+  const { aba } = await searchParams;
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+
+  const profile = await getProfile(viewer.email);
+  const name = profile.name ?? viewer.name ?? viewer.email.split("@")[0];
+  const image = profile.image ?? viewer.image ?? null;
+  const tab = viewer.owner && (aba === "analises" || aba === "design") ? aba : "dados";
+  const settings = tab === "analises" ? await getSettings() : null;
+
+  const tabs = [
+    { label: "Meus dados", href: "/perfil", active: tab === "dados" },
+    ...(viewer.owner
+      ? [
+          { label: "Análises", href: "/perfil?aba=analises", active: tab === "analises" },
+          { label: "Design system", href: "/perfil?aba=design", active: tab === "design" },
+        ]
+      : []),
+  ];
+
+  return (
+    <AppShell active="perfil">
+      <Page
+        width="max-w-4xl"
+        title={
+          <span className="flex items-center gap-3">
+            <Avatar name={name} image={image} size={44} />
+            <span>
+              {name}
+              <span className="block text-[13px] font-normal text-muted-foreground">{profile.role ?? viewer.email}</span>
+            </span>
+          </span>
+        }
+        actions={<Segmented label="Seções do perfil" items={tabs} />}
+      >
+        {tab === "dados" && (
+          <ProfileForm email={viewer.email} initial={{ name, role: profile.role ?? "", image }} />
+        )}
+        {tab === "analises" && settings && (
+          <>
+            <p className="text-[13px] text-muted-foreground">Quando e como as análises dos sites são executadas.</p>
+            <SettingsForm initial={settings} />
+          </>
+        )}
+        {tab === "design" && <DesignSystemDoc />}
+      </Page>
+    </AppShell>
+  );
+}

@@ -17,8 +17,8 @@ export interface TreeGroup {
 }
 
 const row = (active: boolean) =>
-  `flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[13px] transition-colors ${
-    active ? "bg-card font-medium text-foreground shadow-sm" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+  `flex items-center gap-2.5 rounded-md px-2.5 h-8 text-[13px] transition-colors ${
+    active ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
   }`;
 
 function SiteLink({ site, active }: { site: Item; active: boolean }) {
@@ -41,8 +41,8 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
 
   return (
     <div>
-      <div className={`flex items-center rounded-xl ${row(group.id === activeFolderId)} !p-0`}>
-        <Link href={`/workspace/${group.id}`} className="flex flex-1 items-center gap-2.5 truncate px-3 py-1.5">
+      <div className={`flex items-center rounded-md ${row(group.id === activeFolderId)} !p-0 !h-8`}>
+        <Link href={`/workspace/${group.id}`} className="flex h-8 flex-1 items-center gap-2.5 truncate px-2.5">
           <Icon className="h-4 w-4 flex-shrink-0" />
           <span className="truncate">{group.name}</span>
         </Link>
@@ -61,7 +61,7 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
           {group.sites.map((s) => (
             <SiteLink key={s.id} site={s} active={s.id === activeSiteId} />
           ))}
-          {group.sites.length === 0 && <p className="px-3 py-1 text-xs text-muted-foreground">Nenhum site</p>}
+          {group.sites.length === 0 && <p className="px-2.5 py-1 text-xs text-muted-foreground">Nenhum site</p>}
         </div>
       )}
     </div>
@@ -85,7 +85,7 @@ export default function WorkspaceTree({
         <Group key={g.id} group={g} activeSiteId={activeSiteId} activeFolderId={activeFolderId} />
       ))}
       {loose.length > 0 && groups.length > 0 && (
-        <p className="px-3 pb-1 pt-3 text-xs font-medium text-muted-foreground">Sem workspace</p>
+        <p className="px-2.5 pb-1 pt-3 text-[11px] font-medium text-muted-foreground">Sem workspace</p>
       )}
       {loose.map((s) => (
         <SiteLink key={s.id} site={s} active={s.id === activeSiteId} />

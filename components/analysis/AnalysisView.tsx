@@ -113,7 +113,7 @@ function CategoryIntro({ category, score }: { category: CategoryKey; score: numb
     <div className="px-6 py-5">
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold text-foreground">{g?.title}</h2>
-        {verdict && <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${verdictClass}`}>{verdict}</span>}
+        {verdict && <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${verdictClass}`}>{verdict}</span>}
       </div>
       <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">{g?.text}</p>
     </div>

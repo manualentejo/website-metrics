@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/AppShell";
 import OverviewContent from "@/components/OverviewContent";
 import { getViewer } from "@/lib/access";
 import { loadOverview } from "@/lib/overview";
-import type { Status } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,27 +24,19 @@ export default async function WorkspacePage({
   if (!viewer.owner && rows.length === 0) notFound();
 
   return (
-    <div className="flex">
-      <Sidebar
-        sites={o.visible.map((s) => ({ id: s.id, name: s.name, status: s.status as Status, folderId: s.folderId }))}
+    <AppShell activeFolderId={id}>
+      <OverviewContent
+        title={folder.name}
+        subtitle="Visão geral dos sites deste workspace."
+        rows={rows}
+        lastRun={o.lastRun}
+        owner={viewer.owner}
         folders={o.folders}
-        activeFolderId={id}
-        userEmail={viewer.email}
-        isOwner={viewer.owner}
+        defaultFolderId={id}
+        statusFilter={statusFilter}
+        folderNames={{}}
+        basePath={`/workspace/${id}`}
       />
-      <main className="h-screen flex-1 overflow-y-auto">
-        <OverviewContent
-          title={folder.name}
-          subtitle="Visão geral dos sites deste workspace."
-          rows={rows}
-          lastRun={o.lastRun}
-          owner={viewer.owner}
-          folders={o.folders}
-          defaultFolderId={id}
-          statusFilter={statusFilter}
-          folderNames={{}}
-        />
-      </main>
-    </div>
+    </AppShell>
   );
 }

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border border-border bg-card text-card-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${className}`}>
+    <section className={`rounded-lg border border-border bg-card text-card-foreground shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${className}`}>
       {children}
     </section>
   );
@@ -20,7 +20,7 @@ export function CardHeader({
   info?: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 px-6 pt-5">
+    <div className="flex items-start justify-between gap-4 px-5 pt-4">
       <div>
         <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
           {title}
