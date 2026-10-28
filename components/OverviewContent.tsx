@@ -11,7 +11,7 @@ import type { OverviewRow } from "@/lib/overview";
 import type { Status } from "@/lib/types";
 
 function Bar({ value }: { value: number | null }) {
-  const color = value === null ? "bg-stroke-soft-200" : value >= 90 ? "bg-success-base-base" : value >= 50 ? "bg-warning-base-base" : "bg-error-base";
+  const color = value === null ? "bg-stroke-soft-200" : value >= 90 ? "bg-success-base" : value >= 50 ? "bg-warning-base" : "bg-error-base";
   return (
     <div className="flex items-center gap-2.5">
       <div className="h-1.5 w-12 overflow-hidden rounded-full bg-bg-soft-200">

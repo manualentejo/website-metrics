@@ -28,7 +28,7 @@ function SiteLink({ site, active }: { site: Item; active: boolean }) {
       <RiGlobalLine className="size-5 flex-shrink-0" />
       <span className="flex-1 truncate">{site.name}</span>
       <span
-        className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success-base-base" : "bg-warning-base-base"}`}
+        className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success-base" : "bg-warning-base"}`}
         title={site.status === "no_ar" ? "No ar" : "Em andamento"}
       />
     </Link>

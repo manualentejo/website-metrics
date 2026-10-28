@@ -107,7 +107,7 @@ export default function InfoTip({
           >
             {heading && <span className="mb-1 block text-label-sm text-text-strong-950">{heading}</span>}
             <span className="block">{body}</span>
-            {good && <span className="mt-2 block text-label-xs text-success-base-base">{good}</span>}
+            {good && <span className="mt-2 block text-label-xs text-success-base">{good}</span>}
           </div>,
           document.body
         )}

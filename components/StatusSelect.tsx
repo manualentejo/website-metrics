@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import type { Status } from "@/lib/types";
 
 const LABEL: Record<Status, string> = { no_ar: "No ar", em_andamento: "Em andamento" };
-const DOT: Record<Status, string> = { no_ar: "bg-success-base-base", em_andamento: "bg-warning-base-base" };
+const DOT: Record<Status, string> = { no_ar: "bg-success-base", em_andamento: "bg-warning-base" };
 
 export default function StatusSelect({
   siteId,
