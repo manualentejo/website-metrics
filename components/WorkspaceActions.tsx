@@ -80,7 +80,7 @@ export default function WorkspaceActions({
         }
       >
         <SiteChecklist sites={candidates} selected={picked} onChange={setPicked} emptyText="Todos os sites já estão neste workspace." />
-        {error && <p role="alert" className="mt-2 text-xs text-destructive">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-paragraph-xs text-error-base">{error}</p>}
       </Modal>
 
       <Modal
@@ -106,7 +106,7 @@ export default function WorkspaceActions({
             className={`${inputClass} w-full`}
           />
         </Field>
-        {error && <p role="alert" className="mt-2 text-xs text-destructive">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-paragraph-xs text-error-base">{error}</p>}
       </Modal>
 
       <Modal
@@ -122,12 +122,12 @@ export default function WorkspaceActions({
           </>
         }
       >
-        <p className="text-[13px] text-muted-foreground">
+        <p className="text-paragraph-sm text-text-sub-600">
           {siteCount > 0
             ? `Só o grupo é excluído. Os ${siteCount} ${siteCount === 1 ? "site continua" : "sites continuam"} no painel, em “Sem workspace”.`
             : "O grupo está vazio e será removido."}
         </p>
-        {error && <p role="alert" className="mt-2 text-xs text-destructive">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-paragraph-xs text-error-base">{error}</p>}
       </Modal>
     </>
   );

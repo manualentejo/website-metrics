@@ -30,7 +30,7 @@ export default function FieldDataCard({ field }: { field: FieldData | null | und
       <CardHeader
         title={
           <span className="flex items-center gap-2">
-            <RiGroupLine className="h-4 w-4 text-muted-foreground" />
+            <RiGroupLine className="h-4 w-4 text-text-sub-600" />
             Usuários reais
           </span>
         }
@@ -39,32 +39,32 @@ export default function FieldDataCard({ field }: { field: FieldData | null | und
       />
       <div className="p-5 pt-3">
         {field === undefined && (
-          <p className="text-[13px] text-muted-foreground">
+          <p className="text-paragraph-sm text-text-sub-600">
             Esta análise é anterior a este recurso. Em Configurar › “Analisar de novo”, ou na próxima análise semanal, os dados aparecem aqui.
           </p>
         )}
         {field === null && (
-          <p className="text-[13px] text-muted-foreground">
+          <p className="text-paragraph-sm text-text-sub-600">
             O Google ainda não tem dados de usuários reais para este site, em geral porque ele recebe poucos acessos. Quando tiver, aparecem aqui.
           </p>
         )}
         {field && (
           <>
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-stroke-soft-200">
               {field.metrics.map((m) => (
                 <li key={m.id} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
                   <span className="min-w-0">
-                    <span className="block text-[13px] font-medium text-foreground">{LABEL[m.id].title}</span>
-                    <span className="block text-xs text-muted-foreground">{LABEL[m.id].hint}</span>
+                    <span className="block text-paragraph-sm font-medium text-text-strong-950">{LABEL[m.id].title}</span>
+                    <span className="block text-paragraph-xs text-text-sub-600">{LABEL[m.id].hint}</span>
                   </span>
                   <span className="flex flex-shrink-0 items-center gap-3">
-                    <span className="text-[13px] font-medium tabular-nums">{format(m.id, m.value)}</span>
+                    <span className="text-paragraph-sm font-medium tabular-nums">{format(m.id, m.value)}</span>
                     {m.category && <Badge tone={VERDICT[m.category].tone}>{VERDICT[m.category].text}</Badge>}
                   </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className="mt-3 text-paragraph-xs text-text-sub-600">
               {field.scope === "origin"
                 ? "Dados do domínio inteiro: a página sozinha não tem acessos suficientes para o Google medir."
                 : "Dados desta página."}{" "}

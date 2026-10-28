@@ -39,7 +39,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             <Avatar name={name} image={image} size={44} />
             <span>
               {name}
-              <span className="block text-[13px] font-normal text-muted-foreground">{profile.role ?? viewer.email}</span>
+              <span className="block text-paragraph-sm font-normal text-text-sub-600">{profile.role ?? viewer.email}</span>
             </span>
           </span>
         }
@@ -50,7 +50,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         )}
         {tab === "analises" && settings && (
           <>
-            <p className="text-[13px] text-muted-foreground">Quando o relatório semanal é gerado.</p>
+            <p className="text-paragraph-sm text-text-sub-600">Quando o relatório semanal é gerado.</p>
             <SettingsForm initial={settings} />
           </>
         )}

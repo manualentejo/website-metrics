@@ -46,7 +46,7 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+        className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-paragraph-sm text-text-sub-600 transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950"
       >
         <RiFolderAddLine className="h-4 w-4" />
         Novo workspace
@@ -76,11 +76,11 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
             />
           </Field>
           <div>
-            <p className="mb-1 text-xs font-medium text-foreground">Sites do grupo (opcional)</p>
+            <p className="mb-1 text-paragraph-xs font-medium text-text-strong-950">Sites do grupo (opcional)</p>
             <SiteChecklist sites={sites} selected={picked} onChange={setPicked} emptyText="Adicione um site primeiro para poder agrupá-lo." />
-            <p className="mt-1 text-xs text-muted-foreground">Um site fica em um workspace só: ao escolher, ele sai do anterior.</p>
+            <p className="mt-1 text-paragraph-xs text-text-sub-600">Um site fica em um workspace só: ao escolher, ele sai do anterior.</p>
           </div>
-          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+          {error && <p role="alert" className="text-paragraph-xs text-error-base">{error}</p>}
         </div>
       </Modal>
     </>

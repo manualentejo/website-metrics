@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { RiCloseLine } from "@remixicon/react";
+import type { ReactNode } from "react";
+import * as AlignModal from "@/components/align/modal";
 
-// Janela de diálogo nativa (<dialog>): foco preso, Esc fecha e clique fora fecha.
+// Diálogo do AlignUI (Radix Dialog): foco preso, Esc e clique fora fecham.
 export default function Modal({
   open,
   onClose,
@@ -19,53 +19,23 @@ export default function Modal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      onClick={(e) => e.target === ref.current && onClose()}
-      aria-label={title}
-      className="m-auto w-full max-w-md rounded-lg border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40"
-    >
-      {open && (
-        <div>
-          <header className="flex items-start justify-between gap-4 px-5 pt-4">
-            <div>
-              <h2 className="text-sm font-semibold">{title}</h2>
-              {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Fechar"
-              className="-mr-1.5 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <RiCloseLine className="h-4 w-4" />
-            </button>
-          </header>
-          <div className="px-5 py-4">{children}</div>
-          {footer && <footer className="flex items-center justify-end gap-2 border-t border-border px-5 py-3">{footer}</footer>}
-        </div>
-      )}
-    </dialog>
+    <AlignModal.Root open={open} onOpenChange={(o) => !o && onClose()}>
+      <AlignModal.Content className="max-w-md">
+        <AlignModal.Header title={title} description={description} />
+        <AlignModal.Body>{children}</AlignModal.Body>
+        {footer && <AlignModal.Footer className="justify-end gap-2">{footer}</AlignModal.Footer>}
+      </AlignModal.Content>
+    </AlignModal.Root>
   );
 }
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-foreground">{label}</span>
+      <span className="mb-1.5 block text-label-sm text-text-strong-950">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-muted-foreground">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-paragraph-xs text-text-sub-600">{hint}</span>}
     </label>
   );
 }

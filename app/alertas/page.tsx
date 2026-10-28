@@ -13,9 +13,9 @@ import { formatDateTime } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 const META: Record<Severity, { label: string; tone: "destructive" | "warning" | "success"; icon: typeof RiErrorWarningLine; color: string }> = {
-  critical: { label: "Crítico", tone: "destructive", icon: RiErrorWarningLine, color: "text-destructive" },
-  warning: { label: "Atenção", tone: "warning", icon: RiAlertLine, color: "text-warning" },
-  good: { label: "Melhorou", tone: "success", icon: RiCheckboxCircleLine, color: "text-success" },
+  critical: { label: "Crítico", tone: "destructive", icon: RiErrorWarningLine, color: "text-error-base" },
+  warning: { label: "Atenção", tone: "warning", icon: RiAlertLine, color: "text-warning-base" },
+  good: { label: "Melhorou", tone: "success", icon: RiCheckboxCircleLine, color: "text-success-base" },
 };
 
 export default async function AlertsPage() {
@@ -34,25 +34,25 @@ export default async function AlertsPage() {
             Quando uma nota cair ou ficar abaixo de 50, o aviso aparece aqui. Os alertas comparam cada análise com a anterior.
           </EmptyState>
         ) : (
-          <Card className="divide-y divide-border">
+          <Card className="divide-y divide-stroke-soft-200">
             {alerts.map((a, i) => {
               const m = META[a.severity];
               return (
                 <Link
                   key={i}
                   href={`/site/${a.siteId}?strategy=${a.strategy}`}
-                  className="flex items-start gap-3 px-5 py-3 hover:bg-secondary/40"
+                  className="flex items-start gap-3 px-5 py-3 hover:bg-bg-weak-50"
                 >
                   <m.icon className={`mt-0.5 h-4 w-4 flex-shrink-0 ${m.color}`} />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-medium text-foreground">
+                    <span className="block text-paragraph-sm font-medium text-text-strong-950">
                       {a.siteName} · {a.title}
                     </span>
-                    <span className="block text-xs text-muted-foreground">{a.detail}</span>
+                    <span className="block text-paragraph-xs text-text-sub-600">{a.detail}</span>
                   </span>
                   <span className="flex flex-shrink-0 flex-col items-end gap-1">
                     <Badge tone={m.tone}>{m.label}</Badge>
-                    <span className="text-[11px] text-muted-foreground">{formatDateTime(a.at)}</span>
+                    <span className="text-paragraph-xs text-text-sub-600">{formatDateTime(a.at)}</span>
                   </span>
                 </Link>
               );

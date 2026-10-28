@@ -81,17 +81,17 @@ export default function SharingPanel({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-raised p-6">
-      <h3 className="text-sm font-semibold text-foreground/80">Compartilhamento e organização</h3>
+    <div className="rounded-2xl border border-stroke-soft-200 bg-surface-raised p-6">
+      <h3 className="text-sm font-semibold text-text-strong-950/80">Compartilhamento e organização</h3>
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <div>
-          <label className="block text-xs text-muted-foreground">Visibilidade</label>
+          <label className="block text-paragraph-xs text-text-sub-600">Visibilidade</label>
           <select
             value={vis}
             disabled={saving}
             onChange={(e) => handleVisibilityChange(e.target.value as "private" | "shared")}
-            className="mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm"
+            className="mt-1 h-9 rounded-md border border-stroke-soft-200 bg-bg-white-0 px-3 text-sm shadow-sm"
           >
             <option value="private">Privado (só eu)</option>
             <option value="shared">Compartilhado</option>
@@ -99,12 +99,12 @@ export default function SharingPanel({
         </div>
 
         <div>
-          <label className="block text-xs text-muted-foreground">Workspace</label>
+          <label className="block text-paragraph-xs text-text-sub-600">Workspace</label>
           <select
             value={folderId}
             disabled={saving}
             onChange={(e) => handleFolderChange(e.target.value)}
-            className="mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm"
+            className="mt-1 h-9 rounded-md border border-stroke-soft-200 bg-bg-white-0 px-3 text-sm shadow-sm"
           >
             <option value="">Sem workspace</option>
             {folders.map((f) => (
@@ -118,7 +118,7 @@ export default function SharingPanel({
 
       {vis === "shared" && (
         <div className="mt-5">
-          <label className="block text-xs text-muted-foreground">
+          <label className="block text-paragraph-xs text-text-sub-600">
             E-mails com acesso (precisam entrar com essa conta Google)
           </label>
           <div className="mt-2 flex gap-2">
@@ -127,26 +127,26 @@ export default function SharingPanel({
               onChange={(e) => setNewEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addEmail()}
               placeholder="nome@exemplo.com"
-              className="flex-1 h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm outline-none focus:border-ring"
+              className="flex-1 h-9 rounded-md border border-stroke-soft-200 bg-bg-white-0 px-3 text-sm shadow-sm outline-none focus:border-ring"
             />
             <button
               onClick={addEmail}
               disabled={saving}
-              className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
+              className="h-9 rounded-md bg-bg-strong-950 px-4 text-sm font-medium text-text-white-0 disabled:opacity-50"
             >
               Adicionar
             </button>
           </div>
           <ul className="mt-3 space-y-1">
             {emails.map((email) => (
-              <li key={email} className="flex items-center justify-between rounded-md bg-secondary px-3 py-1.5 text-sm">
-                <span className="text-foreground/80">{email}</span>
-                <button onClick={() => removeEmail(email)} className="text-xs text-muted-foreground hover:text-destructive">
+              <li key={email} className="flex items-center justify-between rounded-md bg-bg-weak-50 px-3 py-1.5 text-sm">
+                <span className="text-text-strong-950/80">{email}</span>
+                <button onClick={() => removeEmail(email)} className="text-paragraph-xs text-text-sub-600 hover:text-error-base">
                   remover
                 </button>
               </li>
             ))}
-            {emails.length === 0 && <li className="text-xs text-muted-foreground">Nenhum e-mail adicionado ainda.</li>}
+            {emails.length === 0 && <li className="text-paragraph-xs text-text-sub-600">Nenhum e-mail adicionado ainda.</li>}
           </ul>
         </div>
       )}

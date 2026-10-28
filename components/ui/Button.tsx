@@ -1,25 +1,23 @@
 import type { ButtonHTMLAttributes } from "react";
+import * as AlignButton from "@/components/align/button";
+import { buttonVariants } from "@/components/align/button";
 
 type Variant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
 type Size = "sm" | "md" | "icon";
 
-const VARIANTS: Record<Variant, string> = {
-  primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
-  secondary: "bg-secondary text-secondary-foreground hover:bg-accent",
-  outline: "border border-input bg-card text-foreground hover:bg-accent shadow-sm",
-  ghost: "text-muted-foreground hover:bg-accent hover:text-foreground",
-  destructive: "bg-destructive text-white hover:bg-destructive/90 shadow-sm",
+// Tradução do vocabulário do painel para o AlignUI (variant + mode + size).
+const MAP: Record<Variant, { variant: "neutral" | "error"; mode: "filled" | "stroke" | "lighter" | "ghost" }> = {
+  primary: { variant: "neutral", mode: "filled" },
+  secondary: { variant: "neutral", mode: "lighter" },
+  outline: { variant: "neutral", mode: "stroke" },
+  ghost: { variant: "neutral", mode: "ghost" },
+  destructive: { variant: "error", mode: "filled" },
 };
-
-// Todos os controles do sistema usam 32px (sm/md) para alinhar lado a lado.
-const SIZES: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs gap-1.5",
-  md: "h-9 px-3.5 text-[13px] gap-2",
-  icon: "h-8 w-8",
-};
+const SIZE: Record<Size, "small" | "xsmall"> = { sm: "xsmall", md: "small", icon: "xsmall" };
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", extra = "") {
-  return `inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${extra}`;
+  const { variant: v, mode } = MAP[variant];
+  return buttonVariants({ variant: v, mode, size: SIZE[size] }).root({ class: `${size === "icon" ? "w-8 px-0" : ""} ${extra}` });
 }
 
 export default function Button({
@@ -29,5 +27,15 @@ export default function Button({
   type = "button",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }) {
-  return <button type={type} className={buttonClass(variant, size, className)} {...props} />;
+  const { variant: v, mode } = MAP[variant];
+  return (
+    <AlignButton.Root
+      type={type}
+      variant={v}
+      mode={mode}
+      size={SIZE[size]}
+      className={`${size === "icon" ? "w-8 px-0" : ""} ${className}`}
+      {...props}
+    />
+  );
 }

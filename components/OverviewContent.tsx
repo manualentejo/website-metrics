@@ -11,13 +11,13 @@ import type { OverviewRow } from "@/lib/overview";
 import type { Status } from "@/lib/types";
 
 function Bar({ value }: { value: number | null }) {
-  const color = value === null ? "bg-border" : value >= 90 ? "bg-success" : value >= 50 ? "bg-warning" : "bg-destructive";
+  const color = value === null ? "bg-stroke-soft-200" : value >= 90 ? "bg-success-base-base" : value >= 50 ? "bg-warning-base-base" : "bg-error-base";
   return (
     <div className="flex items-center gap-2.5">
-      <div className="h-1 w-16 overflow-hidden rounded-sm bg-secondary">
-        <div className={`h-full ${color}`} style={{ width: `${value ?? 0}%` }} />
+      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-bg-soft-200">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${value ?? 0}%` }} />
       </div>
-      <span className="w-6 text-[13px] tabular-nums text-foreground">{value === null ? "—" : Math.round(value)}</span>
+      <span className="w-6 text-label-sm tabular-nums text-text-strong-950">{value === null ? "—" : Math.round(value)}</span>
     </div>
   );
 }
@@ -25,9 +25,9 @@ function Bar({ value }: { value: number | null }) {
 function Stat({ label, value, hint }: { label: string; value: string | number; hint: string }) {
   return (
     <Card className="px-5 py-4">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+      <p className="text-subheading-xs uppercase text-text-soft-400">{label}</p>
+      <p className="mt-2 text-title-h4 text-text-strong-950">{value}</p>
+      <p className="mt-1 text-paragraph-xs text-text-sub-600">{hint}</p>
     </Card>
   );
 }
@@ -73,7 +73,7 @@ export function SitesTable({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[820px] text-left">
           <thead>
-            <tr className="border-y border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-subheading-xs uppercase text-text-soft-400">
               <th className="px-5 py-2">Site</th>
               <th className="px-3 py-2">Desempenho</th>
               <th className="px-3 py-2">Acessib.</th>
@@ -85,13 +85,13 @@ export function SitesTable({
           </thead>
           <tbody>
             {filtered.map((site) => (
-              <tr key={site.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40">
+              <tr key={site.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
                 <td className="px-5 py-2.5">
                   <Link href={`/site/${site.id}`} className="flex items-center gap-3">
                     <ScoreGauge score={site.desktop?.performanceScore ?? null} label="" size={40} />
                     <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-medium text-foreground">{site.name}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
+                      <span className="block truncate text-label-sm text-text-strong-950">{site.name}</span>
+                      <span className="block truncate text-paragraph-xs text-text-sub-600">
                         {site.folderId && folderNames[site.folderId] ? `${folderNames[site.folderId]} · ` : ""}
                         {site.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                       </span>
@@ -111,9 +111,9 @@ export function SitesTable({
                         href={`/site/${site.id}?config=1`}
                         aria-label={`Configurar ${site.name}`}
                         title="Configurar site"
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        className="flex size-8 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-weak-50 hover:text-text-strong-950"
                       >
-                        <RiSettings3Line className="h-4 w-4" />
+                        <RiSettings3Line className="size-5" />
                       </Link>
                     )}
                   </div>

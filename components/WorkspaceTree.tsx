@@ -18,17 +18,17 @@ export interface TreeGroup {
 }
 
 const row = (active: boolean) =>
-  `flex items-center gap-2.5 rounded-md px-2.5 h-8 text-[13px] transition-colors ${
-    active ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+  `flex items-center gap-2 rounded-lg px-3 h-9 text-label-sm transition duration-200 ${
+    active ? "bg-bg-weak-50 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950"
   }`;
 
 function SiteLink({ site, active }: { site: Item; active: boolean }) {
   return (
     <Link href={`/site/${site.id}`} className={row(active)}>
-      <RiGlobalLine className="h-4 w-4 flex-shrink-0" />
+      <RiGlobalLine className="size-5 flex-shrink-0" />
       <span className="flex-1 truncate">{site.name}</span>
       <span
-        className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success" : "bg-warning"}`}
+        className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success-base-base" : "bg-warning-base-base"}`}
         title={site.status === "no_ar" ? "No ar" : "Em andamento"}
       />
     </Link>
@@ -42,9 +42,9 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
 
   return (
     <div>
-      <div className={`flex items-center rounded-md ${row(group.id === activeFolderId)} !p-0 !h-8`}>
-        <Link href={`/workspace/${group.id}`} className="flex h-8 flex-1 items-center gap-2.5 truncate px-2.5">
-          <Icon className="h-4 w-4 flex-shrink-0" />
+      <div className={`flex items-center ${row(group.id === activeFolderId)} !p-0 !h-9`}>
+        <Link href={`/workspace/${group.id}`} className="flex h-9 flex-1 items-center gap-2 truncate px-3">
+          <Icon className="size-5 flex-shrink-0" />
           <span className="truncate">{group.name}</span>
         </Link>
         <button
@@ -52,17 +52,17 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label={`${open ? "Recolher" : "Expandir"} ${group.name}`}
-          className="mr-1 rounded-md p-1.5 hover:bg-accent"
+          className="mr-1 rounded-md p-1 hover:bg-bg-soft-200"
         >
-          <RiArrowDownSLine className={`h-3.5 w-3.5 transition-transform ${open ? "" : "-rotate-90"}`} />
+          <RiArrowDownSLine className={`size-4 transition-transform ${open ? "" : "-rotate-90"}`} />
         </button>
       </div>
       {open && (
-        <div className="ml-[19px] mt-0.5 space-y-0.5 border-l border-border pl-2">
+        <div className="ml-[19px] mt-0.5 space-y-0.5 border-l border-stroke-soft-200 pl-2">
           {group.sites.map((s) => (
             <SiteLink key={s.id} site={s} active={s.id === activeSiteId} />
           ))}
-          {group.sites.length === 0 && <p className="px-2.5 py-1 text-xs text-muted-foreground">Nenhum site</p>}
+          {group.sites.length === 0 && <p className="px-3 py-1 text-paragraph-xs text-text-sub-600">Nenhum site</p>}
         </div>
       )}
     </div>
@@ -86,7 +86,7 @@ export default function WorkspaceTree({
         <Group key={g.id} group={g} activeSiteId={activeSiteId} activeFolderId={activeFolderId} />
       ))}
       {loose.length > 0 && groups.length > 0 && (
-        <p className="px-2.5 pb-1 pt-3 text-[11px] font-medium text-muted-foreground">Sem workspace</p>
+        <p className="px-2.5 pb-1 pt-3 text-paragraph-xs font-medium text-text-sub-600">Sem workspace</p>
       )}
       {loose.map((s) => (
         <SiteLink key={s.id} site={s} active={s.id === activeSiteId} />

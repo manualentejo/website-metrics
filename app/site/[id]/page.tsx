@@ -77,8 +77,8 @@ export default async function SiteDetailPage({
   return (
     <AppShell activeSiteId={id} activeFolderId={undefined}>
         <div className="mx-auto max-w-5xl px-8 py-6">
-          <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
-            <Link href="/sites" className="hover:text-foreground/80">Sites</Link>
+          <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-paragraph-xs text-text-sub-600">
+            <Link href="/sites" className="hover:text-text-strong-950/80">Sites</Link>
             {folder && (
               <>
                 <RiArrowRightSLine className="h-3 w-3" />
@@ -86,23 +86,23 @@ export default async function SiteDetailPage({
               </>
             )}
             <RiArrowRightSLine className="h-3 w-3" />
-            <span className="text-muted-foreground">{site.name}</span>
+            <span className="text-text-sub-600">{site.name}</span>
           </nav>
 
           <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">{site.name}</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-text-strong-950">{site.name}</h1>
               <a
                 href={site.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                className="mt-1 inline-flex items-center gap-1 text-sm text-text-sub-600 hover:text-text-strong-950"
               >
                 {site.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 <RiExternalLinkLine className="h-3.5 w-3.5" />
               </a>
               {analyzedAt && (
-                <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <p className="mt-2 flex flex-wrap items-center gap-1.5 text-paragraph-xs text-text-sub-600">
                   Analisado em {formatDateTime(analyzedAt)}
                   {analysis?.meta.lighthouseVersion && <> · Lighthouse {analysis.meta.lighthouseVersion}</>}
                   <InfoTip term="lab-data" align="start" />
@@ -155,12 +155,12 @@ export default async function SiteDetailPage({
                 <ScoreGauge score={latest.bestPracticesScore} label="Boas práticas" size={90} />
                 <ScoreGauge score={latest.seoScore} label="SEO" size={90} />
               </div>
-              <p className="mt-6 text-center text-sm text-muted-foreground">
+              <p className="mt-6 text-center text-sm text-text-sub-600">
                 A análise detalhada (Insights, Diagnóstico e auditorias) aparece a partir da próxima execução.
               </p>
             </Card>
           ) : (
-            <Card className="p-10 text-center text-sm text-muted-foreground">
+            <Card className="p-10 text-center text-sm text-text-sub-600">
               Ainda não há dados para este site no {strategyLabel}. A primeira análise roda na próxima sexta-feira
               às 15h (horário de Brasília).
             </Card>

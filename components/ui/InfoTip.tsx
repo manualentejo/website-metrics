@@ -92,7 +92,7 @@ export default function InfoTip({
           e.stopPropagation();
           setPinned((p) => !p);
         }}
-        className="inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full align-middle text-muted-foreground transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full align-middle text-text-soft-400 transition-colors hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <RiInformationLine className="h-3.5 w-3.5" strokeWidth={2} />
       </button>
@@ -103,11 +103,11 @@ export default function InfoTip({
             id={id}
             role="tooltip"
             style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, width: WIDTH }}
-            className="fixed z-[60] rounded-xl border border-border bg-card p-3 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-muted-foreground shadow-lg"
+            className="fixed z-[60] rounded-xl bg-bg-white-0 p-3 text-left text-paragraph-xs normal-case text-text-sub-600 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200"
           >
-            {heading && <span className="mb-1 block text-[13px] font-semibold text-foreground">{heading}</span>}
+            {heading && <span className="mb-1 block text-label-sm text-text-strong-950">{heading}</span>}
             <span className="block">{body}</span>
-            {good && <span className="mt-2 block font-medium text-success">{good}</span>}
+            {good && <span className="mt-2 block text-label-xs text-success-base-base">{good}</span>}
           </div>,
           document.body
         )}

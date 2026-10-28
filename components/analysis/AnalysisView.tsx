@@ -65,15 +65,15 @@ export default function AnalysisView({
               role="tab"
               onClick={() => setTab(key)}
               aria-selected={tab === key}
-              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-secondary ${
-                tab === key ? "bg-secondary" : "bg-card"
+              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-bg-weak-50 ${
+                tab === key ? "bg-bg-weak-50" : "bg-bg-white-0"
               }`}
             >
               <ScoreGauge score={pct(analysis.categories[key].score)} label="" size={76} />
-              <span className={`text-sm font-medium ${tab === key ? "text-foreground" : "text-muted-foreground"}`}>
+              <span className={`text-sm font-medium ${tab === key ? "text-text-strong-950" : "text-text-sub-600"}`}>
                 {GLOSSARY[key]?.title ?? analysis.categories[key].title}
               </span>
-              <span className={`mt-1 h-0.5 w-10 rounded-full ${tab === key ? "bg-primary" : "bg-transparent"}`} />
+              <span className={`mt-1 h-0.5 w-10 rounded-full ${tab === key ? "bg-bg-strong-950" : "bg-transparent"}`} />
             </button>
           ))}
         </div>
@@ -111,14 +111,14 @@ function CategoryIntro({ category, score }: { category: CategoryKey; score: numb
   const verdict =
     score === null ? null : score >= 90 ? "Bom" : score >= 50 ? "Precisa melhorar" : "Ruim";
   const verdictClass =
-    score === null ? "" : score >= 90 ? "bg-success/10 text-success" : score >= 50 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive";
+    score === null ? "" : score >= 90 ? "bg-success-base-lighter text-success-base" : score >= 50 ? "bg-warning-base-lighter text-warning-base" : "bg-error-lighter text-error-base";
   return (
     <div className="px-6 py-5">
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-foreground">{g?.title}</h2>
-        {verdict && <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${verdictClass}`}>{verdict}</span>}
+        <h2 className="text-lg font-semibold text-text-strong-950">{g?.title}</h2>
+        {verdict && <span className={`rounded-md px-2 py-0.5 text-paragraph-xs font-medium ${verdictClass}`}>{verdict}</span>}
       </div>
-      <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">{g?.text}</p>
+      <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text-sub-600">{g?.text}</p>
     </div>
   );
 }
@@ -149,10 +149,10 @@ function PerformanceTab({
     <div className="space-y-6">
       <Card>
         <CategoryIntro category="performance" score={pct(analysis.categories.performance.score)} />
-        <div className="flex flex-wrap justify-center gap-5 border-t border-border px-6 py-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap justify-center gap-5 border-t border-stroke-soft-200 px-6 py-3 text-paragraph-xs text-text-sub-600">
           <span className="flex items-center gap-1.5"><svg viewBox="0 0 12 12" className="h-3 w-3"><path d="M6 1 11.5 11H.5z" fill="#e11d48" /></svg>0–49 ruim</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 bg-warning/100" />50–89 precisa melhorar</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-success/100" />90–100 bom</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 bg-warning-base/100" />50–89 precisa melhorar</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-success-base/100" />90–100 bom</span>
         </div>
       </Card>
 
@@ -162,7 +162,7 @@ function PerformanceTab({
           description="Os 5 tempos que formam a nota de desempenho."
           info={<InfoTip term="lab-data" />}
         />
-        <div className="mt-4 overflow-hidden rounded-b-2xl border-t border-border">
+        <div className="mt-4 overflow-hidden rounded-b-2xl border-t border-stroke-soft-200">
           <MetricsPanel analysis={analysis} />
         </div>
       </Card>
@@ -226,7 +226,7 @@ function CategoryTab({
 
       <Card className="overflow-hidden">
         {failing.length === 0 && (
-          <p className="px-6 py-5 text-sm text-success">Nenhum problema encontrado nesta categoria.</p>
+          <p className="px-6 py-5 text-sm text-success-base">Nenhum problema encontrado nesta categoria.</p>
         )}
         {groupOrder.map((g) => (
           <AuditSection

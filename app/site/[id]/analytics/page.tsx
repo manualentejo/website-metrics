@@ -38,7 +38,7 @@ function countryName(code: string) {
 function AreaChart({ data }: { data: { date: string; views: number; visitors: number }[] }) {
   if (data.length < 2) {
     return (
-      <div className="flex h-56 items-center justify-center text-[13px] text-muted-foreground">
+      <div className="flex h-56 items-center justify-center text-paragraph-sm text-text-sub-600">
         Ainda não há dias suficientes para o gráfico.
       </div>
     );
@@ -52,7 +52,7 @@ function AreaChart({ data }: { data: { date: string; views: number; visitors: nu
   return (
     <div>
       <div className="relative">
-        <span className="absolute left-0 top-0 text-[11px] text-muted-foreground">{max}</span>
+        <span className="absolute left-0 top-0 text-paragraph-xs text-text-sub-600">{max}</span>
         <svg viewBox={`0 0 ${w} ${h}`} className="h-56 w-full" preserveAspectRatio="none" role="img" aria-label="Visitas por dia">
           <defs>
             <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
@@ -65,7 +65,7 @@ function AreaChart({ data }: { data: { date: string; views: number; visitors: nu
           <path d={line("visitors")} fill="none" stroke="hsl(0 0% 9%)" strokeWidth="1.75" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
-      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
+      <div className="mt-2 flex items-center justify-between border-t border-stroke-soft-200 pt-2 text-paragraph-xs text-text-sub-600">
         <span>{dm(data[0].date)}</span>
         <span className="flex gap-4">
           <span className="flex items-center gap-1.5"><span className="h-0.5 w-3 bg-foreground" />Visitantes</span>
@@ -82,14 +82,14 @@ function Ranking({ title, items, format }: { title: string; items: { label: stri
   const max = Math.max(...items.map((i) => i.n), 1);
   return (
     <section>
-      <h3 className="mb-3 text-[13px] font-medium text-foreground">{title}</h3>
+      <h3 className="mb-3 text-paragraph-sm font-medium text-text-strong-950">{title}</h3>
       <div className="space-y-1">
-        {items.length === 0 && <p className="text-[13px] text-muted-foreground">Sem dados no período.</p>}
+        {items.length === 0 && <p className="text-paragraph-sm text-text-sub-600">Sem dados no período.</p>}
         {items.map((i) => (
-          <div key={i.label} className="relative flex h-8 items-center justify-between overflow-hidden rounded-md px-2.5 text-[13px]">
-            <span className="absolute inset-y-0 left-0 rounded-md bg-secondary" style={{ width: `${Math.max((i.n / max) * 100, 4)}%` }} />
+          <div key={i.label} className="relative flex h-8 items-center justify-between overflow-hidden rounded-md px-2.5 text-paragraph-sm">
+            <span className="absolute inset-y-0 left-0 rounded-md bg-bg-weak-50" style={{ width: `${Math.max((i.n / max) * 100, 4)}%` }} />
             <span className="relative truncate">{format ? format(i.label) : i.label}</span>
-            <span className="relative ml-3 tabular-nums text-muted-foreground">{short(i.n)}</span>
+            <span className="relative ml-3 tabular-nums text-text-sub-600">{short(i.n)}</span>
           </div>
         ))}
       </div>
@@ -139,7 +139,7 @@ export default async function SiteAnalyticsPage({
         width="max-w-5xl"
         title={
           <span className="flex items-center gap-2">
-            <Link href={`/site/${id}`} aria-label="Voltar à análise" className="text-muted-foreground hover:text-foreground">
+            <Link href={`/site/${id}`} aria-label="Voltar à análise" className="text-text-sub-600 hover:text-text-strong-950">
               <RiArrowLeftLine className="h-4 w-4" />
             </Link>
             Visitas
@@ -154,47 +154,47 @@ export default async function SiteAnalyticsPage({
         }
       >
         {loadError && (
-          <Card className="border-destructive/40 p-4 text-[13px]">
-            <p className="font-medium text-destructive">Não foi possível carregar as visitas.</p>
-            {viewer.owner && <p className="mt-1 break-all text-xs text-muted-foreground">{loadError}</p>}
+          <Card className="border-error-base/40 p-4 text-paragraph-sm">
+            <p className="font-medium text-error-base">Não foi possível carregar as visitas.</p>
+            {viewer.owner && <p className="mt-1 break-all text-paragraph-xs text-text-sub-600">{loadError}</p>}
           </Card>
         )}
 
-        <div className="grid grid-cols-2 gap-y-4 border-y border-border py-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-y-4 border-y border-stroke-soft-200 py-4 sm:grid-cols-4">
           {kpis.map(([label, value], i) => (
-            <div key={label} className={`px-1 sm:px-5 ${i ? "sm:border-l sm:border-border" : "sm:pl-0"}`}>
-              <p className="text-xs text-muted-foreground">{label}</p>
+            <div key={label} className={`px-1 sm:px-5 ${i ? "sm:border-l sm:border-stroke-soft-200" : "sm:pl-0"}`}>
+              <p className="text-paragraph-xs text-text-sub-600">{label}</p>
               <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
             </div>
           ))}
         </div>
 
         {empty && !loadError && (
-          <Card className="p-4 text-[13px] text-muted-foreground">
+          <Card className="p-4 text-paragraph-sm text-text-sub-600">
             Ainda não há visitas neste período. A contagem só existe em sites com o código instalado; veja “Configurar” na página do site.
           </Card>
         )}
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
           <section>
-            <h3 className="mb-3 text-[13px] font-medium text-foreground">Visitas por dia</h3>
+            <h3 className="mb-3 text-paragraph-sm font-medium text-text-strong-950">Visitas por dia</h3>
             <AreaChart data={a.daily} />
           </section>
           <Ranking title="Páginas mais visitadas" items={a.pages} />
         </div>
 
-        <div className="grid gap-8 border-t border-border pt-6 md:grid-cols-3">
+        <div className="grid gap-8 border-t border-stroke-soft-200 pt-6 md:grid-cols-3">
           <Ranking title="De onde vêm" items={a.referrers} />
           <Ranking title="Países" items={a.countries} format={countryName} />
           <Ranking title="Aparelhos" items={a.devices} format={(l) => DEVICE[l] ?? l} />
         </div>
 
-        <section className="border-t border-border pt-6">
-          <h3 className="mb-1 text-[13px] font-medium text-foreground">Visitantes por mês</h3>
-          <p className="mb-3 text-xs text-muted-foreground">Últimos 12 meses. Quem volta em outro dia conta de novo.</p>
-          <table className="w-full text-left text-[13px]">
+        <section className="border-t border-stroke-soft-200 pt-6">
+          <h3 className="mb-1 text-paragraph-sm font-medium text-text-strong-950">Visitantes por mês</h3>
+          <p className="mb-3 text-paragraph-xs text-text-sub-600">Últimos 12 meses. Quem volta em outro dia conta de novo.</p>
+          <table className="w-full text-left text-paragraph-sm">
             <thead>
-              <tr className="border-y border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-paragraph-xs font-medium uppercase tracking-wider text-text-sub-600">
                 <th className="px-3 py-2">Mês</th>
                 <th className="px-3 py-2">Visitantes</th>
                 <th className="px-3 py-2 text-right">Visualizações</th>
@@ -202,22 +202,22 @@ export default async function SiteAnalyticsPage({
             </thead>
             <tbody>
               {a.months.map((m) => (
-                <tr key={m.month} className="border-b border-border last:border-b-0">
+                <tr key={m.month} className="border-b border-stroke-soft-200 last:border-b-0">
                   <td className="px-3 py-2.5">{MONTHS[Number(m.month.slice(5)) - 1]}/{m.month.slice(0, 4)}</td>
                   <td className="px-3 py-2.5 tabular-nums">{num(m.visitors)}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{num(m.views)}</td>
                 </tr>
               ))}
               {a.months.length === 0 && (
-                <tr><td colSpan={3} className="px-3 py-6 text-center text-muted-foreground">Nenhuma visita registrada ainda.</td></tr>
+                <tr><td colSpan={3} className="px-3 py-6 text-center text-text-sub-600">Nenhuma visita registrada ainda.</td></tr>
               )}
             </tbody>
           </table>
         </section>
 
         {viewer.owner && (
-          <details className="rounded-md border border-border px-4 py-3 text-[13px] text-muted-foreground">
-            <summary className="cursor-pointer font-medium text-foreground">Código de rastreio deste site</summary>
+          <details className="rounded-md border border-stroke-soft-200 px-4 py-3 text-paragraph-sm text-text-sub-600">
+            <summary className="cursor-pointer font-medium text-text-strong-950">Código de rastreio deste site</summary>
             <p className="mt-2">
               Só para sites que você pode editar. No Framer: Site Settings › General › Custom Code › End of {"<head>"} tag. Em sites de
               clientes, não instale sem autorização deles.

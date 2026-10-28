@@ -27,43 +27,19 @@ export default function LoginPage() {
   const { data: session, status } = useSession();
 
   return (
-    <main className="grid min-h-screen bg-background lg:grid-cols-[1.1fr_1fr]">
-      <section className="hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
+    <main className="grid min-h-screen bg-bg-white-0 lg:grid-cols-2">
+      <section className="flex flex-col px-6 py-8 sm:px-12">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-foreground text-xs font-bold text-primary">M</span>
-          <span className="text-sm font-semibold tracking-tight">Métricas</span>
+          <span className="flex size-8 items-center justify-center rounded-lg bg-bg-strong-950 text-label-sm text-text-white-0">M</span>
+          <span className="text-label-md text-text-strong-950">Métricas</span>
         </div>
-        <div className="max-w-md">
-          <h2 className="text-3xl font-semibold leading-tight tracking-tight">Saiba como seus sites estão indo, sem precisar ser especialista.</h2>
-          <ul className="mt-10 space-y-6">
-            {FEATURES.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex gap-4">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-primary-foreground/10">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>
-                  <span className="block text-sm font-medium">{title}</span>
-                  <span className="block text-[13px] text-primary-foreground/60">{text}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="text-xs text-primary-foreground/50">Lighthouse via PageSpeed Insights</p>
-      </section>
 
-      <section className="flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">M</span>
-            <span className="text-sm font-semibold tracking-tight">Métricas</span>
-          </div>
-
+        <div className="mx-auto flex w-full max-w-[360px] flex-1 flex-col justify-center py-12">
           {session?.user ? (
             <>
-              <h1 className="text-xl font-semibold tracking-tight">Você já está conectado</h1>
-              <p className="mt-1.5 text-[13px] text-muted-foreground">Entrou como {session.user.email}.</p>
-              <div className="mt-6 flex flex-col gap-2">
+              <h1 className="text-title-h5 text-text-strong-950">Você já está conectado</h1>
+              <p className="mt-2 text-paragraph-sm text-text-sub-600">Entrou como {session.user.email}.</p>
+              <div className="mt-8 flex flex-col gap-3">
                 <Link href="/" className={buttonClass("primary", "md", "w-full")}>Ir para o painel</Link>
                 <button type="button" onClick={() => signOut({ callbackUrl: "/login" })} className={buttonClass("outline", "md", "w-full")}>
                   Entrar com outra conta
@@ -72,22 +48,42 @@ export default function LoginPage() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-semibold tracking-tight">Entrar</h1>
-              <p className="mt-1.5 text-[13px] text-muted-foreground">Use sua conta Google para acessar o painel.</p>
+              <h1 className="text-title-h5 text-text-strong-950">Entrar</h1>
+              <p className="mt-2 text-paragraph-sm text-text-sub-600">Use sua conta Google para acessar o painel.</p>
               <button
                 type="button"
                 disabled={status === "loading"}
                 onClick={() => signIn("google", { callbackUrl: "/" })}
-                className={buttonClass("outline", "md", "mt-6 w-full")}
+                className={buttonClass("outline", "md", "mt-8 w-full")}
               >
                 <GoogleIcon />
                 Continuar com Google
               </button>
-              <p className="mt-6 text-xs text-muted-foreground">
+              <p className="mt-6 text-paragraph-xs text-text-sub-600">
                 O acesso é só para quem foi convidado. Se você não consegue entrar, peça a quem compartilhou o painel para liberar seu e-mail.
               </p>
             </>
           )}
+        </div>
+      </section>
+
+      <section className="hidden flex-col justify-center bg-bg-weak-50 p-12 lg:flex">
+        <div className="mx-auto w-full max-w-md">
+          <h2 className="text-title-h5 text-text-strong-950">Saiba como seus sites estão indo, sem precisar ser especialista.</h2>
+          <ul className="mt-8 space-y-3">
+            {FEATURES.map(({ icon: Icon, title, text }) => (
+              <li key={title} className="flex gap-4 rounded-2xl bg-bg-white-0 p-4 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">
+                  <Icon className="size-5 text-text-sub-600" />
+                </span>
+                <span>
+                  <span className="block text-label-sm text-text-strong-950">{title}</span>
+                  <span className="mt-0.5 block text-paragraph-xs text-text-sub-600">{text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 text-paragraph-xs text-text-soft-400">Lighthouse via PageSpeed Insights</p>
         </div>
       </section>
     </main>

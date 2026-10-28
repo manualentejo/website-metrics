@@ -15,14 +15,14 @@ export default function SidebarUserFooter({
     <Link
       href="/perfil"
       aria-label="Abrir meu perfil"
-      className={`m-2 flex items-center gap-2.5 rounded-md p-2 transition-colors hover:bg-accent/60 ${active ? "bg-accent" : ""}`}
+      className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-bg-weak-50 ${active ? "bg-bg-weak-50" : ""}`}
     >
       <Avatar name={user.name} image={user.image} size={32} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-medium text-foreground">{user.name}</span>
-        <span className="block truncate text-[11px] text-muted-foreground">{user.email}</span>
+        <span className="block truncate text-label-sm text-text-strong-950">{user.name}</span>
+        <span className="block truncate text-paragraph-xs text-text-sub-600">{user.email}</span>
       </span>
-      <RiExpandUpDownLine className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+      <RiExpandUpDownLine className="size-5 flex-shrink-0 text-text-sub-600" />
     </Link>
   );
 }

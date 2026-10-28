@@ -112,10 +112,10 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
         }
       >
         {confirming ? (
-          <div className="space-y-2 text-[13px] text-muted-foreground">
+          <div className="space-y-2 text-paragraph-sm text-text-sub-600">
             <p>Isso apaga o site do painel, com todas as notas, o histórico e as visitas registradas. Não dá para desfazer.</p>
             <p>O site na internet não é afetado.</p>
-            {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+            {error && <p role="alert" className="text-paragraph-xs text-error-base">{error}</p>}
           </div>
         ) : (
           <div className="space-y-4">
@@ -137,8 +137,8 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
               </Select>
             </Field>
 
-            <details className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground">
-              <summary className="cursor-pointer font-medium text-foreground">Contar visitas (opcional)</summary>
+            <details className="rounded-md border border-stroke-soft-200 px-3 py-2 text-paragraph-xs text-text-sub-600">
+              <summary className="cursor-pointer font-medium text-text-strong-950">Contar visitas (opcional)</summary>
               <p className="mt-2">
                 Só funciona em sites que você pode editar: o código precisa ser colado no site. Em sites de clientes, não instale sem
                 autorização deles.
@@ -146,14 +146,14 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
               <div className="mt-2"><CopyBox text={snippet} /></div>
             </details>
 
-            {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+            {error && <p role="alert" className="text-paragraph-xs text-error-base">{error}</p>}
 
-            <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+            <div className="flex items-center justify-between gap-2 border-t border-stroke-soft-200 pt-3">
               <Button variant="outline" size="sm" onClick={reanalyze} disabled={busy !== null}>
                 <RiRefreshLine className="h-3.5 w-3.5" />
                 {busy === "analyze" ? "Analisando… (cerca de 1 min)" : "Analisar de novo"}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setConfirming(true)} className="text-destructive hover:text-destructive">
+              <Button variant="outline" size="sm" onClick={() => setConfirming(true)} className="text-error-base hover:text-error-base">
                 <RiDeleteBinLine className="h-3.5 w-3.5" />
                 Excluir site
               </Button>

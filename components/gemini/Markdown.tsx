@@ -7,8 +7,8 @@ function inline(text: string): ReactNode[] {
   let m: RegExpExecArray | null;
   while ((m = regex.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
-    if (m[1]) out.push(<strong key={m.index} className="font-semibold text-foreground">{m[1]}</strong>);
-    else out.push(<code key={m.index} className="rounded bg-secondary px-1 font-mono text-[12px]">{m[2]}</code>);
+    if (m[1]) out.push(<strong key={m.index} className="font-semibold text-text-strong-950">{m[1]}</strong>);
+    else out.push(<code key={m.index} className="rounded bg-bg-weak-50 px-1 font-mono text-[12px]">{m[2]}</code>);
     last = m.index + m[0].length;
   }
   if (last < text.length) out.push(text.slice(last));
@@ -50,9 +50,9 @@ export default function Markdown({ text }: { text: string }) {
     }
     flush();
     if (heading) {
-      blocks.push(<p key={blocks.length} className="pt-1 font-semibold text-foreground">{inline(heading[1])}</p>);
+      blocks.push(<p key={blocks.length} className="pt-1 font-semibold text-text-strong-950">{inline(heading[1])}</p>);
     } else if (line.trim() === "---") {
-      blocks.push(<hr key={blocks.length} className="border-border" />);
+      blocks.push(<hr key={blocks.length} className="border-stroke-soft-200" />);
     } else if (line.trim()) {
       blocks.push(<p key={blocks.length}>{inline(line)}</p>);
     }

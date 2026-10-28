@@ -15,7 +15,7 @@ export default function Select({
       <select className={`${selectClass} w-full ${className}`} {...props}>
         {children}
       </select>
-      <RiArrowDownSLine className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+      <RiArrowDownSLine className="pointer-events-none absolute right-2.5 top-1/2 size-5 -translate-y-1/2 text-text-sub-600" />
     </div>
   );
 }

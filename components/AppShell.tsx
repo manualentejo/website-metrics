@@ -34,7 +34,7 @@ export default async function AppShell({
   const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-bg-white-0">
       <Sidebar
         sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}
         folders={allFolders}
@@ -48,7 +48,7 @@ export default async function AppShell({
           image: profile.image ?? viewer.image ?? null,
         }}
       />
-      <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-lg border border-border bg-card">{children}</main>
+      <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-2xl bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">{children}</main>
       {aside}
     </div>
   );

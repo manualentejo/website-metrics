@@ -34,18 +34,18 @@ export default function AuditSection({
   const label = (
     <>
       {title}
-      <span className="ml-1.5 font-normal text-muted-foreground">({items.length})</span>
+      <span className="ml-1.5 font-normal text-text-sub-600">({items.length})</span>
     </>
   );
-  const labelClass = "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground";
+  const labelClass = "text-paragraph-xs font-semibold uppercase tracking-wider text-text-sub-600";
   const info = (infoTerm || infoText) && (
     <InfoTip term={infoTerm} title={infoText ? title : undefined} text={infoText} align="start" />
   );
 
   return (
-    <div className="border-t border-border first:border-t-0">
+    <div className="border-t border-stroke-soft-200 first:border-t-0">
       {collapsible ? (
-        <div className="flex items-center gap-1.5 px-6 py-3 hover:bg-secondary">
+        <div className="flex items-center gap-1.5 px-6 py-3 hover:bg-bg-weak-50">
           <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className={`text-left ${labelClass}`}>
             {label}
           </button>
@@ -54,7 +54,7 @@ export default function AuditSection({
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
-            className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            className="ml-auto flex items-center gap-1 text-paragraph-xs text-text-sub-600 hover:text-text-strong-950"
           >
             {open ? "Ocultar" : "Mostrar"}
             <RiArrowDownSLine className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -66,7 +66,7 @@ export default function AuditSection({
           {info}
         </div>
       )}
-      {description && open && !collapsible && <p className="px-6 pb-2 text-xs text-muted-foreground">{description}</p>}
+      {description && open && !collapsible && <p className="px-6 pb-2 text-paragraph-xs text-text-sub-600">{description}</p>}
       {open && (
         <ul>
           {items.map(({ id, audit }) => (

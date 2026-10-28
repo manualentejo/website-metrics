@@ -10,8 +10,8 @@ import { formatDateTime } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 function Score({ v }: { v: number | null }) {
-  if (v === null) return <span className="text-muted-foreground">—</span>;
-  const tone = v >= 90 ? "text-success" : v >= 50 ? "text-warning" : "text-destructive";
+  if (v === null) return <span className="text-text-sub-600">—</span>;
+  const tone = v >= 90 ? "text-success-base" : v >= 50 ? "text-warning-base" : "text-error-base";
   return <span className={`font-medium tabular-nums ${tone}`}>{Math.round(v)}</span>;
 }
 
@@ -40,9 +40,9 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
             }
           />
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-[13px]">
+            <table className="w-full min-w-[720px] text-left text-paragraph-sm">
               <thead>
-                <tr className="border-y border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-paragraph-xs font-medium uppercase tracking-wider text-text-sub-600">
                   <th className="px-5 py-2">Data</th>
                   <th className="px-3 py-2">Site</th>
                   <th className="px-3 py-2">Desempenho</th>
@@ -54,10 +54,10 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40">
-                    <td className="px-5 py-2.5 text-muted-foreground">{formatDateTime(r.ranAt)}</td>
+                  <tr key={r.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
+                    <td className="px-5 py-2.5 text-text-sub-600">{formatDateTime(r.ranAt)}</td>
                     <td className="px-3 py-2.5">
-                      <Link href={`/site/${r.siteId}?strategy=${strategy}`} className="font-medium text-foreground hover:underline">
+                      <Link href={`/site/${r.siteId}?strategy=${strategy}`} className="font-medium text-text-strong-950 hover:underline">
                         {r.site.name}
                       </Link>
                     </td>
@@ -65,7 +65,7 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
                     <td className="px-3 py-2.5"><Score v={r.accessibilityScore} /></td>
                     <td className="px-3 py-2.5"><Score v={r.bestPracticesScore} /></td>
                     <td className="px-3 py-2.5"><Score v={r.seoScore} /></td>
-                    <td className="px-5 py-2.5 text-right tabular-nums text-muted-foreground">
+                    <td className="px-5 py-2.5 text-right tabular-nums text-text-sub-600">
                       {r.lcpMs === null ? "—" : `${(r.lcpMs / 1000).toFixed(1)} s`}
                     </td>
                   </tr>

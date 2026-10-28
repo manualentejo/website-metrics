@@ -8,7 +8,7 @@ export default function Avatar({ name, image, size = 32 }: { name: string; image
   return (
     <span
       style={style}
-      className="flex flex-shrink-0 items-center justify-center rounded-full bg-primary font-semibold uppercase text-primary-foreground"
+      className="flex flex-shrink-0 items-center justify-center rounded-full bg-bg-strong-950 font-medium uppercase text-text-white-0"
     >
       {name[0] ?? "?"}
     </span>

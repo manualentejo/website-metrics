@@ -12,10 +12,10 @@ import { inputClass } from "@/components/ui/fields";
 
 function Row({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-3 border-b border-border px-5 py-4 last:border-b-0 md:grid-cols-[1fr_340px] md:gap-8">
+    <div className="grid gap-3 border-b border-stroke-soft-200 px-5 py-4 last:border-b-0 md:grid-cols-[1fr_340px] md:gap-8">
       <div>
-        <p className="text-[13px] font-medium text-foreground">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+        <p className="text-paragraph-sm font-medium text-text-strong-950">{title}</p>
+        <p className="mt-0.5 text-paragraph-xs text-text-sub-600">{description}</p>
       </div>
       <div>{children}</div>
     </div>
@@ -108,7 +108,7 @@ export default function ProfileForm({
           </div>
         </Row>
         <Row title="E-mail" description="Vem da sua conta Google e não pode ser alterado aqui.">
-          <input value={email} readOnly className={`${inputClass} w-full bg-secondary text-muted-foreground`} />
+          <input value={email} readOnly className={`${inputClass} w-full bg-bg-weak-50 text-text-sub-600`} />
         </Row>
         <Row title="Sessão" description="Sai deste dispositivo. Você entra de novo com a conta Google.">
           <Button variant="outline" size="sm" onClick={() => signOut({ callbackUrl: "/login" })}>
@@ -119,7 +119,7 @@ export default function ProfileForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        {msg && <p role="status" className="text-xs text-muted-foreground">{msg}</p>}
+        {msg && <p role="status" className="text-paragraph-xs text-text-sub-600">{msg}</p>}
         <Button
           variant="outline"
           disabled={!dirty || saving}

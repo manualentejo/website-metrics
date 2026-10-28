@@ -91,24 +91,24 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
         role="dialog"
         aria-modal="true"
         aria-label="Pergunte ao Gemini"
-        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-card shadow-2xl transition-transform duration-200 ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-stroke-soft-200 bg-bg-white-0 shadow-2xl transition-transform duration-200 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="flex items-center justify-between border-b border-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-stroke-soft-200 px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-strong-950 text-text-white-0">
               <RiSparklingLine className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-foreground">Pergunte ao Gemini</p>
-              <p className="text-xs text-muted-foreground">Sobre os dados de {siteName}</p>
+              <p className="text-sm font-semibold text-text-strong-950">Pergunte ao Gemini</p>
+              <p className="text-paragraph-xs text-text-sub-600">Sobre os dados de {siteName}</p>
             </div>
           </div>
           <button
             onClick={() => setOpen(false)}
             aria-label="Fechar"
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground/80"
+            className="rounded-md p-1.5 text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950/80"
           >
             <RiCloseLine className="h-4 w-4" />
           </button>
@@ -117,7 +117,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
           {messages.length === 0 && (
             <div className="space-y-4">
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-relaxed text-text-sub-600">
                 A IA lê o histórico e a análise completa do Lighthouse deste site e responde em linguagem simples,
                 com soluções pensadas para sites feitos no Framer.
               </p>
@@ -126,7 +126,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
                   <button
                     key={s}
                     onClick={() => send(s)}
-                    className="rounded-lg border border-border px-3 py-2 text-left text-sm text-foreground/80 transition-colors hover:bg-secondary"
+                    className="rounded-lg border border-stroke-soft-200 px-3 py-2 text-left text-sm text-text-strong-950/80 transition-colors hover:bg-bg-weak-50"
                   >
                     {s}
                   </button>
@@ -137,17 +137,17 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
 
           {messages.map((m, i) =>
             m.role === "user" ? (
-              <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-3.5 py-2 text-sm text-primary-foreground">
+              <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bg-strong-950 px-3.5 py-2 text-sm text-text-white-0">
                 {m.text}
               </div>
             ) : (
-              <div key={i} className="max-w-[95%] rounded-2xl rounded-bl-md bg-secondary px-4 py-3 text-sm leading-relaxed text-foreground/80">
+              <div key={i} className="max-w-[95%] rounded-2xl rounded-bl-md bg-bg-weak-50 px-4 py-3 text-sm leading-relaxed text-text-strong-950/80">
                 <Markdown text={m.text} />
               </div>
             )
           )}
           {loading && (
-            <div className="flex w-fit items-center gap-1 rounded-2xl bg-secondary px-4 py-3" aria-label="Gemini está escrevendo">
+            <div className="flex w-fit items-center gap-1 rounded-2xl bg-bg-weak-50 px-4 py-3" aria-label="Gemini está escrevendo">
               {[0, 150, 300].map((d) => (
                 <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: `${d}ms` }} />
               ))}
@@ -161,9 +161,9 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
             e.preventDefault();
             if (!loading) send(input);
           }}
-          className="border-t border-border p-4"
+          className="border-t border-stroke-soft-200 p-4"
         >
-          <div className="flex items-end gap-2 rounded-xl border border-border bg-card p-2 focus-within:border-ring">
+          <div className="flex items-end gap-2 rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-2 focus-within:border-ring">
             <textarea
               ref={inputRef}
               value={input}
@@ -176,18 +176,18 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
                 }
               }}
               placeholder="Pergunte algo sobre este site…"
-              className="max-h-32 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-muted-foreground"
+              className="max-h-32 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-text-sub-600"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Enviar pergunta"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-30"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-strong-950 text-text-white-0 transition-opacity disabled:opacity-30"
             >
               <RiArrowUpLine className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">A IA pode errar. Confira antes de aplicar mudanças.</p>
+          <p className="mt-2 text-center text-paragraph-xs text-text-sub-600">A IA pode errar. Confira antes de aplicar mudanças.</p>
         </form>
       </aside>
     </>

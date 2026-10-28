@@ -50,7 +50,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             <Link href={`/relatorios?m=${prev}`} aria-label="Mês anterior" className={buttonClass("outline", "icon")}>
               <RiArrowLeftSLine className="h-4 w-4" />
             </Link>
-            <span className="w-36 text-center text-[13px] font-medium">{MONTHS[month - 1]} de {year}</span>
+            <span className="w-36 text-center text-paragraph-sm font-medium">{MONTHS[month - 1]} de {year}</span>
             <Link href={`/relatorios?m=${next}`} aria-label="Próximo mês" className={buttonClass("outline", "icon")}>
               <RiArrowRightSLine className="h-4 w-4" />
             </Link>
@@ -59,23 +59,23 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         width="max-w-5xl"
       >
         <Card className="overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-7 border-b border-stroke-soft-200 bg-bg-weak-50 text-paragraph-xs font-medium uppercase tracking-wider text-text-sub-600">
             {WEEKDAYS.map((w) => (
               <div key={w} className="px-3 py-2">{w}</div>
             ))}
           </div>
           <div className="grid grid-cols-7">
             {cells.map((day, i) => {
-              if (day === null) return <div key={i} className="min-h-24 border-b border-r border-border bg-secondary/30" />;
+              if (day === null) return <div key={i} className="min-h-24 border-b border-r border-stroke-soft-200 bg-bg-weak-50" />;
               const date = `${ym}-${String(day).padStart(2, "0")}`;
               const isReportDay = i % 7 === settings.weekday;
               const ready = isReportDay && date <= today && available(date);
               return (
                 <div
                   key={i}
-                  className={`flex min-h-24 flex-col gap-1.5 border-b border-r border-border p-2 ${date === today ? "bg-accent/50" : ""}`}
+                  className={`flex min-h-24 flex-col gap-1.5 border-b border-r border-stroke-soft-200 p-2 ${date === today ? "bg-bg-weak-50/50" : ""}`}
                 >
-                  <span className={`text-xs tabular-nums ${date === today ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{day}</span>
+                  <span className={`text-paragraph-xs tabular-nums ${date === today ? "font-semibold text-text-strong-950" : "text-text-sub-600"}`}>{day}</span>
                   {isReportDay &&
                     (ready ? (
                       <a href={`/api/reports/pdf?date=${date}`} className={buttonClass("primary", "sm", "w-full")}>
@@ -84,7 +84,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                       </a>
                     ) : date > today ? (
                       <>
-                        <span className="text-[11px] text-muted-foreground">Agendado</span>
+                        <span className="text-paragraph-xs text-text-sub-600">Agendado</span>
                         {available(today) && new Date(date).getTime() - new Date(today).getTime() <= 7 * DAY && (
                           <a href={`/api/reports/pdf?date=${today}`} className={buttonClass("outline", "sm", "w-full")}>
                             <RiDownloadLine className="h-3.5 w-3.5" />
@@ -93,14 +93,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                         )}
                       </>
                     ) : (
-                      <span className="text-[11px] text-muted-foreground">Sem dados</span>
+                      <span className="text-paragraph-xs text-text-sub-600">Sem dados</span>
                     ))}
                 </div>
               );
             })}
           </div>
         </Card>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-paragraph-xs text-text-sub-600">
           O PDF traz as notas de cada site (computador primeiro, depois celular), a mudança desde a análise anterior e o que fazer no Framer para cada ponto ruim ou que pode melhorar.
         </p>
       </Page>

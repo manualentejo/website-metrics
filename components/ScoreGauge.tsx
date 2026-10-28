@@ -1,8 +1,8 @@
 function colorFor(score: number | null) {
-  if (score === null) return { stroke: "hsl(0 0% 80%)", text: "text-muted-foreground" };
-  if (score >= 90) return { stroke: "hsl(152 55% 36%)", text: "text-foreground" };
-  if (score >= 50) return { stroke: "hsl(36 90% 44%)", text: "text-foreground" };
-  return { stroke: "hsl(0 68% 50%)", text: "text-foreground" };
+  if (score === null) return { stroke: "#d1d1d1", text: "text-text-soft-400" };
+  if (score >= 90) return { stroke: "#1fc16b", text: "text-text-strong-950" };
+  if (score >= 50) return { stroke: "#ff8447", text: "text-text-strong-950" };
+  return { stroke: "#fb3748", text: "text-text-strong-950" };
 }
 
 // Anel de nota. O número escala com o tamanho do anel para nunca encostar na borda.
@@ -26,7 +26,7 @@ export default function ScoreGauge({
     <div className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(0 0% 91%)" strokeWidth={sw} />
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#ebebeb" strokeWidth={sw} />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -45,7 +45,7 @@ export default function ScoreGauge({
           {score === null ? "—" : Math.round(score)}
         </div>
       </div>
-      {label && <span className="text-center text-[13px] text-muted-foreground">{label}</span>}
+      {label && <span className="text-center text-paragraph-sm text-text-sub-600">{label}</span>}
     </div>
   );
 }

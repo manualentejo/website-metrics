@@ -12,12 +12,12 @@ const METRIC_IDS = [
 ];
 
 const VALUE_COLOR = {
-  fail: "text-destructive",
-  average: "text-warning",
-  pass: "text-success",
-  info: "text-foreground/80",
-  manual: "text-foreground/80",
-  na: "text-foreground/80",
+  fail: "text-error-base",
+  average: "text-warning-base",
+  pass: "text-success-base",
+  info: "text-text-strong-950/80",
+  manual: "text-text-strong-950/80",
+  na: "text-text-strong-950/80",
 };
 
 export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
@@ -30,14 +30,14 @@ export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
         const status = auditStatus(audit);
         const ref = analysis.categories.performance.auditRefs.find((r) => r.id === id);
         return (
-          <div key={id} className="flex gap-3 bg-card px-6 py-4">
+          <div key={id} className="flex gap-3 bg-bg-white-0 px-6 py-4">
             <span className="mt-1.5">
               <StatusIcon status={status} />
             </span>
             <div>
-              <p className="flex items-center gap-1.5 text-sm text-foreground/80">
+              <p className="flex items-center gap-1.5 text-sm text-text-strong-950/80">
                 {audit.title}
-                {ref?.acronym && <span className="text-xs text-muted-foreground">({ref.acronym})</span>}
+                {ref?.acronym && <span className="text-paragraph-xs text-text-sub-600">({ref.acronym})</span>}
                 <InfoTip term={id} align="start" />
               </p>
               <p className={`mt-0.5 text-2xl font-semibold tracking-tight ${VALUE_COLOR[status]}`}>
@@ -47,7 +47,7 @@ export default function MetricsPanel({ analysis }: { analysis: Analysis }) {
           </div>
         );
       })}
-      {metrics.length % 2 === 1 && <div className="hidden bg-card sm:block" />}
+      {metrics.length % 2 === 1 && <div className="hidden bg-bg-white-0 sm:block" />}
     </div>
   );
 }

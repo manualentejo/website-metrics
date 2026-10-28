@@ -53,9 +53,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             }
           />
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-[13px]">
+            <table className="w-full min-w-[680px] text-left text-paragraph-sm">
               <thead>
-                <tr className="border-y border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-paragraph-xs font-medium uppercase tracking-wider text-text-sub-600">
                   <th className="px-5 py-2">#</th>
                   <th className="px-3 py-2">Site</th>
                   {COLS.map((c) => (
@@ -66,10 +66,10 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               </thead>
               <tbody>
                 {rows.map((x, i) => (
-                  <tr key={x.site.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40">
-                    <td className="px-5 py-2.5 tabular-nums text-muted-foreground">{i + 1}</td>
+                  <tr key={x.site.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
+                    <td className="px-5 py-2.5 tabular-nums text-text-sub-600">{i + 1}</td>
                     <td className="px-3 py-2.5">
-                      <Link href={`/site/${x.site.id}?strategy=${strategy}`} className="font-medium text-foreground hover:underline">
+                      <Link href={`/site/${x.site.id}?strategy=${strategy}`} className="font-medium text-text-strong-950 hover:underline">
                         {x.site.name}
                       </Link>
                     </td>
@@ -78,7 +78,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                       const isBest = v !== null && v === best[c.key] && rows.length > 1;
                       return (
                         <td key={c.key} className="px-3 py-2.5 tabular-nums">
-                          <span className={isBest ? "rounded-sm bg-success/10 px-1.5 py-0.5 font-medium text-success" : "text-foreground"}>
+                          <span className={isBest ? "rounded-sm bg-success-base-lighter px-1.5 py-0.5 font-medium text-success-base" : "text-text-strong-950"}>
                             {v === null ? "—" : Math.round(v)}
                           </span>
                         </td>
@@ -95,7 +95,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               </div>
             )}
           </div>
-          <p className="border-t border-border px-5 py-2.5 text-xs text-muted-foreground">
+          <p className="border-t border-stroke-soft-200 px-5 py-2.5 text-paragraph-xs text-text-sub-600">
             Em verde, a melhor nota de cada categoria.
           </p>
         </Card>
