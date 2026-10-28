@@ -33,7 +33,7 @@ export default function IssueList({ issues, showSite = true }: { issues: Alert[]
                   {a.title}
                 </span>
                 <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-paragraph-xs text-text-sub-600">
-                  <span>{a.category}</span>
+                  <span>{a.category} · {a.strategy === "mobile" ? "celular" : "computador"}</span>
                   <span aria-hidden>·</span>
                   <span>Detectado em {formatDateTime(a.at).split(",")[0]}</span>
                   <span aria-hidden>·</span>
