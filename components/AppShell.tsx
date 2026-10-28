@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites, folders } from "@/db/schema";
+import SidebarFrame from "./SidebarFrame";
 import Sidebar, { type NavKey } from "./Sidebar";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { getProfile } from "@/lib/profile";
@@ -34,7 +35,8 @@ export default async function AppShell({
   const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
 
   return (
-    <div className="flex h-screen bg-bg-white-0">
+    <SidebarFrame
+      sidebar={
       <Sidebar
         sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}
         folders={allFolders}
@@ -48,8 +50,10 @@ export default async function AppShell({
           image: profile.image ?? viewer.image ?? null,
         }}
       />
-      <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-2xl bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">{children}</main>
+      }
+    >
+      <main className="min-h-0 flex-1 overflow-y-auto bg-bg-weak-50 lg:my-2 lg:mr-2 lg:rounded-2xl ring-stroke-soft-200 lg:ring-1 lg:ring-inset">{children}</main>
       {aside}
-    </div>
+    </SidebarFrame>
   );
 }

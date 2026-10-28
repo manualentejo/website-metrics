@@ -39,6 +39,8 @@ export default function AnalysisView({
   history,
   siteName,
   strategyLabel,
+  categories = ["performance", "accessibility", "best-practices", "seo"],
+  showHistory = true,
 }: {
   analysis: Analysis;
   finalScreenshot: string | null;
@@ -46,19 +48,22 @@ export default function AnalysisView({
   history: ReportRow[];
   siteName: string;
   strategyLabel: string;
+  categories?: CategoryKey[];
+  showHistory?: boolean;
 }) {
-  const [tab, setTab] = useState<CategoryKey>("performance");
+  const [tab, setTab] = useState<CategoryKey>(categories[0]);
   const common = { siteName, strategyLabel };
 
   return (
     <div className="space-y-6">
-      <Card>
+      {categories.length > 1 && <Card>
         <div
           role="tablist"
           aria-label="Categorias da análise"
-          className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-4"
+          className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+          style={{ ["--cols" as string]: categories.length }}
         >
-          {(["performance", "accessibility", "best-practices", "seo"] as CategoryKey[]).map((key) => (
+          {categories.map((key) => (
             <button
               key={key}
               type="button"
@@ -77,7 +82,7 @@ export default function AnalysisView({
             </button>
           ))}
         </div>
-      </Card>
+      </Card>}
 
       {tab === "performance" && <FieldDataCard field={analysis.field} />}
 
@@ -87,7 +92,7 @@ export default function AnalysisView({
         <CategoryTab key={tab} analysis={analysis} category={tab} {...common} />
       )}
 
-      <Card>
+      {showHistory && <Card>
         <CardHeader
           title="Evolução das notas"
           description="Uma análise por semana, mantendo até 52 semanas."
@@ -101,7 +106,7 @@ export default function AnalysisView({
         <div className="px-6 pb-6 pt-4">
           <ScoreChart reports={history} />
         </div>
-      </Card>
+      </Card>}
     </div>
   );
 }

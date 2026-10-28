@@ -15,13 +15,15 @@ export interface Alert {
   title: string;
   detail: string;
   at: Date;
+  category: "SEO" | "Performance" | "Acessibilidade" | "Boas práticas";
+  href: string;
 }
 
 const CATEGORIES = [
-  { key: "performanceScore", label: "Desempenho" },
-  { key: "accessibilityScore", label: "Acessibilidade" },
-  { key: "bestPracticesScore", label: "Boas práticas" },
-  { key: "seoScore", label: "SEO" },
+  { key: "performanceScore", label: "Desempenho", category: "Performance", tab: "performance" },
+  { key: "accessibilityScore", label: "Acessibilidade", category: "Acessibilidade", tab: "performance" },
+  { key: "bestPracticesScore", label: "Boas práticas", category: "Boas práticas", tab: "performance" },
+  { key: "seoScore", label: "SEO", category: "SEO", tab: "seo" },
 ] as const;
 
 export async function visibleSites(viewer: Viewer) {
@@ -54,15 +56,18 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
       const [now, before] = log.filter((r) => r.siteId === site.id && r.strategy === strategy);
       if (!now) continue;
       const base = { siteId: site.id, siteName: site.name, strategy, at: now.ranAt };
+      const hrefFor = (tab: string) => `/site/${site.id}/${tab}?strategy=${strategy}&from=overview`;
       const device = strategy === "mobile" ? "celular" : "computador";
 
       for (const c of CATEGORIES) {
+        const extra = { category: c.category, href: hrefFor(c.tab) };
         const cur = now[c.key];
         const prev = before?.[c.key];
         if (cur === null) continue;
         if (typeof prev === "number" && cur - prev <= -5) {
           alerts.push({
             ...base,
+            ...extra,
             severity: prev - cur >= 15 ? "critical" : "warning",
             title: `${c.label} caiu ${Math.round(prev - cur)} pontos`,
             detail: `De ${Math.round(prev)} para ${Math.round(cur)} no ${device}.`,
@@ -70,6 +75,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
         } else if (typeof prev === "number" && cur - prev >= 5) {
           alerts.push({
             ...base,
+            ...extra,
             severity: "good",
             title: `${c.label} subiu ${Math.round(cur - prev)} pontos`,
             detail: `De ${Math.round(prev)} para ${Math.round(cur)} no ${device}.`,
@@ -78,6 +84,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
         if (cur < 50) {
           alerts.push({
             ...base,
+            ...extra,
             severity: "critical",
             title: `${c.label} abaixo de 50`,
             detail: `Nota ${Math.round(cur)} no ${device}. Veja o que corrigir na análise do site.`,
@@ -87,6 +94,8 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
       if (now.lcpMs !== null && now.lcpMs > 4000) {
         alerts.push({
           ...base,
+          category: "Performance",
+          href: hrefFor("performance"),
           severity: "warning",
           title: "Carregamento do conteúdo principal lento (LCP)",
           detail: `${(now.lcpMs / 1000).toFixed(1)} s no ${device}; o ideal é abaixo de 2,5 s.`,

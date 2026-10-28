@@ -1,14 +1,12 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { RiArrowLeftLine } from "@remixicon/react";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites } from "@/db/schema";
-import AppShell from "@/components/AppShell";
+import SiteWorkspace from "@/components/site/SiteWorkspace";
 import CopyBox from "@/components/CopyBox";
 import { Card } from "@/components/ui/Card";
-import { Page, Segmented } from "@/components/ui/Page";
+import { Segmented } from "@/components/ui/Page";
 import { canViewSite, getAccessibleSiteIds, getViewer } from "@/lib/access";
 import { loadAnalytics } from "@/lib/analytics";
 
@@ -134,25 +132,14 @@ export default async function SiteAnalyticsPage({
   ];
 
   return (
-    <AppShell activeSiteId={id}>
-      <Page
-        width="max-w-5xl"
-        title={
-          <span className="flex items-center gap-2">
-            <Link href={`/site/${id}`} aria-label="Voltar à análise" className="text-text-sub-600 hover:text-text-strong-950">
-              <RiArrowLeftLine className="h-4 w-4" />
-            </Link>
-            Visitas
-          </span>
-        }
-        subtitle={`${site.name} · contagem própria, sem cookies.`}
-        actions={
-          <Segmented
-            label="Período"
-            items={PERIODS.map((x) => ({ label: x.label, href: `/site/${id}/analytics?p=${x.value}`, active: period === x.value }))}
-          />
-        }
-      >
+    <SiteWorkspace siteId={id} tab="analytics">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-paragraph-xs text-text-sub-600">Contagem própria, sem cookies. Só existe em sites com o código instalado.</p>
+        <Segmented
+          label="Período"
+          items={PERIODS.map((x) => ({ label: x.label, href: `/site/${id}/analytics?p=${x.value}`, active: period === x.value }))}
+        />
+      </div>
         {loadError && (
           <Card className="border-error-base/40 p-4 text-paragraph-sm">
             <p className="font-medium text-error-base">Não foi possível carregar as visitas.</p>
@@ -225,7 +212,6 @@ export default async function SiteAnalyticsPage({
             <div className="mt-2"><CopyBox text={snippet} /></div>
           </details>
         )}
-      </Page>
-    </AppShell>
+    </SiteWorkspace>
   );
 }

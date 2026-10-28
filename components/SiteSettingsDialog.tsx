@@ -40,7 +40,7 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
     setName(site.name);
     setUrl(bare(site.url));
     setFolderId(site.folderId ?? "");
-    if (defaultOpen) router.replace(`/site/${site.id}`);
+    if (defaultOpen) router.replace(`/site/${site.id}/settings`);
   }
 
   async function save() {

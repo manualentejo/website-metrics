@@ -40,7 +40,7 @@ export default async function AlertsPage() {
               return (
                 <Link
                   key={i}
-                  href={`/site/${a.siteId}?strategy=${a.strategy}`}
+                  href={a.href}
                   className="flex items-start gap-3 px-5 py-3 hover:bg-bg-weak-50"
                 >
                   <m.icon className={`mt-0.5 h-4 w-4 flex-shrink-0 ${m.color}`} />

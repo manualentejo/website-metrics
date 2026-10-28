@@ -16,7 +16,7 @@ export function Page({
   width?: string;
 }) {
   return (
-    <div className={`mx-auto space-y-6 px-8 py-8 ${width}`}>
+    <div className={`mx-auto space-y-6 px-4 py-6 sm:px-8 sm:py-8 ${width}`}>
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-title-h6 text-text-strong-950">{title}</h1>
@@ -33,24 +33,29 @@ export function Page({
 export function Segmented({
   items,
   label,
+  onSelect,
 }: {
   items: { href: string; label: string; active: boolean }[];
   label: string;
+  /** Para uso em componentes cliente: troca o estado em vez de navegar. */
+  onSelect?: (index: number) => void;
 }) {
   return (
     <nav aria-label={label} className="inline-flex items-center gap-1 rounded-10 bg-bg-weak-50 p-1">
-      {items.map((i) => (
-        <Link
-          key={i.label}
-          href={i.href}
-          aria-current={i.active ? "page" : undefined}
-          className={`inline-flex h-7 items-center whitespace-nowrap rounded-md px-3 text-label-sm transition duration-300 ${
-            i.active ? "bg-bg-white-0 text-text-strong-950 shadow-toggle-switch" : "text-text-soft-400 hover:text-text-strong-950"
-          }`}
-        >
-          {i.label}
-        </Link>
-      ))}
+      {items.map((i, idx) => {
+        const cls = `inline-flex h-7 items-center whitespace-nowrap rounded-md px-3 text-label-sm transition duration-300 ${
+          i.active ? "bg-bg-white-0 text-text-strong-950 shadow-toggle-switch" : "text-text-soft-400 hover:text-text-strong-950"
+        }`;
+        return onSelect ? (
+          <button key={i.label} type="button" aria-pressed={i.active} onClick={() => onSelect(idx)} className={cls}>
+            {i.label}
+          </button>
+        ) : (
+          <Link key={i.label} href={i.href} aria-current={i.active ? "page" : undefined} className={cls}>
+            {i.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

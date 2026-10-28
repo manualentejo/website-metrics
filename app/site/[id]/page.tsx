@@ -1,184 +1,172 @@
-import { RiExternalLinkLine, RiArrowRightSLine, RiBarChartLine } from "@remixicon/react";
-import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-
-import { db } from "@/db/client";
-import { sites, reports, snapshots, folders, siteAccess } from "@/db/schema";
-import { and, asc, eq } from "drizzle-orm";
-import AppShell from "@/components/AppShell";
-import ScoreGauge from "@/components/ScoreGauge";
-import StatusSelect from "@/components/StatusSelect";
-import SharingPanel from "@/components/SharingPanel";
-import AnalysisView from "@/components/analysis/AnalysisView";
-import AskGeminiButton from "@/components/gemini/AskGeminiButton";
-import GeminiDrawer from "@/components/gemini/GeminiDrawer";
-import InfoTip from "@/components/ui/InfoTip";
-import { Card } from "@/components/ui/Card";
-import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
-import { formatDateTime } from "@/lib/format";
+import { redirect } from "next/navigation";
+import SiteWorkspace, { requireSite } from "@/components/site/SiteWorkspace";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { Segmented } from "@/components/ui/Page";
-import SiteSettingsDialog from "@/components/SiteSettingsDialog";
-import { hasVisits } from "@/lib/analytics";
-import { headers } from "next/headers";
+import MetricCard from "@/components/charts/MetricCard";
+import TrendIndicator from "@/components/charts/TrendIndicator";
+import TimeSeriesChart from "@/components/charts/TimeSeriesChart";
+import ChartEmptyState from "@/components/charts/ChartEmptyState";
+import IssueList from "@/components/overview/IssueList";
+import ActivityFeed from "@/components/overview/ActivityFeed";
+import AIInsightsPanel from "@/components/overview/AIInsightsPanel";
+import { loadFixQueue } from "@/lib/insights";
+import { PERIODS, loadPortfolio, lastValue, type Period } from "@/lib/portfolio";
 import { buttonClass } from "@/components/ui/Button";
-import type { ReportRow, Status, Strategy } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function SiteDetailPage({
+// Visão geral de UM site: o mesmo motor de dados do Overview global, filtrado para este site.
+export default async function SiteOverviewPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ strategy?: string; status?: string; config?: string }>;
+  searchParams: Promise<{ strategy?: string; config?: string; d?: string }>;
 }) {
   const { id } = await params;
-  const { strategy: strategyParam, status: statusFilter, config } = await searchParams;
-  const strategy: Strategy = strategyParam === "mobile" ? "mobile" : "desktop";
-  const strategyLabel = strategy === "mobile" ? "celular" : "computador";
+  const sp = await searchParams;
 
-  const viewer = await getViewer();
-  if (!viewer) redirect("/login");
+  // Links antigos (/site/ID?strategy=… e ?config=1) continuam funcionando.
+  if (sp.config) redirect(`/site/${id}/settings?config=1`);
+  if (sp.strategy) redirect(`/site/${id}/performance?strategy=${sp.strategy === "mobile" ? "mobile" : "desktop"}`);
 
-  const accessibleSiteIds = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
-
-  const [allSites, allFolders] = await Promise.all([
-    db.select().from(sites).orderBy(asc(sites.sortOrder)),
-    db.select().from(folders).orderBy(asc(folders.sortOrder)),
-  ]);
-  const site = allSites.find((s) => s.id === id);
-  if (!site || !canViewSite(viewer, site, accessibleSiteIds, site.id)) notFound();
-
-  const visibleSites = allSites.filter((s) => canViewSite(viewer, s, accessibleSiteIds, s.id));
-  const folder = allFolders.find((f) => f.id === site.folderId);
-
-  const [history, [snapshot], accessRows] = await Promise.all([
-    db
-      .select()
-      .from(reports)
-      .where(and(eq(reports.siteId, id), eq(reports.strategy, strategy)))
-      .orderBy(asc(reports.ranAt))
-      .limit(104),
-    db.select().from(snapshots).where(and(eq(snapshots.siteId, id), eq(snapshots.strategy, strategy))),
-    viewer.owner ? db.select().from(siteAccess).where(eq(siteAccess.siteId, id)) : Promise.resolve([]),
-  ]);
-
-  const validHistory = history.filter((r) => !r.error);
-  const latest = validHistory[validHistory.length - 1];
-  const analysis = snapshot?.analysis ?? null;
-  const analyzedAt = analysis?.meta.fetchTime ?? latest?.ranAt;
-
-  const visitsOn = await hasVisits(id);
-  const host = (await headers()).get("x-forwarded-host") ?? (await headers()).get("host") ?? "";
-  const snippet = `<script defer src="https://${host}/t.js" data-site="${id}"></script>`;
-
-  const strategyHref = (s: Strategy) => `/site/${id}?strategy=${s}${statusFilter ? `&status=${statusFilter}` : ""}`;
+  const days = (PERIODS.find((p) => String(p) === sp.d) ?? 28) as Period;
+  const { viewer, site } = await requireSite(id);
+  const [p, fixes] = await Promise.all([loadPortfolio(viewer, { days, siteIds: [id] }), loadFixQueue(viewer)]);
+  const row = p.rows[0];
+  const opportunities = fixes.filter((f) => f.siteId === id).slice(0, 5);
+  const perfNow = lastValue(p.series.performance.current);
+  const perfPrev = lastValue(p.series.performance.previous);
+  const period = (d: number) => ({ label: `${d} dias`, href: d === 28 ? `/site/${id}` : `/site/${id}?d=${d}`, active: days === d });
 
   return (
-    <AppShell activeSiteId={id} activeFolderId={undefined}>
-        <div className="mx-auto max-w-5xl px-8 py-6">
-          <nav aria-label="Caminho" className="mb-4 flex items-center gap-1 text-paragraph-xs text-text-sub-600">
-            <Link href="/sites" className="hover:text-text-strong-950/80">Sites</Link>
-            {folder && (
-              <>
-                <RiArrowRightSLine className="h-3 w-3" />
-                <span>{folder.name}</span>
-              </>
+    <SiteWorkspace siteId={id} tab="overview">
+      <div className="flex justify-end">
+        <Segmented label="Período" items={PERIODS.map(period)} />
+      </div>
+
+      <section aria-label="Indicadores do site" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <MetricCard
+          label="Saúde de SEO"
+          href={`/site/${id}/seo`}
+          value={p.kpi.seo === null ? "—" : Math.round(p.kpi.seo)}
+          trend={<TrendIndicator current={p.kpi.seo} delta={p.kpi.seoDelta} suffix={`vs ${days} dias antes`} />}
+          spark={p.kpi.seoSpark}
+          hint="Lighthouse · computador"
+          info={{ title: "Saúde de SEO", text: "Nota de SEO técnico do Lighthouse (0–100), medida em laboratório. Não é posição no Google." }}
+        />
+        <MetricCard
+          label="Desempenho"
+          href={`/site/${id}/performance`}
+          value={perfNow === null ? "—" : Math.round(perfNow)}
+          trend={<TrendIndicator current={perfNow} previous={perfPrev} suffix={`vs ${days} dias antes`} />}
+          spark={p.series.performance.current.map((x) => x.value)}
+          hint="Lighthouse · computador"
+          info={{ title: "Desempenho", text: "Nota de velocidade do Lighthouse (0–100) em ambiente de teste, não a experiência medida em usuários reais." }}
+        />
+        <MetricCard
+          label="Visitas"
+          href={`/site/${id}/analytics`}
+          connected={!!p.series.visits}
+          value={row?.visits?.toLocaleString("pt-BR")}
+          trend={
+            p.series.visits ? (
+              <TrendIndicator
+                unit="count"
+                current={p.series.visits.current.reduce((a, b) => a + (b.value ?? 0), 0)}
+                previous={p.series.visits.previous.reduce((a, b) => a + (b.value ?? 0), 0)}
+                suffix={`vs ${days} dias antes`}
+              />
+            ) : undefined
+          }
+          spark={p.series.visits?.current.map((x) => x.value)}
+          hint="Contagem própria, sem cookies"
+          setupText="Sem código de rastreio neste site. Instale em Configurações, só se você puder editar o site."
+          info={{ title: "Visitas", text: "Visualizações de página contadas pelo código de rastreio próprio. Só existe em sites onde o código foi instalado." }}
+        />
+        <MetricCard
+          label="Problemas críticos"
+          href="/alertas"
+          value={p.kpi.critical}
+          trend={<TrendIndicator current={p.kpi.critical} delta={null} goodWhen="down" />}
+          hint={`${p.kpi.problems} alertas abertos`}
+          info={{ title: "Problemas críticos", text: "Notas abaixo de 50 ou quedas de 15 pontos ou mais desde a auditoria anterior. Menos é melhor." }}
+        />
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="Evolução de SEO" description={`${days} dias contra os ${days} anteriores.`} />
+          <div className="p-5"><TimeSeriesChart current={p.series.seo.current} previous={p.series.seo.previous} unit="score" label="SEO" height={220} /></div>
+        </Card>
+        <Card>
+          <CardHeader title="Evolução de desempenho" description={`${days} dias contra os ${days} anteriores.`} />
+          <div className="p-5"><TimeSeriesChart current={p.series.performance.current} previous={p.series.performance.previous} unit="score" label="Desempenho" height={220} /></div>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="Tráfego orgânico" description="Cliques e impressões do Google Search Console." />
+          <div className="p-5">
+            <ChartEmptyState kind="setup" title="Search Console não conectado" className="h-44">
+              Sem a integração, nenhum número de tráfego orgânico é exibido. As visitas próprias aparecem na aba Visitas.
+            </ChartEmptyState>
+          </div>
+        </Card>
+        <Card>
+          <CardHeader
+            title="Resumo GEO"
+            action={<Link href={`/site/${id}/geo`} className="text-label-xs text-text-strong-950 underline underline-offset-2">Abrir GEO</Link>}
+          />
+          <div className="p-5">
+            <ChartEmptyState kind="setup" title="Nenhum prompt monitorado" className="h-44">
+              AI Visibility só passa a existir depois que você cadastrar prompts para acompanhar.
+            </ChartEmptyState>
+          </div>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader title="Principais problemas" description="Abertos na última auditoria deste site." />
+        <div className="px-4 pb-3 pt-2 sm:px-5"><IssueList issues={p.attention} showSite={false} /></div>
+      </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader
+            title="Oportunidades"
+            description="Auditorias reprovadas que mais pesam na nota, no computador."
+            action={<Link href={`/site/${id}/performance`} className={buttonClass("ghost", "sm")}>Ver análise</Link>}
+          />
+          <div className="px-4 pb-3 pt-2 sm:px-5">
+            {opportunities.length === 0 ? (
+              <p className="py-4 text-paragraph-sm text-text-sub-600">Nada reprovado na análise detalhada atual.</p>
+            ) : (
+              <ul className="divide-y divide-stroke-soft-200">
+                {opportunities.map((o) => (
+                  <li key={o.auditId} className="py-2.5">
+                    <Link href={`/site/${id}/${o.auditId.includes("seo") || /canonical|meta|robots|hreflang|crawl|link-text|document-title|http-status/.test(o.auditId) ? "seo" : "performance"}`} className="block hover:underline">
+                      <span className="block text-label-sm text-text-strong-950">{o.title}</span>
+                      <span className="block text-paragraph-xs text-text-sub-600">{o.displayValue ?? o.plain ?? ""}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             )}
-            <RiArrowRightSLine className="h-3 w-3" />
-            <span className="text-text-sub-600">{site.name}</span>
-          </nav>
+          </div>
+        </Card>
+        <Card>
+          <CardHeader title="Atividade recente" />
+          <div className="px-3 pb-3 pt-2 sm:px-4"><ActivityFeed items={p.activity} showSite={false} /></div>
+        </Card>
+      </div>
 
-          <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight text-text-strong-950">{site.name}</h1>
-              <a
-                href={site.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 inline-flex items-center gap-1 text-sm text-text-sub-600 hover:text-text-strong-950"
-              >
-                {site.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                <RiExternalLinkLine className="h-3.5 w-3.5" />
-              </a>
-              {analyzedAt && (
-                <p className="mt-2 flex flex-wrap items-center gap-1.5 text-paragraph-xs text-text-sub-600">
-                  Analisado em {formatDateTime(analyzedAt)}
-                  {analysis?.meta.lighthouseVersion && <> · Lighthouse {analysis.meta.lighthouseVersion}</>}
-                  <InfoTip term="lab-data" align="start" />
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Segmented
-                label="Dispositivo"
-                items={(["desktop", "mobile"] as Strategy[]).map((x) => ({
-                  label: x === "mobile" ? "Celular" : "Computador",
-                  href: strategyHref(x),
-                  active: strategy === x,
-                }))}
-              />
-              <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!viewer.owner} />
-              {visitsOn && (
-                <Link href={`/site/${id}/analytics`} className={buttonClass("outline", "md")}>
-                  <RiBarChartLine className="h-4 w-4" />
-                  Visitas
-                </Link>
-              )}
-              {viewer.owner && (
-                <SiteSettingsDialog
-                  site={{ id: site.id, name: site.name, url: site.url, folderId: site.folderId }}
-                  folders={allFolders.map((f) => ({ id: f.id, name: f.name }))}
-                  snippet={snippet}
-                  defaultOpen={config === "1"}
-                />
-              )}
-              <AskGeminiButton />
-            </div>
-          </header>
-
-          {analysis ? (
-            <AnalysisView
-              analysis={analysis}
-              finalScreenshot={snapshot?.finalScreenshot ?? null}
-              thumbnails={snapshot?.thumbnails ?? []}
-              history={validHistory as unknown as ReportRow[]}
-              siteName={site.name}
-              strategyLabel={strategyLabel}
-            />
-          ) : latest ? (
-            <Card className="p-8">
-              <div className="flex flex-wrap justify-around gap-6">
-                <ScoreGauge score={latest.performanceScore} label="Desempenho" size={90} />
-                <ScoreGauge score={latest.accessibilityScore} label="Acessibilidade" size={90} />
-                <ScoreGauge score={latest.bestPracticesScore} label="Boas práticas" size={90} />
-                <ScoreGauge score={latest.seoScore} label="SEO" size={90} />
-              </div>
-              <p className="mt-6 text-center text-sm text-text-sub-600">
-                A análise detalhada (Insights, Diagnóstico e auditorias) aparece a partir da próxima execução.
-              </p>
-            </Card>
-          ) : (
-            <Card className="p-10 text-center text-sm text-text-sub-600">
-              Ainda não há dados para este site no {strategyLabel}. A primeira análise roda na próxima sexta-feira
-              às 15h (horário de Brasília).
-            </Card>
-          )}
-
-          {viewer.owner && (
-            <div className="mt-6">
-              <SharingPanel
-                siteId={site.id}
-                visibility={site.visibility as "private" | "shared"}
-                initialEmails={accessRows.map((r) => r.email)}
-                folders={allFolders}
-                currentFolderId={site.folderId}
-              />
-            </div>
-          )}
-        </div>
-      <GeminiDrawer siteId={site.id} siteName={site.name} />
-    </AppShell>
+      <Card>
+        <CardHeader title="Resumo da semana" description={`Só com os dados de ${site.name}.`} />
+        <div className="px-5 pb-4 pt-2"><AIInsightsPanel insights={p.insights} /></div>
+      </Card>
+    </SiteWorkspace>
   );
 }
