@@ -93,7 +93,13 @@ export default async function SiteAnalyticsPage({
   const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
   if (!site || !canViewSite(viewer, site, accessible, site.id)) notFound();
 
-  const a = await loadAnalytics(id, Number(period));
+  let loadError: string | null = null;
+  let a: Awaited<ReturnType<typeof loadAnalytics>> = { daily: [], visitors: 0, views: 0, pages: [], devices: [], referrers: [], countries: [], months: [] };
+  try {
+    a = await loadAnalytics(id, Number(period));
+  } catch (e) {
+    loadError = e instanceof Error ? e.message : String(e);
+  }
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const snippet = `<script defer src="https://${host}/t.js" data-site="${id}"></script>`;
@@ -118,6 +124,12 @@ export default async function SiteAnalyticsPage({
           />
         }
       >
+        {loadError && (
+          <Card className="border-destructive/40 p-5 text-[13px]">
+            <p className="font-medium text-destructive">Não foi possível carregar as visitas.</p>
+            {viewer.owner && <p className="mt-1 break-all text-xs text-muted-foreground">{loadError}</p>}
+          </Card>
+        )}
         <div className="grid gap-4 sm:grid-cols-3">
           {[
             ["Visitantes", a.visitors],
