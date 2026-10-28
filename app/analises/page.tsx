@@ -75,7 +75,7 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
             {rows.length === 0 && (
               <div className="p-5">
                 <EmptyState title="Nenhuma análise ainda">
-                  A primeira análise aparece aqui assim que rodar. O dono do painel pode iniciá-la em Perfil › Análises.
+                  A primeira análise aparece aqui assim que rodar. O dono do painel pode iniciá-la em Perfil › Relatório.
                 </EmptyState>
               </div>
             )}

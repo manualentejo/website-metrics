@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import ProfileForm from "@/components/ProfileForm";
 import SettingsForm from "@/components/SettingsForm";
-import DesignSystemDoc from "@/components/DesignSystemDoc";
 import { Page, Segmented } from "@/components/ui/Page";
 import Avatar from "@/components/ui/Avatar";
 import { getViewer } from "@/lib/access";
@@ -19,15 +18,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const profile = await getProfile(viewer.email);
   const name = profile.name ?? viewer.name ?? viewer.email.split("@")[0];
   const image = profile.image ?? viewer.image ?? null;
-  const tab = viewer.owner && (aba === "analises" || aba === "design") ? aba : "dados";
+  const tab = viewer.owner && aba === "analises" ? aba : "dados";
   const settings = tab === "analises" ? await getSettings() : null;
 
   const tabs = [
     { label: "Meus dados", href: "/perfil", active: tab === "dados" },
     ...(viewer.owner
       ? [
-          { label: "Análises", href: "/perfil?aba=analises", active: tab === "analises" },
-          { label: "Design system", href: "/perfil?aba=design", active: tab === "design" },
+          { label: "Relatório", href: "/perfil?aba=analises", active: tab === "analises" },
         ]
       : []),
   ];
@@ -52,11 +50,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         )}
         {tab === "analises" && settings && (
           <>
-            <p className="text-[13px] text-muted-foreground">Quando e como as análises dos sites são executadas.</p>
+            <p className="text-[13px] text-muted-foreground">Quando o relatório semanal é gerado.</p>
             <SettingsForm initial={settings} />
           </>
         )}
-        {tab === "design" && <DesignSystemDoc />}
       </Page>
     </AppShell>
   );
