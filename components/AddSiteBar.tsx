@@ -23,7 +23,7 @@ export default function AddSiteBar({
   async function add() {
     if (!url.trim() || busy) return;
     setBusy(true);
-    setMsg(null);
+    setMsg("Analisando o site no computador e no celular. Leva cerca de 1 minuto.");
     const res = await fetch("/api/sites", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -33,7 +33,7 @@ export default function AddSiteBar({
     setBusy(false);
     if (!res.ok) return setMsg(data?.error ?? "Não foi possível adicionar.");
     setUrl("");
-    setMsg("Site adicionado. A primeira análise roda no próximo horário agendado, ou use “Analisar agora” em Perfil › Análises.");
+    setMsg(data?.analysis?.some((r: { ok: boolean }) => !r.ok) ? "Site adicionado, mas a análise falhou em parte. Confira o endereço." : "Site adicionado e analisado.");
     router.refresh();
   }
 
@@ -60,7 +60,7 @@ export default function AddSiteBar({
         </Select>
         <Button onClick={add} disabled={busy || !url.trim()}>
           <Plus className="h-4 w-4" />
-          {busy ? "Adicionando…" : "Adicionar site"}
+          {busy ? "Analisando…" : "Adicionar site"}
         </Button>
       </div>
       {msg && <p role="status" className="mt-2 text-xs text-muted-foreground">{msg}</p>}

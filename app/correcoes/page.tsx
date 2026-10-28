@@ -18,7 +18,7 @@ export default async function FixQueuePage() {
     <AppShell active="correcoes">
       <Page
         title="Fila de correções"
-        subtitle="Problemas encontrados no celular, do que mais pesa na nota para o que menos pesa. Abra o site e use “Pergunte ao Gemini” para o passo a passo no Framer."
+        subtitle="Problemas encontrados no computador, do que mais pesa na nota para o que menos pesa. Abra o site e use “Pergunte ao Gemini” para o passo a passo no Framer."
       >
         {items.length === 0 ? (
           <EmptyState title="Nada para corrigir agora">
@@ -29,7 +29,7 @@ export default async function FixQueuePage() {
             {items.map((it, i) => (
               <Link
                 key={`${it.siteId}-${it.auditId}`}
-                href={`/site/${it.siteId}?strategy=mobile`}
+                href={`/site/${it.siteId}?strategy=desktop`}
                 className="flex items-start gap-4 px-5 py-3 hover:bg-secondary/40"
               >
                 <span className="w-5 flex-shrink-0 pt-0.5 text-xs tabular-nums text-muted-foreground">{i + 1}</span>

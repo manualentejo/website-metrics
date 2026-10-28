@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Play } from "lucide-react";
-import Button from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import Select from "@/components/ui/Select";
 import type { AppSettings } from "@/lib/settings";
@@ -24,7 +22,6 @@ function Row({ title, description, children }: { title: string; description: str
 export default function SettingsForm({ initial }: { initial: AppSettings }) {
   const [s, setS] = useState(initial);
   const [msg, setMsg] = useState<string | null>(null);
-  const [running, setRunning] = useState(false);
 
   async function save(patch: Partial<AppSettings>) {
     setS((p) => ({ ...p, ...patch }));
@@ -37,26 +34,10 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
     setTimeout(() => setMsg(null), 2500);
   }
 
-  async function runNow() {
-    setRunning(true);
-    setMsg("Analisando os sites… leva alguns minutos, pode continuar usando o painel.");
-    try {
-      const res = await fetch("/api/settings", { method: "POST" });
-      const data = await res.json().catch(() => null);
-      const failed = data?.results?.filter((r: { ok: boolean }) => !r.ok).length ?? 0;
-      setMsg(res.ok ? `Análise concluída${failed ? ` (${failed} falha(s))` : ""}. Atualize a página para ver.` : "A análise falhou.");
-      if (res.ok) setS((p) => ({ ...p, lastRunAt: new Date().toISOString() }));
-    } catch {
-      setMsg("A análise demorou demais; confira em alguns minutos.");
-    } finally {
-      setRunning(false);
-    }
-  }
-
   return (
     <div className="space-y-6">
       <Card>
-        <Row title="Análise automática" description="Liga ou desliga a execução semanal do Lighthouse em todos os sites.">
+        <Row title="Relatório semanal" description="Liga ou desliga a análise semanal de todos os sites e a geração do relatório em PDF.">
           <label className="flex cursor-pointer items-center gap-3">
             <span className="text-sm text-muted-foreground">{s.enabled ? "Ligada" : "Desligada"}</span>
             <button
@@ -70,7 +51,7 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
             </button>
           </label>
         </Row>
-        <Row title="Dia da semana" description="Em que dia a análise e o relatório semanal são gerados.">
+        <Row title="Dia da semana" description="Dia em que o relatório da semana fica disponível em Relatórios.">
           <Select value={s.weekday} onChange={(e) => save({ weekday: Number(e.target.value) })} wrapperClassName="w-full">
             {DAYS.map((d, i) => (
               <option key={d} value={i}>{d}</option>
@@ -83,19 +64,6 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
               <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
             ))}
           </Select>
-        </Row>
-        <Row
-          title="Analisar agora"
-          description={
-            s.lastRunAt
-              ? `Última execução: ${new Date(s.lastRunAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
-              : "Roda a análise de todos os sites imediatamente, sem esperar o horário."
-          }
-        >
-          <Button variant="outline" size="sm" onClick={runNow} disabled={running}>
-            <Play className="h-3.5 w-3.5" />
-            {running ? "Analisando…" : "Analisar agora"}
-          </Button>
         </Row>
       </Card>
       {msg && <p role="status" className="text-sm text-muted-foreground">{msg}</p>}

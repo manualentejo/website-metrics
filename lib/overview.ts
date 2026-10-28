@@ -16,10 +16,11 @@ export async function loadOverview(viewer: Viewer) {
         .from(reports)
         .where(and(inArray(reports.siteId, visible.map((s) => s.id)), isNull(reports.error)))
         .orderBy(desc(reports.ranAt))
-        .limit(visible.length * 12)
+        .limit(visible.length * 16)
     : [];
   const rows = visible.map((site) => ({
     ...site,
+    desktop: recent.find((r) => r.siteId === site.id && r.strategy === "desktop") ?? null,
     mobile: recent.find((r) => r.siteId === site.id && r.strategy === "mobile") ?? null,
   }));
   return { visible, folders: allFolders, rows, lastRun: recent[0]?.ranAt ?? null };

@@ -20,8 +20,9 @@ export const config = {
      * - /login (página de login)
      * - /api/auth/* (NextAuth)
      * - /api/cron/* (protegido pelo próprio CRON_SECRET)
+     * - /api/collect e /t.js (rastreio de visitas dos sites)
      * - arquivos estáticos do Next
      */
-    "/((?!login|api/auth|api/cron|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|api/auth|api/cron|api/collect|t\.js|_next/static|_next/image|favicon.ico).*)",
   ],
 };

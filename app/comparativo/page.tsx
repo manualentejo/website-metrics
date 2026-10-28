@@ -17,7 +17,7 @@ const COLS = [
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
   const { d } = await searchParams;
-  const strategy = d === "desktop" ? "desktop" : "mobile";
+  const strategy = d === "mobile" ? "mobile" : "desktop";
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   const { visible, log } = await loadReportLog(viewer, 600);
@@ -46,8 +46,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               <Segmented
                 label="Dispositivo"
                 items={[
-                  { label: "Celular", href: "/comparativo", active: strategy === "mobile" },
-                  { label: "Computador", href: "/comparativo?d=desktop", active: strategy === "desktop" },
+                  { label: "Computador", href: "/comparativo", active: strategy === "desktop" },
+                  { label: "Celular", href: "/comparativo?d=mobile", active: strategy === "mobile" },
                 ]}
               />
             }

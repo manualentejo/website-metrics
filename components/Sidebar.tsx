@@ -6,6 +6,7 @@ import {
   Bell,
   GitCompareArrows,
   Wrench,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import type { Status } from "@/lib/types";
@@ -13,7 +14,7 @@ import SidebarUserFooter from "./SidebarUserFooter";
 import NewFolderForm from "./NewFolderForm";
 import WorkspaceTree from "./WorkspaceTree";
 
-export type NavKey = "home" | "sites" | "analises" | "alertas" | "comparativo" | "correcoes" | "perfil";
+export type NavKey = "home" | "sites" | "analises" | "alertas" | "comparativo" | "correcoes" | "relatorios" | "perfil";
 
 const NAV: { key: NavKey; href: string; label: string; icon: LucideIcon }[] = [
   { key: "home", href: "/", label: "Visão geral", icon: LayoutDashboard },
@@ -22,6 +23,7 @@ const NAV: { key: NavKey; href: string; label: string; icon: LucideIcon }[] = [
   { key: "alertas", href: "/alertas", label: "Alertas", icon: Bell },
   { key: "comparativo", href: "/comparativo", label: "Comparativo", icon: GitCompareArrows },
   { key: "correcoes", href: "/correcoes", label: "Fila de correções", icon: Wrench },
+  { key: "relatorios", href: "/relatorios", label: "Relatórios", icon: CalendarDays },
 ];
 
 interface SiteNavItem {

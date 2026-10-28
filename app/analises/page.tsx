@@ -17,7 +17,7 @@ function Score({ v }: { v: number | null }) {
 
 export default async function AnalysesPage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
   const { d } = await searchParams;
-  const strategy = d === "desktop" ? "desktop" : "mobile";
+  const strategy = d === "mobile" ? "mobile" : "desktop";
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   const { log } = await loadReportLog(viewer, 400);
@@ -33,8 +33,8 @@ export default async function AnalysesPage({ searchParams }: { searchParams: Pro
               <Segmented
                 label="Dispositivo"
                 items={[
-                  { label: "Celular", href: "/analises", active: strategy === "mobile" },
-                  { label: "Computador", href: "/analises?d=desktop", active: strategy === "desktop" },
+                  { label: "Computador", href: "/analises", active: strategy === "desktop" },
+                  { label: "Celular", href: "/analises?d=mobile", active: strategy === "mobile" },
                 ]}
               />
             }

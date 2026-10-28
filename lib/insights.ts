@@ -24,7 +24,7 @@ const CATEGORIES = [
   { key: "seoScore", label: "SEO" },
 ] as const;
 
-async function visibleSites(viewer: Viewer) {
+export async function visibleSites(viewer: Viewer) {
   const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
   const all = await db.select().from(sites).orderBy(asc(sites.sortOrder), asc(sites.createdAt));
   return all.filter((s) => canViewSite(viewer, s, accessible, s.id));
@@ -118,7 +118,7 @@ export async function loadFixQueue(viewer: Viewer): Promise<FixItem[]> {
   const snaps = await db
     .select()
     .from(snapshots)
-    .where(and(inArray(snapshots.siteId, visible.map((s) => s.id)), eq(snapshots.strategy, "mobile")));
+    .where(and(inArray(snapshots.siteId, visible.map((s) => s.id)), eq(snapshots.strategy, "desktop")));
 
   const items: FixItem[] = [];
   for (const snap of snaps) {

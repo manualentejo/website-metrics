@@ -56,7 +56,7 @@ export function SitesTable({
     <Card className="overflow-hidden">
       <CardHeader
         title={title}
-        description="Clique em um site para ver a análise completa. Notas da análise para celular."
+        description="Notas do computador, nosso foco. A coluna Celular mostra o desempenho no celular."
         action={
           <Segmented
             label="Filtrar por status"
@@ -69,7 +69,7 @@ export function SitesTable({
         }
       />
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left">
+        <table className="w-full min-w-[820px] text-left">
           <thead>
             <tr className="border-y border-border bg-secondary/60 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               <th className="px-5 py-2">Site</th>
@@ -77,6 +77,7 @@ export function SitesTable({
               <th className="px-3 py-2">Acessib.</th>
               <th className="px-3 py-2">Boas práticas</th>
               <th className="px-3 py-2">SEO</th>
+              <th className="px-3 py-2">Celular</th>
               <th className="px-5 py-2 text-right">Status</th>
             </tr>
           </thead>
@@ -85,7 +86,7 @@ export function SitesTable({
               <tr key={site.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40">
                 <td className="px-5 py-2.5">
                   <Link href={`/site/${site.id}`} className="flex items-center gap-3">
-                    <ScoreGauge score={site.mobile?.performanceScore ?? null} label="" size={40} />
+                    <ScoreGauge score={site.desktop?.performanceScore ?? null} label="" size={40} />
                     <span className="min-w-0">
                       <span className="block truncate text-[13px] font-medium text-foreground">{site.name}</span>
                       <span className="block truncate text-xs text-muted-foreground">
@@ -95,10 +96,11 @@ export function SitesTable({
                     </span>
                   </Link>
                 </td>
+                <td className="px-3 py-2.5"><Bar value={site.desktop?.performanceScore ?? null} /></td>
+                <td className="px-3 py-2.5"><Bar value={site.desktop?.accessibilityScore ?? null} /></td>
+                <td className="px-3 py-2.5"><Bar value={site.desktop?.bestPracticesScore ?? null} /></td>
+                <td className="px-3 py-2.5"><Bar value={site.desktop?.seoScore ?? null} /></td>
                 <td className="px-3 py-2.5"><Bar value={site.mobile?.performanceScore ?? null} /></td>
-                <td className="px-3 py-2.5"><Bar value={site.mobile?.accessibilityScore ?? null} /></td>
-                <td className="px-3 py-2.5"><Bar value={site.mobile?.bestPracticesScore ?? null} /></td>
-                <td className="px-3 py-2.5"><Bar value={site.mobile?.seoScore ?? null} /></td>
                 <td className="px-5 py-2.5 text-right">
                   <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!owner} />
                 </td>
@@ -143,7 +145,7 @@ export default function OverviewContent({
 }) {
   const live = rows.filter((r) => r.status === "no_ar").length;
   const vals = rows
-    .flatMap((r) => [r.mobile?.performanceScore, r.mobile?.accessibilityScore, r.mobile?.bestPracticesScore, r.mobile?.seoScore])
+    .flatMap((r) => [r.desktop?.performanceScore, r.desktop?.accessibilityScore, r.desktop?.bestPracticesScore, r.desktop?.seoScore])
     .filter((v): v is number => typeof v === "number");
   const overall = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
 
@@ -151,7 +153,7 @@ export default function OverviewContent({
     <Page title={title} subtitle={subtitle}>
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Sites monitorados" value={rows.length} hint={`${live} no ar · ${rows.length - live} em andamento`} />
-        <Stat label="Nota média (celular)" value={overall ?? "—"} hint="Média das 4 categorias" />
+        <Stat label="Nota média (computador)" value={overall ?? "—"} hint="Média das 4 categorias" />
         <Stat
           label="Última análise"
           value={lastRun ? formatDateTime(lastRun).split(",")[0] : "—"}

@@ -4,8 +4,10 @@ import { authOptions, isOwner } from "@/lib/auth";
 import { db } from "@/db/client";
 import { sites, reports } from "@/db/schema";
 import { asc, desc, eq } from "drizzle-orm";
+import { analyzeSite } from "@/lib/runAnalysis";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -54,7 +56,11 @@ export async function POST(req: NextRequest) {
     .insert(sites)
     .values({ name, url: normalized, folderId: folderId || null, sortOrder: all.length + 1 })
     .returning();
-  return NextResponse.json(site);
+
+  // Analisa na hora (computador e celular) para o site já entrar com notas.
+  const apiKey = process.env.PAGESPEED_API_KEY;
+  const results = apiKey ? await analyzeSite(site, apiKey) : [];
+  return NextResponse.json({ ...site, analysis: results });
 }
 
 export async function PATCH(req: NextRequest) {

@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/Card";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { formatDateTime } from "@/lib/format";
 import { Segmented } from "@/components/ui/Page";
+import { buttonClass } from "@/components/ui/Button";
 import type { ReportRow, Status, Strategy } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export default async function SiteDetailPage({
 }) {
   const { id } = await params;
   const { strategy: strategyParam, status: statusFilter } = await searchParams;
-  const strategy: Strategy = strategyParam === "desktop" ? "desktop" : "mobile";
+  const strategy: Strategy = strategyParam === "mobile" ? "mobile" : "desktop";
   const strategyLabel = strategy === "mobile" ? "celular" : "computador";
 
   const viewer = await getViewer();
@@ -104,13 +105,14 @@ export default async function SiteDetailPage({
             <div className="flex flex-wrap items-center gap-2">
               <Segmented
                 label="Dispositivo"
-                items={(["mobile", "desktop"] as Strategy[]).map((x) => ({
+                items={(["desktop", "mobile"] as Strategy[]).map((x) => ({
                   label: x === "mobile" ? "Celular" : "Computador",
                   href: strategyHref(x),
                   active: strategy === x,
                 }))}
               />
               <StatusSelect siteId={site.id} status={site.status as Status} readOnly={!viewer.owner} />
+              <Link href={`/site/${id}/analytics`} className={buttonClass("outline", "md")}>Visitas</Link>
               <AskGeminiButton />
             </div>
           </header>
