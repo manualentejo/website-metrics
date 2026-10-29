@@ -90,6 +90,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const unit = metric.key === "visits" ? "count" : "score";
   const label = { seo: "SEO médio", performance: "Desempenho médio", geo: "Nota GEO média", visits: "Visitas" }[metric.key];
   const seoCount = p.distribution.reduce((a, b) => a + b.count, 0);
+  const band = (key: "performance" | "geo") => {
+    const v = p.rows.map((r) => r[key]).filter((x): x is number => x !== null);
+    return [v.filter((x) => x >= 90).length, v.filter((x) => x >= 50 && x < 90).length, v.filter((x) => x < 50).length];
+  };
+  const perfBand = band("performance");
+  const geoBand = band("geo");
 
   return (
     <div className="flex flex-col gap-3 p-4 sm:p-5 lg:h-full lg:overflow-hidden">
@@ -198,23 +204,55 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </Panel>
 
-            <Panel className="lg:col-span-4" title="Saúde de SEO por faixa" description="Quantos sites em cada faixa de nota" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
+            <Panel className="lg:col-span-4" title="Sites por faixa de nota" description="Quantos sites em cada faixa" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
               {seoCount === 0 ? (
                 <ChartEmptyState title="Sem notas ainda" className="h-full min-h-[10rem]" />
               ) : (
                 <div className="space-y-4">
-                  <DonutChart
-                    center={String(seoCount)}
-                    centerLabel="sites"
-                    slices={[
-                      { label: "Bom (90–100)", value: p.distribution[0].count, tone: "success" },
-                      { label: "Médio (50–89)", value: p.distribution[1].count, tone: "warning" },
-                      { label: "Ruim (0–49)", value: p.distribution[2].count, tone: "error" },
-                    ]}
-                  />
+                  <div>
+                    <p className="mb-1.5 text-label-xs uppercase tracking-wide text-text-soft-400">SEO</p>
+                    <DonutChart
+                      size={104}
+                      center={String(seoCount)}
+                      centerLabel="sites"
+                      slices={[
+                        { label: "Bom (90–100)", value: p.distribution[0].count, tone: "success" },
+                        { label: "Médio (50–89)", value: p.distribution[1].count, tone: "warning" },
+                        { label: "Ruim (0–49)", value: p.distribution[2].count, tone: "error" },
+                      ]}
+                    />
+                  </div>
+                  <div className="border-t border-stroke-soft-200 pt-3">
+                    <p className="mb-1.5 text-label-xs uppercase tracking-wide text-text-soft-400">Desempenho</p>
+                    <DonutChart
+                      size={104}
+                      center={String(perfBand.reduce((a, b) => a + b, 0))}
+                      centerLabel="sites"
+                      slices={[
+                        { label: "Bom (90–100)", value: perfBand[0], tone: "success" },
+                        { label: "Médio (50–89)", value: perfBand[1], tone: "warning" },
+                        { label: "Ruim (0–49)", value: perfBand[2], tone: "error" },
+                      ]}
+                    />
+                  </div>
+                  {geoBand.some(Boolean) && (
+                    <div className="border-t border-stroke-soft-200 pt-3">
+                      <p className="mb-1.5 text-label-xs uppercase tracking-wide text-text-soft-400">GEO</p>
+                      <DonutChart
+                        size={104}
+                        center={String(geoBand.reduce((a, b) => a + b, 0))}
+                        centerLabel="sites"
+                        slices={[
+                          { label: "Bom (90–100)", value: geoBand[0], tone: "success" },
+                          { label: "Médio (50–89)", value: geoBand[1], tone: "warning" },
+                          { label: "Ruim (0–49)", value: geoBand[2], tone: "error" },
+                        ]}
+                      />
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-4 border-t border-stroke-soft-200 pt-3">
-                    <Movers title="Melhoraram" items={p.seoMovers.up} up />
-                    <Movers title="Pioraram" items={p.seoMovers.down} up={false} />
+                    <Movers title="SEO melhorou" items={p.seoMovers.up} up />
+                    <Movers title="SEO piorou" items={p.seoMovers.down} up={false} />
                   </div>
                 </div>
               )}
