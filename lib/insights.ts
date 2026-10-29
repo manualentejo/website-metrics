@@ -24,7 +24,7 @@ const CATEGORIES = [
   { key: "performanceScore", label: "Desempenho", category: "Performance", tab: "performance" },
   { key: "accessibilityScore", label: "Acessibilidade", category: "Acessibilidade", tab: "performance" },
   { key: "bestPracticesScore", label: "Boas práticas", category: "Boas práticas", tab: "performance" },
-  { key: "seoScore", label: "SEO", category: "SEO", tab: "seo" },
+  { key: "seoScore", label: "SEO", category: "SEO", tab: "performance" },
 ] as const;
 
 export async function visibleSites(viewer: Viewer) {
@@ -57,11 +57,11 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
       const [now, before] = log.filter((r) => r.siteId === site.id && r.strategy === strategy);
       if (!now) continue;
       const base = { siteId: site.id, siteName: site.name, siteUrl: site.url, strategy, at: now.ranAt };
-      const hrefFor = (tab: string) => `/site/${site.id}/${tab}?strategy=${strategy}&from=overview`;
+      const hrefFor = (tab: string, cat?: string) => `/site/${site.id}/${tab}?strategy=${strategy}&from=overview${cat ? `&cat=${cat}` : ""}`;
       const device = strategy === "mobile" ? "celular" : "computador";
 
       for (const c of CATEGORIES) {
-        const extra = { category: c.category, href: hrefFor(c.tab) };
+        const extra = { category: c.category, href: hrefFor(c.tab, c.category === "SEO" ? "seo" : undefined) };
         const cur = now[c.key];
         const prev = before?.[c.key];
         if (cur === null) continue;

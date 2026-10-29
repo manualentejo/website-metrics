@@ -54,7 +54,7 @@ function Movers({ title, items, up }: { title: string; items: Mover[]; up: boole
         <ul className="space-y-0.5">
           {items.slice(0, 3).map((m) => (
             <li key={m.siteId}>
-              <Link href={`/site/${m.siteId}/seo`} className="flex items-center justify-between gap-2 rounded-md py-0.5 text-paragraph-sm hover:bg-bg-weak-50">
+              <Link href={`/site/${m.siteId}/performance?cat=seo`} className="flex items-center justify-between gap-2 rounded-md py-0.5 text-paragraph-sm hover:bg-bg-weak-50">
                 <span className="truncate text-text-strong-950">{m.siteName}</span>
                 <TrendIndicator current={m.to} previous={m.from} goodWhen="up" />
               </Link>

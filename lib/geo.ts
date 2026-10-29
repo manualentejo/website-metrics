@@ -2,13 +2,19 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { askGemini } from "@/lib/gemini";
-import { askGeminiGrounded } from "@/lib/geminiGrounded";
+import { askGeminiGrounded, type GroundedAnswer } from "@/lib/geminiGrounded";
+import { askOpenAI, openaiConfigured } from "@/lib/openaiSearch";
 
 // Visibilidade em IA (GEO): perguntamos ao Gemini, como uma pessoa faria, prompts cadastrados
 // por site e registramos se a marca foi mencionada e se o domínio apareceu entre as fontes.
-// Só o Gemini é consultado; outros mecanismos não entram até existir integração real.
+// Cada mecanismo só entra se houver integração real: Gemini (GEMINI_API_KEY) e ChatGPT (OPENAI_API_KEY).
 
-export const ENGINE = "gemini";
+export const ENGINES = [
+  { id: "gemini", label: "Gemini", ask: askGeminiGrounded, connected: () => Boolean(process.env.GEMINI_API_KEY) },
+  { id: "chatgpt", label: "ChatGPT", ask: askOpenAI, connected: openaiConfigured },
+] as const;
+export const engineLabel = (id: string) => ENGINES.find((e) => e.id === id)?.label ?? id;
+export const engineStatus = () => ENGINES.map((e) => ({ id: e.id, label: e.label, connected: e.connected() }));
 
 let ensured = false;
 export async function ensureGeoTables() {
@@ -58,6 +64,7 @@ export interface GeoPrompt {
 }
 export interface GeoResult {
   runId: string;
+  engine: string;
   ranAt: Date;
   promptId: string | null;
   prompt: string;
@@ -74,6 +81,7 @@ export interface GeoBatch {
   mentioned: number;
   cited: number;
   verifiable: number;
+  byEngine: Record<string, { total: number; mentioned: number; cited: number; verifiable: number }>;
   results: GeoResult[];
 }
 
@@ -93,7 +101,7 @@ export async function getGeo(siteId: string, siteName: string) {
   const [s, p, r] = await Promise.all([
     db.execute(sql`SELECT brand, description, competitors FROM geo_settings WHERE site_id = ${siteId}`),
     db.execute(sql`SELECT id::text AS id, prompt FROM geo_prompts WHERE site_id = ${siteId} ORDER BY created_at`),
-    db.execute(sql`SELECT run_id::text AS run_id, ran_at, prompt_id::text AS prompt_id, prompt, mentioned, cited, competitors, answer, sources
+    db.execute(sql`SELECT run_id::text AS run_id, engine, ran_at, prompt_id::text AS prompt_id, prompt, mentioned, cited, competitors, answer, sources
       FROM geo_runs WHERE site_id = ${siteId} AND ran_at > now() - interval '400 days' ORDER BY ran_at DESC LIMIT 2000`),
   ]);
   const st = rows(s)[0];
@@ -107,6 +115,7 @@ export async function getGeo(siteId: string, siteName: string) {
     const id = String(x.run_id);
     const res: GeoResult = {
       runId: id,
+      engine: String(x.engine),
       ranAt: new Date(String(x.ran_at)),
       promptId: x.prompt_id ? String(x.prompt_id) : null,
       prompt: String(x.prompt),
@@ -116,7 +125,12 @@ export async function getGeo(siteId: string, siteName: string) {
       answer: String(x.answer),
       sources: (x.sources as { uri: string; title: string }[]) ?? [],
     };
-    const b = byRun.get(id) ?? { runId: id, ranAt: res.ranAt, total: 0, mentioned: 0, cited: 0, verifiable: 0, results: [] };
+    const b = byRun.get(id) ?? { runId: id, ranAt: res.ranAt, total: 0, mentioned: 0, cited: 0, verifiable: 0, byEngine: {}, results: [] };
+    const e = (b.byEngine[res.engine] ??= { total: 0, mentioned: 0, cited: 0, verifiable: 0 });
+    e.total++;
+    if (res.mentioned) e.mentioned++;
+    if (res.cited !== null) e.verifiable++;
+    if (res.cited) e.cited++;
     b.total++;
     if (res.mentioned) b.mentioned++;
     if (res.cited !== null) b.verifiable++;
@@ -168,7 +182,7 @@ export async function suggestPrompts(brand: string, domain: string, description:
   return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string" && !mentions(x, brand) && !x.toLowerCase().includes(domain.toLowerCase())) : [];
 }
 
-/** Roda todos os prompts do site (4 em paralelo) e grava uma verificação. */
+/** Roda todos os prompts do site em cada mecanismo conectado (4 consultas em paralelo) e grava uma verificação. */
 export async function runGeoCheck(siteId: string, siteUrl: string) {
   await ensureGeoTables();
   const [s] = rows(await db.execute(sql`SELECT brand, competitors FROM geo_settings WHERE site_id = ${siteId}`));
@@ -177,31 +191,32 @@ export async function runGeoCheck(siteId: string, siteUrl: string) {
   const competitors = (s.competitors as string[]) ?? [];
   const prompts = rows(await db.execute(sql`SELECT id::text AS id, prompt FROM geo_prompts WHERE site_id = ${siteId} ORDER BY created_at`));
   if (!prompts.length) throw new Error("Cadastre ao menos um prompt.");
+  const engines = ENGINES.filter((e) => e.connected());
+  if (!engines.length) throw new Error("Nenhuma IA conectada.");
   const domain = hostOf(siteUrl);
   const runId = randomUUID();
+  const tasks = prompts.flatMap((p) => engines.map((e) => ({ p, e })));
   let ok = 0;
   let lastError = "";
 
-  for (let i = 0; i < prompts.length; i += 4) {
+  for (let i = 0; i < tasks.length; i += 4) {
     await Promise.all(
-      prompts.slice(i, i + 4).map(async (p) => {
+      tasks.slice(i, i + 4).map(async ({ p, e }) => {
         try {
-          const a = await askGeminiGrounded(String(p.prompt));
+          const a: GroundedAnswer = await e.ask(String(p.prompt));
           const mentioned = mentions(a.text, brand) || a.text.toLowerCase().includes(domain);
-          const cited = a.grounded
-            ? a.sources.some((x) => norm(x.title).includes(domain) || hostOf(x.uri) === domain)
-            : null;
+          const cited = a.grounded ? a.sources.some((x) => norm(x.title).includes(domain) || hostOf(x.uri) === domain) : null;
           const comp = competitors.filter((c) => mentions(a.text, c));
           await db.execute(sql`INSERT INTO geo_runs (run_id, site_id, prompt_id, prompt, engine, mentioned, cited, competitors, answer, sources, grounded)
-            VALUES (${runId}::uuid, ${siteId}, ${String(p.id)}::uuid, ${String(p.prompt)}, ${ENGINE}, ${mentioned}, ${cited}, ${JSON.stringify(comp)}::jsonb,
+            VALUES (${runId}::uuid, ${siteId}, ${String(p.id)}::uuid, ${String(p.prompt)}, ${e.id}, ${mentioned}, ${cited}, ${JSON.stringify(comp)}::jsonb,
                     ${a.text.slice(0, 6000)}, ${JSON.stringify(a.sources.slice(0, 12))}::jsonb, ${a.grounded})`);
           ok++;
-        } catch (e) {
-          lastError = e instanceof Error ? e.message : String(e);
+        } catch (err) {
+          lastError = `${e.label}: ${err instanceof Error ? err.message : String(err)}`;
         }
       })
     );
   }
   if (!ok) throw new Error(lastError || "Nenhuma consulta funcionou.");
-  return { runId, done: ok, failed: prompts.length - ok };
+  return { runId, done: ok, failed: tasks.length - ok, lastError };
 }

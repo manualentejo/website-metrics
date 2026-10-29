@@ -21,6 +21,7 @@ export default async function AnalysisTab({
   categories,
   showHistory,
   highlight,
+  initialCategory,
 }: {
   siteId: string;
   siteName: string;
@@ -29,6 +30,7 @@ export default async function AnalysisTab({
   categories: CategoryKey[];
   showHistory: boolean;
   highlight?: string;
+  initialCategory?: CategoryKey;
 }) {
   const strategyLabel = strategy === "mobile" ? "celular" : "computador";
   const [history, [snapshot]] = await Promise.all([
@@ -59,7 +61,7 @@ export default async function AnalysisTab({
           label="Dispositivo"
           items={(["desktop", "mobile"] as Strategy[]).map((x) => ({
             label: x === "mobile" ? "Celular" : "Computador",
-            href: `${basePath}?strategy=${x}`,
+            href: `${basePath}?strategy=${x}${initialCategory ? `&cat=${initialCategory}` : ""}`,
             active: strategy === x,
           }))}
         />
@@ -75,6 +77,7 @@ export default async function AnalysisTab({
           strategyLabel={strategyLabel}
           categories={categories}
           showHistory={showHistory}
+          initialCategory={initialCategory}
         />
       ) : latest ? (
         <Card className="p-8">

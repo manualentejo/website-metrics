@@ -41,6 +41,7 @@ export default function AnalysisView({
   strategyLabel,
   categories = ["performance", "accessibility", "best-practices", "seo"],
   showHistory = true,
+  initialCategory,
 }: {
   analysis: Analysis;
   finalScreenshot: string | null;
@@ -50,8 +51,9 @@ export default function AnalysisView({
   strategyLabel: string;
   categories?: CategoryKey[];
   showHistory?: boolean;
+  initialCategory?: CategoryKey;
 }) {
-  const [tab, setTab] = useState<CategoryKey>(categories[0]);
+  const [tab, setTab] = useState<CategoryKey>(initialCategory && categories.includes(initialCategory) ? initialCategory : categories[0]);
   const common = { siteName, strategyLabel };
 
   return (

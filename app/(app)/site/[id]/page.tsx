@@ -13,6 +13,9 @@ import AIInsightsPanel from "@/components/overview/AIInsightsPanel";
 import { loadFixQueue } from "@/lib/insights";
 import { PERIODS, loadPortfolio, lastValue, type Period } from "@/lib/portfolio";
 import { buttonClass } from "@/components/ui/Button";
+import ScoreGauge from "@/components/ScoreGauge";
+import { getGeoAudits } from "@/lib/geoAudit";
+import { RiErrorWarningLine, RiRobot2Line, RiSearchEyeLine, RiSpeedUpLine } from "@remixicon/react";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +36,9 @@ export default async function SiteOverviewPage({
 
   const days = (PERIODS.find((p) => String(p) === sp.d) ?? 28) as Period;
   const { viewer, site } = await requireSite(id);
-  const [p, fixes] = await Promise.all([loadPortfolio(viewer, { days, siteIds: [id] }), loadFixQueue(viewer)]);
+  const [p, fixes, audits] = await Promise.all([loadPortfolio(viewer, { days, siteIds: [id] }), loadFixQueue(viewer), getGeoAudits(id, 2).catch(() => [])]);
+  const geoAudit = audits[0];
+  const geoFixes = geoAudit?.checks.filter((c) => c.status !== "ok").sort((a, b) => (a.status === b.status ? b.weight - a.weight : a.status === "fail" ? -1 : 1)).slice(0, 3) ?? [];
   const row = p.rows[0];
   const opportunities = fixes.filter((f) => f.siteId === id).slice(0, 5);
   const perfNow = lastValue(p.series.performance.current);
@@ -46,50 +51,44 @@ export default async function SiteOverviewPage({
         <Segmented label="Período" items={PERIODS.map(period)} />
       </div>
 
-      <section aria-label="Indicadores do site" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section aria-label="Indicadores do site" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Saúde de SEO"
-          href={`/site/${id}/seo`}
+          icon={RiSearchEyeLine}
+          tone="green"
+          href={`/site/${id}/performance?cat=seo`}
           value={p.kpi.seo === null ? "—" : Math.round(p.kpi.seo)}
           trend={<TrendIndicator current={p.kpi.seo} delta={p.kpi.seoDelta} suffix={`vs ${days} dias antes`} />}
           spark={p.kpi.seoSpark}
-          hint="Lighthouse · computador"
           info={{ title: "Saúde de SEO", text: "Nota de SEO técnico do Lighthouse (0–100), medida em laboratório. Não é posição no Google." }}
         />
         <MetricCard
           label="Desempenho"
+          icon={RiSpeedUpLine}
+          tone="orange"
           href={`/site/${id}/performance`}
           value={perfNow === null ? "—" : Math.round(perfNow)}
           trend={<TrendIndicator current={perfNow} previous={perfPrev} suffix={`vs ${days} dias antes`} />}
           spark={p.series.performance.current.map((x) => x.value)}
-          hint="Lighthouse · computador"
           info={{ title: "Desempenho", text: "Nota de velocidade do Lighthouse (0–100) em ambiente de teste, não a experiência medida em usuários reais." }}
         />
         <MetricCard
-          label="Visitas"
-          href={`/site/${id}/analytics`}
-          connected={!!p.series.visits}
-          value={row?.visits?.toLocaleString("pt-BR")}
-          trend={
-            p.series.visits ? (
-              <TrendIndicator
-                unit="count"
-                current={p.series.visits.current.reduce((a, b) => a + (b.value ?? 0), 0)}
-                previous={p.series.visits.previous.reduce((a, b) => a + (b.value ?? 0), 0)}
-                suffix={`vs ${days} dias antes`}
-              />
-            ) : undefined
-          }
-          spark={p.series.visits?.current.map((x) => x.value)}
-          hint="Contagem própria, sem cookies"
-          setupText="Sem código de rastreio neste site. Instale em Configurações, só se você puder editar o site."
-          info={{ title: "Visitas", text: "Visualizações de página contadas pelo código de rastreio próprio. Só existe em sites onde o código foi instalado." }}
+          label="Preparo para IAs"
+          icon={RiRobot2Line}
+          tone="purple"
+          href={`/site/${id}/geo?v=preparo`}
+          connected={!!geoAudit}
+          value={geoAudit?.score}
+          trend={<TrendIndicator current={geoAudit?.score ?? null} previous={audits[1]?.score ?? null} suffix="vs anterior" />}
+          setupText="Abra a aba GEO para a primeira auditoria."
+          info={{ title: "Preparo para IAs (GEO)", text: "Quão preparado o site está para ser entendido e citado por ChatGPT, Gemini e Perplexity. Auditoria técnica, sem IA e sem custo." }}
         />
         <MetricCard
           label="Problemas críticos"
+          icon={RiErrorWarningLine}
+          tone="red"
           href="/alertas"
           value={p.kpi.critical}
-          trend={<TrendIndicator current={p.kpi.critical} delta={null} goodWhen="down" />}
           hint={`${p.kpi.problems} alertas abertos`}
           info={{ title: "Problemas críticos", text: "Notas abaixo de 50 ou quedas de 15 pontos ou mais desde a auditoria anterior. Menos é melhor." }}
         />
@@ -98,35 +97,44 @@ export default async function SiteOverviewPage({
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader title="Evolução de SEO" description={`${days} dias contra os ${days} anteriores.`} />
-          <div className="p-5"><TimeSeriesChart current={p.series.seo.current} previous={p.series.seo.previous} unit="score" label="SEO" height={220} /></div>
+          <div className="p-5"><TimeSeriesChart current={p.series.seo.current} previous={p.series.seo.previous} unit="score" label="SEO" height={220} tone="green" /></div>
         </Card>
         <Card>
           <CardHeader title="Evolução de desempenho" description={`${days} dias contra os ${days} anteriores.`} />
-          <div className="p-5"><TimeSeriesChart current={p.series.performance.current} previous={p.series.performance.previous} unit="score" label="Desempenho" height={220} /></div>
+          <div className="p-5"><TimeSeriesChart current={p.series.performance.current} previous={p.series.performance.previous} unit="score" label="Desempenho" height={220} tone="orange" /></div>
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader title="Tráfego orgânico" description="Cliques e impressões do Google Search Console." />
-          <div className="p-5">
-            <ChartEmptyState kind="setup" title="Search Console não conectado" className="h-44">
-              Sem a integração, nenhum número de tráfego orgânico é exibido. As visitas próprias aparecem na aba Visitas.
-            </ChartEmptyState>
-          </div>
-        </Card>
-        <Card>
-          <CardHeader
-            title="Resumo GEO"
-            action={<Link href={`/site/${id}/geo`} className="text-label-xs text-text-strong-950 underline underline-offset-2">Abrir GEO</Link>}
-          />
-          <div className="p-5">
-            <ChartEmptyState kind="setup" title="Nenhum prompt monitorado" className="h-44">
-              AI Visibility só passa a existir depois que você cadastrar prompts para acompanhar.
-            </ChartEmptyState>
-          </div>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader
+          title="Preparo para IAs (GEO)"
+          description="O que falta para ChatGPT, Gemini e Perplexity entenderem e citarem este site."
+          action={<Link href={`/site/${id}/geo`} className="text-label-xs text-text-strong-950 underline underline-offset-2">Abrir GEO</Link>}
+        />
+        <div className="flex flex-wrap items-start gap-5 p-5">
+          {geoAudit ? (
+            <>
+              <ScoreGauge score={geoAudit.score} label="" size={84} />
+              <ul className="min-w-0 flex-1 divide-y divide-stroke-soft-200">
+                {geoFixes.length === 0 && <li className="py-2 text-paragraph-sm text-text-sub-600">Tudo certo nas verificações atuais.</li>}
+                {geoFixes.map((c) => (
+                  <li key={c.id} className="py-2">
+                    <Link href={`/site/${id}/geo?v=preparo`} className="flex items-start gap-2 hover:underline">
+                      <span className={`mt-1.5 size-2 flex-shrink-0 rounded-full ${c.status === "fail" ? "bg-error-base" : "bg-warning-base"}`} />
+                      <span>
+                        <span className="block text-label-sm text-text-strong-950">{c.title}</span>
+                        <span className="block text-paragraph-xs text-text-sub-600">{c.found}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-paragraph-sm text-text-sub-600">Ainda não auditado. Abra a aba GEO e a primeira auditoria roda sozinha.</p>
+          )}
+        </div>
+      </Card>
 
       <Card>
         <CardHeader title="Principais problemas" description="Abertos na última auditoria deste site." />

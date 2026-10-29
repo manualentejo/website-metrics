@@ -339,7 +339,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
           key: "opportunity",
           label: "Oportunidade",
           text: `${nameOf.get(opportunity.siteId)} tem a menor nota de SEO. Auditoria reprovada de maior peso: “${opportunity.title}”.`,
-          href: `/site/${opportunity.siteId}/seo`,
+          href: `/site/${opportunity.siteId}/performance?cat=seo`,
           evidence: "Auditorias de SEO do Lighthouse",
         }
       : { key: "opportunity", label: "Oportunidade", text: "Sem auditorias de SEO reprovadas nos dados atuais.", href: null, evidence: null },

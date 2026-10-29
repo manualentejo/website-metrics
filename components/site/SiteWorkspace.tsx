@@ -21,11 +21,8 @@ export type SiteTab = "overview" | "seo" | "geo" | "performance" | "analytics" |
 
 const MAIN: { key: SiteTab; label: string; path: string }[] = [
   { key: "overview", label: "Visão geral", path: "" },
-  { key: "seo", label: "SEO", path: "/seo" },
-  { key: "geo", label: "GEO", path: "/geo" },
   { key: "performance", label: "Desempenho", path: "/performance" },
-  { key: "analytics", label: "Visitas", path: "/analytics" },
-  { key: "competitors", label: "Concorrentes", path: "/competitors" },
+  { key: "geo", label: "GEO", path: "/geo" },
 ];
 const SECONDARY: { key: SiteTab; label: string; path: string }[] = [
   { key: "history", label: "Histórico", path: "/history" },
@@ -66,7 +63,7 @@ export default async function SiteWorkspace({
     .orderBy(desc(reports.ranAt))
     .limit(1);
 
-  const current = [...MAIN, ...SECONDARY].find((t) => t.key === tab)!;
+  const current = [...MAIN, ...SECONDARY].find((t) => t.key === tab) ?? { key: tab, label: tab, path: tab === "analytics" ? "/analytics" : "" };
   const link = (t: { path: string }) => `/site/${siteId}${t.path}${query}`;
   const domain = site.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
   const tabCls = (on: boolean) =>

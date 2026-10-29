@@ -8,7 +8,7 @@ export default async function SitePerformancePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ strategy?: string; from?: string }>;
+  searchParams: Promise<{ strategy?: string; from?: string; cat?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -20,7 +20,8 @@ export default async function SitePerformancePage({
         siteName={site.name}
         basePath={`/site/${id}/performance`}
         strategy={sp.strategy === "mobile" ? "mobile" : "desktop"}
-        categories={["performance", "accessibility", "best-practices"]}
+        categories={["performance", "seo", "accessibility", "best-practices"]}
+        initialCategory={(["performance", "seo", "accessibility", "best-practices"] as const).find((c) => c === sp.cat)}
         showHistory
         highlight={sp.from === "overview" ? "Visão geral" : undefined}
       />

@@ -13,10 +13,11 @@ interface Props {
   initial: { brand: string; description: string; competitors: string[] };
   configured: boolean;
   prompts: { id: string; prompt: string }[];
+  engines: { id: string; label: string; connected: boolean }[];
 }
 
 /** Configuração da visibilidade em IA: marca, concorrentes, prompts e botão de verificar. Só o dono vê. */
-export default function GeoManager({ siteId, initial, configured, prompts }: Props) {
+export default function GeoManager({ siteId, initial, configured, prompts, engines }: Props) {
   const router = useRouter();
   const [brand, setBrand] = useState(initial.brand);
   const [description, setDescription] = useState(initial.description);
@@ -77,7 +78,7 @@ export default function GeoManager({ siteId, initial, configured, prompts }: Pro
         status: r.failed ? "warning" : "success",
         variant: "filled",
         title: "Verificação concluída",
-        description: r.failed ? `${r.failed} prompt(s) falharam.` : `${r.done} prompts consultados.`,
+        description: r.failed ? `${r.failed} consulta(s) falharam. ${r.lastError ?? ""}` : `${r.done} respostas coletadas.`,
       });
       router.refresh();
     });
@@ -151,8 +152,28 @@ export default function GeoManager({ siteId, initial, configured, prompts }: Pro
           {busy === "run" ? "Consultando o Gemini…" : "Verificar agora"}
         </Button>
         <p className="text-paragraph-xs text-text-sub-600">
-          {configured ? "Leva de 20 segundos a 2 minutos, conforme o número de prompts." : "Salve a configuração para liberar a verificação."}
+          {configured ? "Leva de 20 segundos a 3 minutos, conforme prompts e IAs." : "Salve a configuração para liberar a verificação."}
         </p>
+      </div>
+      <div className="rounded-xl bg-bg-weak-50 p-3 text-paragraph-xs text-text-sub-600">
+        <p className="mb-1 text-label-xs uppercase tracking-wide text-text-soft-400">IAs consultadas</p>
+        <ul className="space-y-1">
+          {engines.map((e) => (
+            <li key={e.id} className="flex flex-wrap items-center gap-x-2">
+              <span className={`size-2 rounded-full ${e.connected ? "bg-success-base" : "bg-stroke-sub-300"}`} />
+              <span className="text-text-strong-950">{e.label}</span>
+              <span>
+                {e.connected
+                  ? e.id === "chatgpt"
+                    ? "conectado · cobrado por uso na sua conta da OpenAI (cerca de US$ 0,02 por resposta, com busca na web)"
+                    : "conectado · usa a cota da sua conta do Gemini"
+                  : e.id === "chatgpt"
+                    ? "não conectado · adicione a variável OPENAI_API_KEY na Vercel para ligar"
+                    : "não conectado"}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
