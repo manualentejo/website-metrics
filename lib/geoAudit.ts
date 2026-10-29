@@ -348,6 +348,11 @@ export async function auditSite(siteUrl: string): Promise<{ score: number; check
 export async function runGeoAudit(siteId: string, siteUrl: string) {
   await ensureGeoAuditTable();
   const r = await auditSite(siteUrl);
+  if (r.checks.length === 1 && r.checks[0].id === "reachable") {
+    // Site fora do ar: não registra nota 0, só avisa.
+    await db.execute(sql`DELETE FROM geo_audits WHERE site_id = ${siteId} AND score = 0 AND jsonb_array_length(checks) = 1`);
+    throw new Error(r.checks[0].found);
+  }
   await db.execute(sql`INSERT INTO geo_audits (site_id, score, checks) VALUES (${siteId}, ${r.score}, ${JSON.stringify(r.checks)}::jsonb)`);
   await db.execute(sql`DELETE FROM geo_audits WHERE site_id = ${siteId} AND id NOT IN (
     SELECT id FROM geo_audits WHERE site_id = ${siteId} ORDER BY ran_at DESC LIMIT 60)`);
@@ -359,6 +364,6 @@ type Row = Record<string, unknown>;
 /** Auditorias do site, da mais recente para a mais antiga. */
 export async function getGeoAudits(siteId: string, limit = 30): Promise<GeoAudit[]> {
   await ensureGeoAuditTable();
-  const res = (await db.execute(sql`SELECT ran_at, score, checks FROM geo_audits WHERE site_id = ${siteId} ORDER BY ran_at DESC LIMIT ${limit}`)) as unknown as Row[];
+  const res = (await db.execute(sql`SELECT ran_at, score, checks FROM geo_audits WHERE site_id = ${siteId} AND NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY ran_at DESC LIMIT ${limit}`)) as unknown as Row[];
   return res.map((r) => ({ ranAt: new Date(String(r.ran_at)), score: Number(r.score), checks: (r.checks as GeoCheck[]) ?? [] }));
 }

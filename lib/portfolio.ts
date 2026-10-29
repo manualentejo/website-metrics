@@ -131,7 +131,7 @@ async function loadGeo(ids: string[], days: number, endKey: string, names: Map<s
   if (!ids.length) return null;
   await ensureGeoAuditTable();
   const list = sql.join(ids.map((i) => sql`${i}::uuid`), sql`, `);
-  const res = (await db.execute(sql`SELECT site_id::text AS id, ran_at AS at, score FROM geo_audits WHERE site_id IN (${list}) ORDER BY ran_at`)) as unknown as { id: string; at: string; score: number }[];
+  const res = (await db.execute(sql`SELECT site_id::text AS id, ran_at AS at, score FROM geo_audits WHERE site_id IN (${list}) AND NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY ran_at`)) as unknown as { id: string; at: string; score: number }[];
   if (!res.length) return null;
   const bySite = new Map<string, { day: string; score: number }[]>();
   for (const r of res) {
