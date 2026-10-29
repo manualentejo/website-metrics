@@ -435,3 +435,12 @@
     background: hsl(var(--primary) / 0.15);
   }
 }
+
+/* Barras de rolagem invisíveis: a rolagem continua funcionando. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}

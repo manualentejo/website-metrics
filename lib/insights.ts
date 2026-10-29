@@ -10,6 +10,7 @@ export type Severity = "critical" | "warning" | "good";
 export interface Alert {
   siteId: string;
   siteName: string;
+  siteUrl: string;
   strategy: "mobile" | "desktop";
   severity: Severity;
   title: string;
@@ -55,7 +56,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
     for (const strategy of ["mobile", "desktop"] as const) {
       const [now, before] = log.filter((r) => r.siteId === site.id && r.strategy === strategy);
       if (!now) continue;
-      const base = { siteId: site.id, siteName: site.name, strategy, at: now.ranAt };
+      const base = { siteId: site.id, siteName: site.name, siteUrl: site.url, strategy, at: now.ranAt };
       const hrefFor = (tab: string) => `/site/${site.id}/${tab}?strategy=${strategy}&from=overview`;
       const device = strategy === "mobile" ? "celular" : "computador";
 

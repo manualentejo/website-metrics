@@ -10,6 +10,7 @@ import StatusSelect from "@/components/StatusSelect";
 import AskGeminiButton from "@/components/gemini/AskGeminiButton";
 import GeminiDrawer from "@/components/gemini/GeminiDrawer";
 import RunAuditButton from "@/components/overview/RunAuditButton";
+import SiteIcon from "@/components/SiteIcon";
 import SiteSwitcher from "./SiteSwitcher";
 import { getViewer } from "@/lib/access";
 import { visibleSites } from "@/lib/insights";
@@ -83,12 +84,7 @@ export default async function SiteWorkspace({
 
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <span
-              aria-hidden
-              className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-bg-white-0 text-title-h6 uppercase text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200"
-            >
-              {site.name.slice(0, 1)}
-            </span>
+            <SiteIcon url={site.url} name={site.name} size={44} className="p-1.5 ring-1 ring-inset ring-stroke-soft-200" />
             <div className="min-w-0">
               <h1 className="truncate text-title-h6 text-text-strong-950">{site.name}</h1>
               <a href={site.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-paragraph-xs text-text-sub-600 hover:text-text-strong-950">

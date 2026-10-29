@@ -1,4 +1,5 @@
 import { and, eq, lt } from "drizzle-orm";
+import { runGeoAudit } from "@/lib/geoAudit";
 import { db } from "@/db/client";
 import { reports, sites, snapshots } from "@/db/schema";
 import { runPsi, type Strategy } from "@/lib/psi";
@@ -47,6 +48,12 @@ export async function analyzeSite(site: SiteRow, apiKey: string): Promise<SiteRe
   }
   const cutoff = new Date(Date.now() - RETENTION_WEEKS * 7 * 24 * 60 * 60 * 1000);
   await db.delete(reports).where(and(eq(reports.siteId, site.id), lt(reports.ranAt, cutoff)));
+  // Auditoria GEO técnica junto da análise (só lê o site; sem custo). Falha aqui não derruba o resto.
+  try {
+    await runGeoAudit(site.id, site.url);
+  } catch {
+    /* ignorado */
+  }
   return results;
 }
 

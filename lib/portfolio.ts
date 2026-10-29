@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { reports } from "@/db/schema";
 import { ensureAnalyticsTable } from "@/lib/analytics";
-import { ensureGeoTables } from "@/lib/geo";
+import { ensureGeoAuditTable } from "@/lib/geoAudit";
 import { loadAlerts, visibleSites, type Alert } from "@/lib/insights";
 import type { Viewer } from "@/lib/access";
 import type { Status } from "@/lib/types";
@@ -35,6 +35,7 @@ export interface SiteSummary {
   performance: number | null;
   seoDelta: number | null;
   performanceDelta: number | null;
+  geo: number | null;
   visits: number | null; // null = site sem código de rastreio / sem dados no período
   lastAudit: Date | null;
 }
@@ -125,19 +126,17 @@ async function loadVisits(ids: string[], days: number, endKey: string) {
   };
 }
 
-/** Visibilidade em IA (% de respostas com a marca) por verificação, só de sites que já verificaram. */
+/** Nota GEO técnica (auditoria sem IA) por site, com a série média do portfólio. */
 async function loadGeo(ids: string[], days: number, endKey: string, names: Map<string, string>) {
   if (!ids.length) return null;
-  await ensureGeoTables();
+  await ensureGeoAuditTable();
   const list = sql.join(ids.map((i) => sql`${i}::uuid`), sql`, `);
-  const res = (await db.execute(sql`SELECT site_id::text AS id, run_id, min(ran_at) AS at, count(*)::int AS total,
-      sum(mentioned::int)::int AS m, sum(CASE WHEN cited THEN 1 ELSE 0 END)::int AS c, count(cited)::int AS v
-    FROM geo_runs WHERE site_id IN (${list}) GROUP BY 1, 2 ORDER BY 3`)) as unknown as { id: string; at: string; total: number; m: number; c: number; v: number }[];
+  const res = (await db.execute(sql`SELECT site_id::text AS id, ran_at AS at, score FROM geo_audits WHERE site_id IN (${list}) ORDER BY ran_at`)) as unknown as { id: string; at: string; score: number }[];
   if (!res.length) return null;
-  const bySite = new Map<string, { day: string; rate: number; cited: number; verifiable: number }[]>();
+  const bySite = new Map<string, { day: string; score: number }[]>();
   for (const r of res) {
     const arr = bySite.get(String(r.id)) ?? [];
-    arr.push({ day: dayKey(new Date(String(r.at))), rate: (Number(r.m) / Number(r.total)) * 100, cited: Number(r.c), verifiable: Number(r.v) });
+    arr.push({ day: dayKey(new Date(String(r.at))), score: Number(r.score) });
     bySite.set(String(r.id), arr);
   }
   const series = (end: string): Point[] =>
@@ -148,7 +147,7 @@ async function loadGeo(ids: string[], days: number, endKey: string, names: Map<s
         let v: number | null = null;
         for (const b of arr) {
           if (b.day > day) break;
-          v = b.rate;
+          v = b.score;
         }
         if (v !== null) vals.push(v);
       }
@@ -156,13 +155,11 @@ async function loadGeo(ids: string[], days: number, endKey: string, names: Map<s
     });
   const cur = series(endKey);
   const prev = series(addDays(endKey, -days));
-  const latest = [...bySite.entries()].map(([id, arr]) => ({ id, name: names.get(id) ?? "", ...arr[arr.length - 1] }));
+  const sites = [...bySite.entries()].map(([id, arr]) => ({ id, name: names.get(id) ?? "", score: arr[arr.length - 1].score }));
   return {
-    rate: lastValue(cur),
+    score: lastValue(cur),
     delta: lastValue(cur) !== null && lastValue(prev) !== null ? lastValue(cur)! - lastValue(prev)! : null,
-    cited: latest.reduce((a, b) => a + b.cited, 0),
-    verifiable: latest.reduce((a, b) => a + b.verifiable, 0),
-    sites: latest.sort((a, b) => b.rate - a.rate),
+    sites,
     series: { current: cur, previous: prev } as SeriesPair,
   };
 }
@@ -219,6 +216,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
       performance: last?.performanceScore ?? null,
       seoDelta: d(last?.seoScore, before?.seoScore),
       performanceDelta: d(last?.performanceScore, before?.performanceScore),
+      geo: geo?.sites.find((g) => g.id === s.id)?.score ?? null,
       visits: trackedIds.has(s.id) ? (visits?.perSite.get(s.id) ?? 0) : null,
       lastAudit: last?.ranAt ?? null,
     };

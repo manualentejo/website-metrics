@@ -10,6 +10,15 @@ export interface ChartPoint {
   value: number | null;
 }
 
+export type Tone = "neutral" | "blue" | "green" | "purple" | "orange";
+const TONES: Record<Tone, { stroke: string; fill: string; bg: string }> = {
+  neutral: { stroke: "stroke-text-strong-950", fill: "fill-text-strong-950", bg: "bg-text-strong-950" },
+  blue: { stroke: "stroke-information-base", fill: "fill-information-base", bg: "bg-information-base" },
+  green: { stroke: "stroke-success-base", fill: "fill-success-base", bg: "bg-success-base" },
+  purple: { stroke: "stroke-feature-base", fill: "fill-feature-base", bg: "bg-feature-base" },
+  orange: { stroke: "stroke-warning-base", fill: "fill-warning-base", bg: "bg-warning-base" },
+};
+
 const PAD = { l: 40, r: 12, t: 12, b: 26 };
 
 function niceMax(v: number) {
@@ -58,8 +67,10 @@ export default function TimeSeriesChart({
   label,
   previousLabel = "Período anterior",
   height = 280,
+  fill = false,
   loading = false,
   error,
+  tone = "neutral",
 }: {
   current: ChartPoint[];
   previous?: ChartPoint[] | null;
@@ -67,17 +78,25 @@ export default function TimeSeriesChart({
   label: string;
   previousLabel?: string;
   height?: number;
+  /** Ocupa a altura do contêiner (que precisa ter altura definida) em vez de usar `height`. */
+  fill?: boolean;
   loading?: boolean;
   error?: string | null;
+  tone?: Tone;
 }) {
+  const T = TONES[tone];
   const wrap = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
+  const [boxH, setBoxH] = useState(height);
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setWidth(Math.max(280, Math.round(e.contentRect.width))));
+    const ro = new ResizeObserver(([e]) => {
+      setWidth(Math.max(280, Math.round(e.contentRect.width)));
+      if (fill) setBoxH(Math.max(150, Math.round(e.contentRect.height) - 30));
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -108,7 +127,8 @@ export default function TimeSeriesChart({
   if (!hasData || !scale || n < 2) return <ChartEmptyState title="Sem dados no período">Quando houver dados nesta janela, o gráfico aparece aqui.</ChartEmptyState>;
 
   const iw = width - PAD.l - PAD.r;
-  const ih = height - PAD.t - PAD.b;
+  const H = fill ? boxH : height;
+  const ih = H - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (i / (n - 1)) * iw;
   const y = (v: number) => PAD.t + ih - ((v - scale.lo) / (scale.hi - scale.lo)) * ih;
   const ticks = Array.from({ length: 5 }, (_, i) => scale.lo + ((scale.hi - scale.lo) * i) / 4);
@@ -129,7 +149,7 @@ export default function TimeSeriesChart({
   return (
     <div
       ref={wrap}
-      className="relative w-full select-none rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950"
+      className={`relative w-full select-none rounded-xl ${fill ? "h-full" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950`}
       tabIndex={0}
       role="group"
       aria-label={`${label}. Use as setas para percorrer os dias.`}
@@ -146,7 +166,7 @@ export default function TimeSeriesChart({
       onPointerMove={(e) => move(e.clientX)}
       onPointerLeave={() => setActive(null)}
     >
-      <svg width={width} height={height} className="block overflow-visible" aria-hidden>
+      <svg width={width} height={H} className="block overflow-visible" aria-hidden>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={PAD.l} x2={width - PAD.r} y1={y(t)} y2={y(t)} className="stroke-stroke-soft-200" strokeDasharray={t === scale.lo ? undefined : "2 4"} />
@@ -157,7 +177,7 @@ export default function TimeSeriesChart({
         ))}
         {current.map((p, i) =>
           i % labelEvery === 0 || i === n - 1 ? (
-            <text key={p.date} x={x(i)} y={height - 6} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} className="fill-text-soft-400 text-[11px]">
+            <text key={p.date} x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} className="fill-text-soft-400 text-[11px]">
               {fmtDay(p.date)}
             </text>
           ) : null
@@ -165,16 +185,16 @@ export default function TimeSeriesChart({
         {previous && <path d={path(previous, x, y)} fill="none" className="stroke-stroke-sub-300" strokeWidth={1.5} strokeDasharray="4 4" />}
         <path
           d={area(current, x, y, scale.lo)}
-          className="fill-text-strong-950"
-          fillOpacity={0.05}
+          className={T.fill}
+          fillOpacity={0.12}
           stroke="none"
         />
-        <path d={path(current, x, y)} fill="none" className="stroke-text-strong-950" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={path(current, x, y)} fill="none" className={T.stroke} strokeWidth={2.25} strokeLinejoin="round" strokeLinecap="round" />
         {active !== null && (
           <g>
             <line x1={x(active)} x2={x(active)} y1={PAD.t} y2={PAD.t + ih} className="stroke-stroke-sub-300" />
             {prev?.value != null && <circle cx={x(active)} cy={y(prev.value)} r={3.5} className="fill-bg-white-0 stroke-stroke-sub-300" strokeWidth={1.5} />}
-            {cur?.value != null && <circle cx={x(active)} cy={y(cur.value)} r={4} className="fill-bg-white-0 stroke-text-strong-950" strokeWidth={2} />}
+            {cur?.value != null && <circle cx={x(active)} cy={y(cur.value)} r={4} className={`fill-bg-white-0 ${T.stroke}`} strokeWidth={2} />}
           </g>
         )}
       </svg>
@@ -185,7 +205,7 @@ export default function TimeSeriesChart({
           title={fmtDay(cur.date).replace("/", " / ") + (prev ? ` · vs ${fmtDay(prev.date)}` : "")}
           rows={[
             {
-              color: "bg-text-strong-950",
+              color: T.bg,
               label,
               value: cur.value === null ? "sem dado" : fmtNumber(cur.value, unit),
               sub: delta ? <span className={up > 0 ? "text-success-base" : up < 0 ? "text-error-base" : "text-text-sub-600"}>{delta}</span> : undefined,
@@ -199,7 +219,7 @@ export default function TimeSeriesChart({
 
       <div className="mt-2 flex items-center gap-4 pl-10 text-paragraph-xs text-text-sub-600">
         <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-4 bg-text-strong-950" />
+          <span className={`h-0.5 w-4 ${T.bg}`} />
           {label}
         </span>
         {previous && (

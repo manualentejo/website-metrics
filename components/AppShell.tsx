@@ -1,59 +1,12 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { asc } from "drizzle-orm";
-import { db } from "@/db/client";
-import { sites, folders } from "@/db/schema";
-import SidebarFrame from "./SidebarFrame";
-import Sidebar, { type NavKey } from "./Sidebar";
-import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
-import { getProfile } from "@/lib/profile";
-import type { Status } from "@/lib/types";
 
-// Moldura comum: barra lateral + painel branco com o conteúdo da página.
-export default async function AppShell({
-  children,
-  active,
-  activeSiteId,
-  activeFolderId,
-  aside,
-}: {
-  children: ReactNode;
-  active?: NavKey;
-  activeSiteId?: string;
-  activeFolderId?: string;
-  aside?: ReactNode;
-}) {
-  const viewer = await getViewer();
-  if (!viewer) redirect("/login");
-
-  const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
-  const [allSites, allFolders, profile] = await Promise.all([
-    db.select().from(sites).orderBy(asc(sites.sortOrder), asc(sites.createdAt)),
-    db.select().from(folders).orderBy(asc(folders.sortOrder), asc(folders.createdAt)),
-    getProfile(viewer.email),
-  ]);
-  const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
-
+// A moldura agora vive em app/(app)/layout.tsx (AppFrame). Este componente só mantém as páginas
+// antigas funcionando: as props de "ativo" vêm da URL na barra lateral.
+export default function AppShell({ children, aside }: { children: ReactNode; active?: string; activeSiteId?: string; activeFolderId?: string; aside?: ReactNode }) {
   return (
-    <SidebarFrame
-      sidebar={
-      <Sidebar
-        sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}
-        folders={allFolders}
-        active={active}
-        activeSiteId={activeSiteId}
-        activeFolderId={activeFolderId}
-        isOwner={viewer.owner}
-        user={{
-          email: viewer.email,
-          name: profile.name ?? viewer.name ?? viewer.email.split("@")[0],
-          image: profile.image ?? viewer.image ?? null,
-        }}
-      />
-      }
-    >
-      <main className="min-h-0 flex-1 overflow-y-auto bg-bg-weak-50 lg:my-2 lg:mr-2 lg:rounded-2xl ring-stroke-soft-200 lg:ring-1 lg:ring-inset">{children}</main>
+    <>
+      {children}
       {aside}
-    </SidebarFrame>
+    </>
   );
 }

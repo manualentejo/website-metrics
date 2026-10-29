@@ -1,13 +1,16 @@
 "use client";
-import { RiArrowDownSLine, RiFolderLine, RiFolderOpenLine, RiGlobalLine } from "@remixicon/react";
+import { RiArrowDownSLine, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import SiteIcon from "./SiteIcon";
 
 
 interface Item {
   id: string;
   name: string;
+  url: string;
   status: "no_ar" | "em_andamento";
 }
 
@@ -25,7 +28,7 @@ const row = (active: boolean) =>
 function SiteLink({ site, active }: { site: Item; active: boolean }) {
   return (
     <Link href={`/site/${site.id}`} className={row(active)}>
-      <RiGlobalLine className="size-5 flex-shrink-0" />
+      <SiteIcon url={site.url} name={site.name} size={20} />
       <span className="flex-1 truncate">{site.name}</span>
       <span
         className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${site.status === "no_ar" ? "bg-success-base" : "bg-warning-base"}`}
@@ -69,17 +72,10 @@ function Group({ group, activeSiteId, activeFolderId }: { group: TreeGroup; acti
   );
 }
 
-export default function WorkspaceTree({
-  groups,
-  loose,
-  activeSiteId,
-  activeFolderId,
-}: {
-  groups: TreeGroup[];
-  loose: Item[];
-  activeSiteId?: string;
-  activeFolderId?: string;
-}) {
+export default function WorkspaceTree({ groups, loose }: { groups: TreeGroup[]; loose: Item[] }) {
+  const pathname = usePathname();
+  const activeSiteId = pathname.split("/")[1] === "site" ? pathname.split("/")[2] : undefined;
+  const activeFolderId = pathname.split("/")[1] === "workspace" ? pathname.split("/")[2] : undefined;
   return (
     <div className="space-y-0.5">
       {groups.map((g) => (

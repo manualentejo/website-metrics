@@ -1,16 +1,17 @@
+"use client";
 import { RiExpandUpDownLine } from "@remixicon/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import Avatar from "./ui/Avatar";
 
 // Cartão do perfil no pé da barra lateral. Configurações ficam dentro do perfil.
 export default function SidebarUserFooter({
   user,
-  active,
 }: {
   user: { email: string; name: string; image: string | null };
-  active?: boolean;
 }) {
+  const active = usePathname().startsWith("/perfil");
   return (
     <Link
       href="/perfil"

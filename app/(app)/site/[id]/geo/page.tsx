@@ -9,6 +9,8 @@ import ComparisonChart from "@/components/charts/ComparisonChart";
 import ChartEmptyState from "@/components/charts/ChartEmptyState";
 import { formatDateTime } from "@/lib/format";
 import { getGeo } from "@/lib/geo";
+import { getGeoAudits } from "@/lib/geoAudit";
+import GeoAuditPanel from "@/components/site/GeoAuditPanel";
 import { dayKey } from "@/lib/portfolio";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +29,10 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
   } catch (e) {
     loadError = e instanceof Error ? e.message : String(e);
   }
+
+  const audits = await getGeoAudits(id).catch(() => []);
+  const latestAudit = audits[0];
+  const auditSeries = [...audits].reverse().map((a) => ({ date: dayKey(a.ranAt), value: a.score }));
 
   const latest = geo?.batches[0];
   const previous = geo?.batches[1];
@@ -52,6 +58,50 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
 
   return (
     <SiteWorkspace siteId={id} tab="geo">
+      <Card>
+        <CardHeader
+          title="Seu site está pronto para as IAs?"
+          description="GEO é fazer o ChatGPT, o Gemini e o Perplexity entenderem e citarem o seu site. Esta auditoria confere isso lendo o site, sem usar IA e sem custo."
+        />
+        <div className="space-y-5 p-5">
+          <GeoAuditPanel
+            siteId={id}
+            score={latestAudit?.score ?? null}
+            previousScore={audits[1]?.score ?? null}
+            checks={latestAudit?.checks ?? []}
+            canRun={viewer.owner}
+          />
+          {auditSeries.length >= 2 && (
+            <div>
+              <p className="mb-2 text-label-xs uppercase tracking-wide text-text-soft-400">Evolução da nota GEO</p>
+              <TimeSeriesChart current={auditSeries} unit="score" label="Nota GEO" height={180} />
+            </div>
+          )}
+          {latestAudit && <p className="text-paragraph-xs text-text-soft-400">Última auditoria: {formatDateTime(latestAudit.ranAt)}. Mede o preparo técnico, não quantas vezes as IAs citam você.</p>}
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="Preciso de palavras-chave?" />
+        <div className="space-y-2 px-5 pb-5 pt-2 text-paragraph-sm text-text-sub-600">
+          <p>Não do jeito antigo. Quem usa IA faz perguntas completas, como “qual a melhor clínica de X na minha cidade?”. Por isso o que mais ajuda é:</p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Escrever, no site, as respostas às perguntas que seus clientes fazem.</li>
+            <li>Dizer com clareza quem você é, o que faz e onde atua.</li>
+            <li>Manter as informações em código (dados estruturados), como a lista acima mostra.</li>
+          </ul>
+        </div>
+      </Card>
+
+      <details className="group rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5">
+          <span>
+            <span className="block text-label-md text-text-strong-950">Avançado: monitorar se o Gemini cita sua marca</span>
+            <span className="block text-paragraph-xs text-text-sub-600">Opcional. Faz perguntas ao Gemini e usa créditos da sua conta do Gemini.</span>
+          </span>
+          <span className="text-label-xs text-text-sub-600 group-open:hidden">Abrir</span>
+        </summary>
+        <div className="space-y-6 border-t border-stroke-soft-200 p-5">
       {loadError && (
         <ChartEmptyState kind="error" title="Não foi possível carregar o GEO" className="h-32">
           {viewer.owner ? loadError : "Tente de novo em instantes."}
@@ -206,6 +256,8 @@ export default async function SiteGeoPage({ params }: { params: Promise<{ id: st
           </div>
         </Card>
       )}
+        </div>
+      </details>
     </SiteWorkspace>
   );
 }

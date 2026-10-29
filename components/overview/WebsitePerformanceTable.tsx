@@ -3,33 +3,38 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RiArrowDownLine, RiArrowUpLine } from "@remixicon/react";
-import TrendIndicator from "@/components/charts/TrendIndicator";
-import StatusBadge from "./StatusBadge";
+import SiteIcon from "@/components/SiteIcon";
 import type { SiteSummary } from "@/lib/portfolio";
 
-type Key = "name" | "seo" | "performance" | "visits" | "trend" | "status";
+type Key = "name" | "seo" | "performance" | "geo" | "status";
 
-const score = (v: number | null) => {
+function Score({ v, delta }: { v: number | null; delta?: number | null }) {
   if (v === null) return <span className="text-text-soft-400">—</span>;
   const tone = v >= 90 ? "bg-success-base" : v >= 50 ? "bg-warning-base" : "bg-error-base";
   return (
-    <span className="inline-flex items-center gap-2 tabular-nums text-text-strong-950">
-      <span className={`size-2 rounded-full ${tone}`} aria-hidden />
-      {Math.round(v)}
+    <span className="block min-w-[3.5rem]">
+      <span className="flex items-baseline gap-1 tabular-nums text-label-sm text-text-strong-950">
+        {Math.round(v)}
+        {delta ? (
+          <span className={`text-[10px] ${delta > 0 ? "text-success-base" : "text-error-base"}`}>
+            {delta > 0 ? "▲" : "▼"}
+            {Math.abs(Math.round(delta))}
+          </span>
+        ) : null}
+      </span>
+      <span className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-bg-weak-50">
+        <span className={`block h-full rounded-full ${tone}`} style={{ width: `${v}%` }} />
+      </span>
     </span>
   );
-};
+}
 
-/** Comparação compacta entre sites (ordenável). Não substitui a página Websites: aqui não há cadastro. */
-export default function WebsitePerformanceTable({ rows, limit = 8 }: { rows: SiteSummary[]; limit?: number }) {
+/** Comparação entre sites: ordenável, com rolagem interna quando há muitos sites. Não substitui a página Sites. */
+export default function WebsitePerformanceTable({ rows }: { rows: SiteSummary[] }) {
   const [sort, setSort] = useState<{ key: Key; dir: 1 | -1 }>({ key: "seo", dir: 1 });
 
   const sorted = useMemo(() => {
-    const val = (r: SiteSummary): number | string | null =>
-      sort.key === "name" ? r.name.toLowerCase()
-      : sort.key === "status" ? r.status
-      : sort.key === "trend" ? (r.seoDelta ?? 0) + (r.performanceDelta ?? 0)
-      : r[sort.key];
+    const val = (r: SiteSummary): number | string | null => (sort.key === "name" ? r.name.toLowerCase() : sort.key === "status" ? r.status : r[sort.key]);
     return [...rows].sort((a, b) => {
       const x = val(a);
       const y = val(b);
@@ -40,8 +45,8 @@ export default function WebsitePerformanceTable({ rows, limit = 8 }: { rows: Sit
     });
   }, [rows, sort]);
 
-  const Th = ({ k, children, right }: { k: Key; children: string; right?: boolean }) => (
-    <th scope="col" aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className={`px-3 py-2 font-normal ${right ? "text-right" : ""}`}>
+  const Th = ({ k, children }: { k: Key; children: string }) => (
+    <th scope="col" aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className="sticky top-0 z-[1] bg-bg-white-0 px-3 py-2 font-normal">
       <button
         type="button"
         onClick={() => setSort((s) => (s.key === k ? { key: k, dir: (-s.dir) as 1 | -1 } : { key: k, dir: k === "name" ? 1 : -1 }))}
@@ -54,44 +59,37 @@ export default function WebsitePerformanceTable({ rows, limit = 8 }: { rows: Sit
   );
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-left">
-        <caption className="sr-only">Comparação de notas entre sites (Lighthouse, computador)</caption>
-        <thead>
-          <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-subheading-xs text-text-soft-400">
-            <Th k="name">Website</Th>
-            <Th k="seo">SEO</Th>
-            <Th k="performance">Desempenho</Th>
-            <Th k="visits">Visitas</Th>
-            <Th k="trend">Tendência</Th>
-            <Th k="status" right>Status</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.slice(0, limit).map((r) => (
-            <tr key={r.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
-              <td className="px-3 py-2.5">
-                <Link href={`/site/${r.id}`} className="block min-w-0 focus-visible:outline-none focus-visible:underline">
+    <table className="w-full text-left">
+      <caption className="sr-only">Comparação de notas entre sites (Lighthouse e auditoria GEO)</caption>
+      <thead>
+        <tr className="text-subheading-xs text-text-soft-400">
+          <Th k="name">Site</Th>
+          <Th k="seo">SEO</Th>
+          <Th k="performance">Desemp.</Th>
+          <Th k="geo">GEO</Th>
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map((r) => (
+          <tr key={r.id} className="border-t border-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50">
+            <td className="px-3 py-2">
+              <Link href={`/site/${r.id}`} className="flex min-w-0 items-center gap-2.5 focus-visible:outline-none focus-visible:underline">
+                <SiteIcon url={r.url} name={r.name} size={24} />
+                <span className="min-w-0">
                   <span className="block truncate text-label-sm text-text-strong-950">{r.name}</span>
-                  <span className="block truncate text-paragraph-xs text-text-sub-600">{r.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
-                </Link>
-              </td>
-              <td className="px-3 py-2.5 text-label-sm">{score(r.seo)}</td>
-              <td className="px-3 py-2.5 text-label-sm">{score(r.performance)}</td>
-              <td className="px-3 py-2.5 text-label-sm tabular-nums">
-                {r.visits === null ? <span className="text-text-soft-400" title="Código de rastreio não instalado">—</span> : r.visits.toLocaleString("pt-BR")}
-              </td>
-              <td className="px-3 py-2.5">
-                <span className="flex flex-col gap-0.5">
-                  <TrendIndicator current={r.seo} delta={r.seoDelta} suffix="SEO" />
-                  <TrendIndicator current={r.performance} delta={r.performanceDelta} suffix="Desemp." />
+                  <span className="flex items-center gap-1.5 text-paragraph-xs text-text-sub-600">
+                    <span className={`size-1.5 rounded-full ${r.status === "no_ar" ? "bg-success-base" : "bg-warning-base"}`} />
+                    {r.status === "no_ar" ? "No ar" : "Em andamento"}
+                  </span>
                 </span>
-              </td>
-              <td className="px-3 py-2.5 text-right"><StatusBadge status={r.status} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              </Link>
+            </td>
+            <td className="px-3 py-2"><Score v={r.seo} delta={r.seoDelta} /></td>
+            <td className="px-3 py-2"><Score v={r.performance} delta={r.performanceDelta} /></td>
+            <td className="px-3 py-2"><Score v={r.geo} /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

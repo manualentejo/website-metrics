@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites } from "@/db/schema";
 import { getViewer } from "@/lib/access";
+import { runGeoAudit } from "@/lib/geoAudit";
 import { addPrompts, getGeo, removePrompt, runGeoCheck, saveSettings, suggestPrompts } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +46,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const list = await suggestPrompts(geo.settings.brand, site.url.replace(/^https?:\/\//, ""), geo.settings.description);
         await addPrompts(id, list);
         return NextResponse.json({ ok: true, added: list.length });
+      }
+      case "audit": {
+        const r = await runGeoAudit(id, site.url);
+        return NextResponse.json({ ok: true, score: r.score });
       }
       case "run": {
         const r = await runGeoCheck(id, site.url);

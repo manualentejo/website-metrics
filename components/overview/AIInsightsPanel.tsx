@@ -17,7 +17,7 @@ const META: Record<WeeklyInsight["key"], { icon: ComponentType<{ className?: str
  * e cada cartão aponta para a métrica ou auditoria que o sustenta. Uma integração de IA entra via
  * `source="ai"` com o mesmo formato de `insights`, sem mudar o layout.
  */
-export default function AIInsightsPanel({ insights, source = "rules" }: { insights: WeeklyInsight[]; source?: "rules" | "ai" }) {
+export default function AIInsightsPanel({ insights, source = "rules", compact = false }: { insights: WeeklyInsight[]; source?: "rules" | "ai"; compact?: boolean }) {
   if (!insights.length)
     return (
       <ChartEmptyState title="Ainda sem dados para resumir" className="h-40">
@@ -26,7 +26,7 @@ export default function AIInsightsPanel({ insights, source = "rules" }: { insigh
     );
   return (
     <div>
-      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <ul className={compact ? "grid gap-2" : "grid gap-3 sm:grid-cols-2 xl:grid-cols-3"}>
         {insights.map((i) => {
           const m = META[i.key];
           const Icon = m.icon;
@@ -50,11 +50,11 @@ export default function AIInsightsPanel({ insights, source = "rules" }: { insigh
               </span>
             </>
           );
-          const cls = `flex min-h-[9rem] flex-col rounded-xl p-4 ${
+          const cls = `flex ${compact ? "p-3" : "min-h-[9rem] p-4"} flex-col rounded-xl ${
             dark ? "bg-bg-strong-950" : "bg-bg-white-0 ring-1 ring-inset ring-stroke-soft-200"
           } ${i.href ? "transition duration-200 hover:ring-stroke-sub-300" : ""}`;
           return (
-            <li key={i.key} className={i.key === "next" ? "sm:col-span-2 xl:col-span-1" : ""}>
+            <li key={i.key} className={!compact && i.key === "next" ? "sm:col-span-2 xl:col-span-1" : ""}>
               {i.href ? (
                 <Link href={i.href} className={`${cls} h-full ${dark ? "hover:opacity-95" : "hover:bg-bg-weak-50"}`}>{body}</Link>
               ) : (

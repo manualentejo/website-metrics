@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RiArrowRightUpLine, RiSearchLine, RiSettings3Line } from "@remixicon/react";
+import SiteIcon from "@/components/SiteIcon";
 import StatusSelect from "@/components/StatusSelect";
 import { inputClass } from "@/components/ui/fields";
 import { Segmented } from "@/components/ui/Page";
@@ -115,9 +116,7 @@ export default function WebsiteInventory({ rows, owner }: { rows: InventoryRow[]
                 <tr key={r.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
                   <td className="px-4 py-2.5">
                     <Link href={`/site/${r.id}`} className="flex items-center gap-3">
-                      <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg bg-bg-weak-50 text-label-sm uppercase text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
-                        {r.name.slice(0, 1)}
-                      </span>
+                      <SiteIcon url={r.url} name={r.name} size={32} className="ring-1 ring-inset ring-stroke-soft-200" />
                       <span className="min-w-0">
                         <span className="block truncate text-label-sm text-text-strong-950">{r.name}</span>
                         <span className="block truncate text-paragraph-xs text-text-sub-600">{bare(r.url)}</span>

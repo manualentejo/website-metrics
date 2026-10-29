@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RiAlertFill, RiArrowRightLine, RiCheckboxCircleFill, RiErrorWarningFill } from "@remixicon/react";
+import SiteIcon from "@/components/SiteIcon";
 import Badge from "@/components/ui/Badge";
 import type { Alert } from "@/lib/insights";
 
@@ -35,7 +36,7 @@ function group(issues: Alert[]): Group[] {
  * (dispositivo e origem preservados na URL). "Aberto" = ainda presente na última auditoria; o painel
  * ainda não registra correções manuais.
  */
-export default function IssueList({ issues, showSite = true }: { issues: Alert[]; showSite?: boolean }) {
+export default function IssueList({ issues, showSite = true, dense = false }: { issues: Alert[]; showSite?: boolean; dense?: boolean }) {
   if (!issues.length)
     return (
       <div className="flex items-center gap-3 rounded-xl bg-success-lighter px-4 py-5 text-paragraph-sm text-text-strong-950">
@@ -48,10 +49,10 @@ export default function IssueList({ issues, showSite = true }: { issues: Alert[]
 
   return (
     <div>
-      <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-paragraph-xs text-text-sub-600">
+      {!dense && <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-paragraph-xs text-text-sub-600">
         <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-error-base" />{critical} crítico{critical === 1 ? "" : "s"}</span>
         <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-warning-base" />{groups.length - critical} em atenção</span>
-      </p>
+      </p>}
       <ul className="grid gap-2">
         {groups.map(({ key, first: a, devices }) => {
           const sev = SEVERITY[a.severity];
@@ -60,9 +61,9 @@ export default function IssueList({ issues, showSite = true }: { issues: Alert[]
             <li key={key}>
               <Link
                 href={a.href}
-                className="group flex items-center gap-3 rounded-xl bg-bg-white-0 p-3 ring-1 ring-inset ring-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50 hover:ring-stroke-sub-300 sm:gap-4 sm:p-4"
+                className={`group flex items-center gap-3 rounded-xl bg-bg-white-0 ring-1 ring-inset ring-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50 hover:ring-stroke-sub-300 ${dense ? "p-2.5" : "p-3 sm:gap-4 sm:p-4"}`}
               >
-                <span className={`flex size-10 flex-shrink-0 items-center justify-center rounded-xl ${sev.tile}`}>
+                <span className={`flex flex-shrink-0 items-center justify-center rounded-xl ${dense ? "size-8" : "size-10"} ${sev.tile}`}>
                   <Icon className="size-5" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -70,9 +71,7 @@ export default function IssueList({ issues, showSite = true }: { issues: Alert[]
                   <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-paragraph-xs text-text-sub-600">
                     {showSite && (
                       <span className="inline-flex items-center gap-1.5 rounded-md bg-bg-weak-50 py-0.5 pl-0.5 pr-2 text-label-xs text-text-strong-950">
-                        <span className="flex size-4 items-center justify-center rounded bg-bg-white-0 text-[10px] uppercase ring-1 ring-inset ring-stroke-soft-200">
-                          {a.siteName.slice(0, 1)}
-                        </span>
+                        <SiteIcon url={a.siteUrl} name={a.siteName} size={16} />
                         {a.siteName}
                       </span>
                     )}
@@ -83,7 +82,7 @@ export default function IssueList({ issues, showSite = true }: { issues: Alert[]
                     <span>Detectado em {day(a.at)}</span>
                   </span>
                 </span>
-                <span className="hidden flex-shrink-0 flex-col items-end gap-1 sm:flex">
+                <span className={`hidden flex-shrink-0 flex-col items-end gap-1 ${dense ? "xl:flex" : "sm:flex"}`}>
                   <Badge tone={sev.tone}>{sev.label}</Badge>
                   <span className="text-paragraph-xs text-text-soft-400">Aberto</span>
                 </span>
