@@ -98,7 +98,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const geoBand = band("geo");
 
   return (
-    <div className="flex flex-col gap-3 p-4 sm:p-5 lg:h-full lg:overflow-hidden">
+    <div className="flex flex-col gap-3 p-3 sm:p-4 lg:absolute lg:inset-0 lg:overflow-hidden">
       <header className="flex flex-shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-title-h6 text-text-strong-950">Visão geral</h1>
@@ -110,7 +110,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <Segmented label="Período" items={PERIODS.map((d) => ({ label: `${d} dias`, href: href({ d: d === 28 ? null : String(d) }), active: days === d }))} />
           <Link href="/relatorios" className={buttonClass("outline", "md")}>
             <RiFileChartLine className="size-4" />
-            Relatórios
+            <span className="hidden xl:inline">Relatórios</span>
           </Link>
           <RunAuditButton sites={auditable} />
         </div>
@@ -122,7 +122,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </ChartEmptyState>
       ) : (
         <>
-          <section aria-label="Indicadores principais" className="grid flex-shrink-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <section aria-label="Indicadores principais" className="grid flex-shrink-0 grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
             <MetricCard
               label="Sites"
               icon={RiGlobalLine}
@@ -175,9 +175,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             />
           </section>
 
-          <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-12 lg:grid-rows-2">
+          <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-12 lg:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)]">
             <Panel
-              className="lg:col-span-8"
+              className="lg:col-span-7 2xl:col-span-8"
               scroll={false}
               title="Desempenho do portfólio"
               description={`${label}, ${days} dias contra os ${days} anteriores`}
@@ -187,7 +187,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 </div>
               }
             >
-              <div className="absolute inset-x-4 inset-y-0 bottom-3 min-h-[15rem]">
+              <div className="absolute inset-x-4 inset-y-0 bottom-2">
                 {metric.key === "visits" && p.visitsError ? (
                   <ChartEmptyState kind="error" title="Não foi possível carregar as visitas" className="h-full">{viewer.owner ? p.visitsError : "Tente novamente em instantes."}</ChartEmptyState>
                 ) : !series ? (
@@ -204,7 +204,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </Panel>
 
-            <Panel className="lg:col-span-4" title="Sites por faixa de nota" description="Quantos sites em cada faixa" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
+            <Panel className="lg:col-span-5 2xl:col-span-4" title="Sites por faixa de nota" description="Quantos sites em cada faixa" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
               {seoCount === 0 ? (
                 <ChartEmptyState title="Sem notas ainda" className="h-full min-h-[10rem]" />
               ) : (
@@ -264,16 +264,23 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </Panel>
 
-            <Panel
-              className="lg:col-span-4"
-              title="Precisa da sua atenção"
-              description="Do mais grave ao menos grave"
-              action={<Link href="/alertas" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Todos</Link>}
-            >
-              <IssueList issues={p.attention} dense />
-            </Panel>
+            <div className="hidden min-h-0 min-w-0 2xl:col-span-4 2xl:flex *:w-full">
+              <Panel title="Precisa da sua atenção" description="Do mais grave ao menos grave" action={<Link href="/alertas" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Todos</Link>}>
+                <IssueList issues={p.attention} dense />
+              </Panel>
+            </div>
 
-            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:col-span-3 lg:min-h-0">
+            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:col-span-7 lg:min-h-0 2xl:hidden">
+              <TabbedPanel
+                tabs={[
+                  { key: "atencao", label: "Atenção", node: <IssueList issues={p.attention} dense /> },
+                  { key: "resumo", label: "Resumo", node: <AIInsightsPanel insights={p.insights} compact /> },
+                  { key: "atividade", label: "Atividade", node: <ActivityFeed items={p.activity} /> },
+                ]}
+              />
+            </section>
+
+            <section className="hidden min-h-0 min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 2xl:col-span-3 2xl:flex">
               <TabbedPanel
                 tabs={[
                   { key: "resumo", label: "Resumo", node: <AIInsightsPanel insights={p.insights} compact /> },

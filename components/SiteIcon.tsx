@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
-const hostOf = (url: string) => url.replace(/^https?:\/\//, "").split("/")[0];
+const hostOf = (url: string) => url.replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").toLowerCase();
+
+const IconsContext = createContext<Record<string, string>>({});
+
+/** Entrega a todos os SiteIcon o mapa domínio → ícone descoberto no servidor. */
+export function SiteIconsProvider({ icons, children }: { icons: Record<string, string>; children: ReactNode }) {
+  return <IconsContext.Provider value={icons}>{children}</IconsContext.Provider>;
+}
 
 /**
- * Ícone do site (o favicon configurado nele). Se não carregar, mostra a inicial.
- * O navegador pede a imagem ao serviço de favicons do Google usando só o domínio do site.
+ * Ícone do site. Usa o ícone configurado no próprio site (descoberto ao cadastrar); se não houver
+ * (ou não carregar), mostra a inicial do nome.
  */
 export default function SiteIcon({ url, name, size = 20, className = "" }: { url: string; name: string; size?: number; className?: string }) {
-  const [failed, setFailed] = useState(false);
+  const icons = useContext(IconsContext);
+  const host = hostOf(url);
+  const sources = icons[host] ? [icons[host]] : [];
+  const [failed, setFailed] = useState(0);
   const style = { width: size, height: size };
-  if (failed)
+
+  if (failed >= sources.length)
     return (
       <span
         style={{ ...style, fontSize: Math.max(10, size * 0.5) }}
@@ -24,12 +35,14 @@ export default function SiteIcon({ url, name, size = 20, className = "" }: { url
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostOf(url))}&sz=64`}
+      key={sources[failed]}
+      src={sources[failed]}
       alt=""
       loading="lazy"
       decoding="async"
+      referrerPolicy="no-referrer"
       style={style}
-      onError={() => setFailed(true)}
+      onError={() => setFailed((n) => n + 1)}
       className={`flex-shrink-0 rounded-md bg-bg-white-0 object-contain ${className}`}
     />
   );

@@ -36,7 +36,7 @@ export default async function SiteOverviewPage({
 
   const days = (PERIODS.find((p) => String(p) === sp.d) ?? 28) as Period;
   const { viewer, site } = await requireSite(id);
-  const [p, fixes, audits] = await Promise.all([loadPortfolio(viewer, { days, siteIds: [id] }), loadFixQueue(viewer), getGeoAudits(id, 2).catch(() => [])]);
+  const [p, fixes, audits] = await Promise.all([loadPortfolio(viewer, { days, siteIds: [id] }), loadFixQueue(viewer, id), getGeoAudits(id, 2).catch(() => [])]);
   const geoAudit = audits[0];
   const geoFixes = geoAudit?.checks.filter((c) => c.status !== "ok").sort((a, b) => (a.status === b.status ? b.weight - a.weight : a.status === "fail" ? -1 : 1)).slice(0, 3) ?? [];
   const row = p.rows[0];

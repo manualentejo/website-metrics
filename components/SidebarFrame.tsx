@@ -18,7 +18,7 @@ export default function SidebarFrame({ sidebar, children }: { sidebar: ReactNode
   }, [open]);
 
   return (
-    <div className="flex h-screen flex-col bg-bg-white-0 lg:flex-row">
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-bg-white-0 lg:flex-row">
       <div className="hidden lg:block">{sidebar}</div>
 
       <div className="flex h-12 flex-shrink-0 items-center gap-3 border-b border-stroke-soft-200 px-3 lg:hidden">

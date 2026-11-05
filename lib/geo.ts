@@ -3,15 +3,13 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { askGemini } from "@/lib/gemini";
 import { askGeminiGrounded, type GroundedAnswer } from "@/lib/geminiGrounded";
-import { askOpenAI, openaiConfigured } from "@/lib/openaiSearch";
 
 // Visibilidade em IA (GEO): perguntamos ao Gemini, como uma pessoa faria, prompts cadastrados
 // por site e registramos se a marca foi mencionada e se o domínio apareceu entre as fontes.
-// Cada mecanismo só entra se houver integração real: Gemini (GEMINI_API_KEY) e ChatGPT (OPENAI_API_KEY).
+// Cada mecanismo só entra se houver integração real: hoje só o Gemini (GEMINI_API_KEY).
 
 export const ENGINES = [
   { id: "gemini", label: "Gemini", ask: askGeminiGrounded, connected: () => Boolean(process.env.GEMINI_API_KEY) },
-  { id: "chatgpt", label: "ChatGPT", ask: askOpenAI, connected: openaiConfigured },
 ] as const;
 export const engineLabel = (id: string) => ENGINES.find((e) => e.id === id)?.label ?? id;
 export const engineStatus = () => ENGINES.map((e) => ({ id: e.id, label: e.label, connected: e.connected() }));
@@ -101,7 +99,7 @@ export async function getGeo(siteId: string, siteName: string) {
   const [s, p, r] = await Promise.all([
     db.execute(sql`SELECT brand, description, competitors FROM geo_settings WHERE site_id = ${siteId}`),
     db.execute(sql`SELECT id::text AS id, prompt FROM geo_prompts WHERE site_id = ${siteId} ORDER BY created_at`),
-    db.execute(sql`SELECT run_id::text AS run_id, engine, ran_at, prompt_id::text AS prompt_id, prompt, mentioned, cited, competitors, answer, sources
+    db.execute(sql`SELECT run_id::text AS run_id, engine, ran_at, prompt_id::text AS prompt_id, prompt, mentioned, cited, competitors
       FROM geo_runs WHERE site_id = ${siteId} AND ran_at > now() - interval '400 days' ORDER BY ran_at DESC LIMIT 2000`),
   ]);
   const st = rows(s)[0];
@@ -122,8 +120,8 @@ export async function getGeo(siteId: string, siteName: string) {
       mentioned: Boolean(x.mentioned),
       cited: x.cited === null ? null : Boolean(x.cited),
       competitors: (x.competitors as string[]) ?? [],
-      answer: String(x.answer),
-      sources: (x.sources as { uri: string; title: string }[]) ?? [],
+      answer: "",
+      sources: [],
     };
     const b = byRun.get(id) ?? { runId: id, ranAt: res.ranAt, total: 0, mentioned: 0, cited: 0, verifiable: 0, byEngine: {}, results: [] };
     const e = (b.byEngine[res.engine] ??= { total: 0, mentioned: 0, cited: 0, verifiable: 0 });
@@ -139,6 +137,17 @@ export async function getGeo(siteId: string, siteName: string) {
     byRun.set(id, b);
   }
   const batches = [...byRun.values()].sort((a, b) => b.ranAt.getTime() - a.ranAt.getTime()); // mais recente primeiro
+  // Texto das respostas e fontes só da última verificação (o resto do histórico só precisa dos números).
+  if (batches[0]) {
+    const full = rows(await db.execute(sql`SELECT engine, prompt, answer, sources FROM geo_runs WHERE run_id = ${batches[0].runId}::uuid`));
+    for (const r of batches[0].results) {
+      const m = full.find((x) => String(x.engine) === r.engine && String(x.prompt) === r.prompt);
+      if (m) {
+        r.answer = String(m.answer);
+        r.sources = (m.sources as { uri: string; title: string }[]) ?? [];
+      }
+    }
+  }
   return { settings: settings ?? { brand: siteName, description: "", competitors: [] }, configured: !!settings, prompts, batches };
 }
 

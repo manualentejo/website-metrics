@@ -1,5 +1,6 @@
 import { and, eq, lt } from "drizzle-orm";
 import { runGeoAudit } from "@/lib/geoAudit";
+import { refreshSiteIcon } from "@/lib/siteIcons";
 import { db } from "@/db/client";
 import { reports, sites, snapshots } from "@/db/schema";
 import { runPsi, type Strategy } from "@/lib/psi";
@@ -51,6 +52,12 @@ export async function analyzeSite(site: SiteRow, apiKey: string): Promise<SiteRe
   // Auditoria GEO técnica junto da análise (só lê o site; sem custo). Falha aqui não derruba o resto.
   try {
     await runGeoAudit(site.id, site.url);
+  } catch {
+    /* ignorado */
+  }
+  // Ícone do site (favicon): descoberto ao cadastrar e renovado a cada análise.
+  try {
+    await refreshSiteIcon(site.id, site.url);
   } catch {
     /* ignorado */
   }

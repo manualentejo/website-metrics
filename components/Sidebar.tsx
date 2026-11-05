@@ -31,7 +31,7 @@ export default function Sidebar({
   const loose = sites.filter((s) => !s.folderId || !folders.some((f) => f.id === s.folderId));
 
   return (
-    <aside className="flex h-screen w-60 flex-shrink-0 flex-col">
+    <aside className="flex h-full w-60 flex-shrink-0 flex-col">
       <div className="px-4 pb-3 pt-4">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="flex size-8 items-center justify-center rounded-lg bg-bg-strong-950 text-label-sm text-text-white-0">M</span>

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions, isOwner } from "@/lib/auth";
 import { db } from "@/db/client";
@@ -11,12 +12,13 @@ export interface Viewer {
   image?: string | null;
 }
 
-export async function getViewer(): Promise<Viewer | null> {
+// cache(): numa mesma requisição, layout e página compartilham o mesmo resultado (uma só leitura da sessão).
+export const getViewer = cache(async (): Promise<Viewer | null> => {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
   if (!email) return null;
   return { email, owner: isOwner(email), name: session?.user?.name, image: session?.user?.image };
-}
+});
 
 /** E-mails com acesso a sites "shared", indexado por site_id. */
 export async function getAccessibleSiteIds(email: string): Promise<Set<string>> {

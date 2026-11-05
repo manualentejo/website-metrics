@@ -4,6 +4,9 @@ import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites, folders } from "@/db/schema";
 import SidebarFrame from "./SidebarFrame";
+import { SiteIconsProvider } from "./SiteIcon";
+import IconBackfill from "./IconBackfill";
+import { getIconMap, hostKey } from "@/lib/siteIcons";
 import Sidebar from "./Sidebar";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { getProfile } from "@/lib/profile";
@@ -15,14 +18,18 @@ export default async function AppFrame({ children }: { children: ReactNode }) {
   if (!viewer) redirect("/login");
 
   const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
-  const [allSites, allFolders, profile] = await Promise.all([
+  const [allSites, allFolders, profile, icons] = await Promise.all([
     db.select().from(sites).orderBy(asc(sites.sortOrder), asc(sites.createdAt)),
     db.select().from(folders).orderBy(asc(folders.sortOrder), asc(folders.createdAt)),
     getProfile(viewer.email),
+    getIconMap().catch(() => ({}) as Record<string, string>),
   ]);
   const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
 
+  const missingIcons = viewer.owner && visible.some((s) => !icons[hostKey(s.url)]);
+
   return (
+    <SiteIconsProvider icons={icons}>
     <SidebarFrame
       sidebar={
       <Sidebar
@@ -37,7 +44,9 @@ export default async function AppFrame({ children }: { children: ReactNode }) {
       />
       }
     >
-      <main className="min-h-0 flex-1 overflow-y-auto bg-bg-weak-50 lg:my-2 lg:mr-2 lg:rounded-2xl">{children}</main>
+      <main className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-bg-weak-50 lg:my-2 lg:mr-2 lg:rounded-2xl">{children}</main>
     </SidebarFrame>
+    {missingIcons && <IconBackfill />}
+    </SiteIconsProvider>
   );
 }

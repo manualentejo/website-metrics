@@ -44,9 +44,9 @@ export default function MetricCard({
 }) {
   const t = TONE[tone];
   return (
-    <div className="group relative flex min-w-0 items-start gap-3 rounded-2xl bg-bg-white-0 p-3.5 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 transition duration-200 focus-within:ring-stroke-sub-300 hover:ring-stroke-sub-300 sm:p-4">
+    <div className="group relative flex min-w-0 items-start gap-3 rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 transition duration-200 focus-within:ring-stroke-sub-300 hover:ring-stroke-sub-300 sm:p-4">
       {Icon && (
-        <span className={`flex size-10 flex-shrink-0 items-center justify-center rounded-xl ${t.tile}`}>
+        <span className={`hidden size-10 flex-shrink-0 items-center justify-center rounded-xl sm:flex lg:hidden xl:flex ${t.tile}`}>
           <Icon className="size-5" aria-hidden />
         </span>
       )}
@@ -66,7 +66,7 @@ export default function MetricCard({
               <div className="mt-0.5 min-h-4">{trend ?? (hint && <span className="block truncate text-paragraph-xs text-text-sub-600">{hint}</span>)}</div>
             </div>
             {spark && (
-              <div className="w-16 flex-shrink-0 sm:w-20">
+              <div className="hidden w-16 flex-shrink-0 sm:block lg:hidden 2xl:block 2xl:w-20">
                 <Sparkline values={spark} className={t.spark} label={`${label}: tendência`} />
               </div>
             )}

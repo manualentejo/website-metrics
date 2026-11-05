@@ -163,13 +163,7 @@ export default function GeoManager({ siteId, initial, configured, prompts, engin
               <span className={`size-2 rounded-full ${e.connected ? "bg-success-base" : "bg-stroke-sub-300"}`} />
               <span className="text-text-strong-950">{e.label}</span>
               <span>
-                {e.connected
-                  ? e.id === "chatgpt"
-                    ? "conectado · cobrado por uso na sua conta da OpenAI (cerca de US$ 0,02 por resposta, com busca na web)"
-                    : "conectado · usa a cota da sua conta do Gemini"
-                  : e.id === "chatgpt"
-                    ? "não conectado · adicione a variável OPENAI_API_KEY na Vercel para ligar"
-                    : "não conectado"}
+                {e.connected ? "conectado · usa a cota da sua conta do Gemini" : "não conectado"}
               </span>
             </li>
           ))}

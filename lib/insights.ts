@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites, reports, snapshots } from "@/db/schema";
@@ -27,11 +28,12 @@ const CATEGORIES = [
   { key: "seoScore", label: "SEO", category: "SEO", tab: "performance" },
 ] as const;
 
-export async function visibleSites(viewer: Viewer) {
+// cache(): vários carregadores da mesma página pedem os sites visíveis; a consulta roda uma vez por requisição.
+export const visibleSites = cache(async (viewer: Viewer) => {
   const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
   const all = await db.select().from(sites).orderBy(asc(sites.sortOrder), asc(sites.createdAt));
   return all.filter((s) => canViewSite(viewer, s, accessible, s.id));
-}
+});
 
 /** Todas as análises registradas dos sites visíveis, da mais recente para a mais antiga. */
 export async function loadReportLog(viewer: Viewer, limit = 200) {
@@ -122,8 +124,8 @@ export interface FixItem {
 }
 
 /** Fila de correções: auditorias de Desempenho, SEO etc. reprovadas, por impacto, no celular. */
-export async function loadFixQueue(viewer: Viewer): Promise<FixItem[]> {
-  const visible = await visibleSites(viewer);
+export async function loadFixQueue(viewer: Viewer, onlySiteId?: string): Promise<FixItem[]> {
+  const visible = (await visibleSites(viewer)).filter((s) => !onlySiteId || s.id === onlySiteId);
   if (!visible.length) return [];
   const snaps = await db
     .select()
