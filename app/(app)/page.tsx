@@ -258,7 +258,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               )}
             </Panel>
 
-            <Panel className="lg:col-span-5" title="Sites" description={`${p.rows.length} monitorados · ordene pelas colunas`} action={<Link href="/sites" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Gerenciar</Link>}>
+            <Panel className="lg:col-span-6 2xl:col-span-5" title="Sites" description={`${p.rows.length} monitorados · ordene pelas colunas`} action={<Link href="/sites" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Gerenciar</Link>}>
               <div className="-mx-4 -mt-1">
                 <WebsitePerformanceTable rows={p.rows} />
               </div>
@@ -270,7 +270,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </Panel>
             </div>
 
-            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:col-span-7 lg:min-h-0 2xl:hidden">
+            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:col-span-6 lg:min-h-0 2xl:hidden">
               <TabbedPanel
                 tabs={[
                   { key: "atencao", label: "Atenção", node: <IssueList issues={p.attention} dense /> },

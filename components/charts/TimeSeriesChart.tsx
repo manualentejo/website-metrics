@@ -95,7 +95,7 @@ export default function TimeSeriesChart({
     if (!el) return;
     const ro = new ResizeObserver(([e]) => {
       setWidth(Math.max(280, Math.round(e.contentRect.width)));
-      if (fill) setBoxH(Math.max(150, Math.round(e.contentRect.height) - 30));
+      if (fill) setBoxH(Math.max(80, Math.round(e.contentRect.height) - 40));
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -217,7 +217,7 @@ export default function TimeSeriesChart({
         />
       )}
 
-      <div className="mt-2 flex items-center gap-4 pl-10 text-paragraph-xs text-text-sub-600">
+      <div className={`mt-2 items-center gap-4 pl-10 text-paragraph-xs text-text-sub-600 ${fill && boxH < 120 ? "hidden" : "flex"}`}>
         <span className="flex items-center gap-1.5">
           <span className={`h-0.5 w-4 ${T.bg}`} />
           {label}
