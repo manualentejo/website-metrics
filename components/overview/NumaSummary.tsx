@@ -30,7 +30,7 @@ export default function NumaSummary() {
   }, [load]);
 
   return (
-    <div className="rounded-xl bg-bg-weak-50 p-3">
+    <div className="ai-gradient rounded-xl p-3 ring-1 ring-inset ring-stroke-soft-200">
       {loading ? (
         <div className="space-y-2" aria-busy="true" aria-label="A Numa está escrevendo">
           <div className="h-3 w-full animate-pulse rounded bg-bg-soft-200" />

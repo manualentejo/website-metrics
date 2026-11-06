@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import Avatar from "./ui/Avatar";
+import RailTip from "./RailTip";
 
 // Cartão do perfil no pé da barra lateral. Configurações ficam dentro do perfil.
 export default function SidebarUserFooter({
@@ -13,10 +14,10 @@ export default function SidebarUserFooter({
 }) {
   const active = usePathname().startsWith("/perfil");
   return (
+    <RailTip label={user.name} hint="Meu perfil">
     <Link
       href="/perfil"
       aria-label="Abrir meu perfil"
-      title={user.name}
       className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-bg-soft-200 group-data-[collapsed=true]/sb:justify-center group-data-[collapsed=true]/sb:p-1.5 ${active ? "bg-[color:var(--accent-soft)]" : ""}`}
     >
       <Avatar name={user.name} image={user.image} size={32} />
@@ -26,5 +27,6 @@ export default function SidebarUserFooter({
       </span>
       <RiExpandUpDownLine className="size-5 flex-shrink-0 text-text-sub-600 group-data-[collapsed=true]/sb:hidden" />
     </Link>
+    </RailTip>
   );
 }

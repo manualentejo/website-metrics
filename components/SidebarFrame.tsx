@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { RiCloseLine, RiMenuFoldLine, RiMenuLine, RiMenuUnfoldLine } from "@remixicon/react";
+import RailTip from "./RailTip";
 
 const SidebarContext = createContext<{ collapsed: boolean; toggle: () => void }>({ collapsed: false, toggle: () => {} });
 
@@ -12,16 +13,18 @@ export function SidebarCollapseButton() {
   const Icon = collapsed ? RiMenuUnfoldLine : RiMenuFoldLine;
   const label = collapsed ? "Expandir barra lateral" : "Recolher barra lateral";
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={label}
-      aria-expanded={!collapsed}
-      title={label}
-      className="hidden size-8 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-soft-200 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950 lg:flex"
-    >
-      <Icon className="size-5" />
-    </button>
+    <RailTip label={label}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={label}
+        aria-expanded={!collapsed}
+        title={collapsed ? undefined : label}
+        className="hidden size-8 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-soft-200 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950 lg:flex group-data-[collapsed=true]/sb:size-10"
+      >
+        <Icon className="size-5" />
+      </button>
+    </RailTip>
   );
 }
 

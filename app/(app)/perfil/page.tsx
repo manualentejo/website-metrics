@@ -5,9 +5,6 @@ import SettingsForm from "@/components/SettingsForm";
 import { Page, Segmented } from "@/components/ui/Page";
 import Avatar from "@/components/ui/Avatar";
 import DbUsageCard from "@/components/DbUsageCard";
-import AppearanceForm from "@/components/AppearanceForm";
-import { getPrefs } from "@/lib/prefs";
-import { DEFAULT_PREFS } from "@/lib/theme";
 import { getViewer } from "@/lib/access";
 import { getProfile } from "@/lib/profile";
 import { getSettings } from "@/lib/settings";
@@ -22,13 +19,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const profile = await getProfile(viewer.email);
   const name = profile.name ?? viewer.name ?? viewer.email.split("@")[0];
   const image = profile.image ?? viewer.image ?? null;
-  const tab = aba === "aparencia" ? "aparencia" : viewer.owner && aba === "analises" ? aba : "dados";
+  const tab = viewer.owner && aba === "analises" ? aba : "dados";
   const settings = tab === "analises" ? await getSettings() : null;
-  const prefs = tab === "aparencia" ? ((await getPrefs(viewer.email).catch(() => null)) ?? DEFAULT_PREFS) : null;
 
   const tabs = [
     { label: "Meus dados", href: "/perfil", active: tab === "dados" },
-    { label: "Aparência", href: "/perfil?aba=aparencia", active: tab === "aparencia" },
     ...(viewer.owner
       ? [
           { label: "Relatório", href: "/perfil?aba=analises", active: tab === "analises" },
@@ -55,7 +50,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <ProfileForm email={viewer.email} initial={{ name, role: profile.role ?? "", image }} />
         )}
         {tab === "dados" && viewer.owner && <DbUsageCard />}
-        {tab === "aparencia" && prefs && <AppearanceForm initial={prefs} />}
         {tab === "analises" && settings && (
           <>
             <p className="text-paragraph-sm text-text-sub-600">Quando o relatório semanal é gerado.</p>

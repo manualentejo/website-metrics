@@ -60,7 +60,7 @@ export default function NumaPanel({ insights, issues }: { insights: WeeklyInsigh
 
       <AIInsightsPanel insights={critical.length ? insights.filter((i) => i.key !== "priority") : insights} compact source="rules" />
 
-      <Link href="/chat" className="flex h-9 items-center justify-center gap-2 rounded-lg bg-bg-strong-950 text-label-sm text-text-white-0 transition hover:opacity-90">
+      <Link href="/chat" className="btn-sheen flex h-9 items-center justify-center gap-2 rounded-lg bg-bg-strong-950 text-label-sm text-text-white-0 transition hover:opacity-90">
         <RiSparklingLine className="size-4" />
         Falar com a Numa
       </Link>

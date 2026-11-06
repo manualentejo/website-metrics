@@ -95,7 +95,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="flex items-center justify-between border-b border-stroke-soft-200 px-5 py-4">
+        <header className="ai-gradient flex items-center justify-between border-b border-stroke-soft-200 px-5 py-4">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-strong-950 text-text-white-0">
               <RiSparklingLine className="h-4 w-4" />

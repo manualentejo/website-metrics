@@ -5,7 +5,7 @@ Não aparece no aplicativo. Os valores vivem em `app/globals.css` (cores, raio),
 ## Princípios
 - Preto e branco sobre fundo cinza claro; cor só para dizer se uma nota é boa, atenção ou ruim.
 - Cantos levemente arredondados: 6 px nos controles, 8 px nos cartões. Círculo só em foto de perfil, bolinhas de status e anéis de nota.
-- Fonte Inter. Uma altura de controle (32 px pequeno, 36 px padrão).
+- Fonte DM Sans. Uma altura de controle (32 px pequeno, 36 px padrão).
 
 ## Cores (HSL, em `app/globals.css`)
 | Token | Valor | Uso |

@@ -2,9 +2,11 @@
 import { RiArrowDownSLine, RiDraggable, RiFolderLine, RiFolderOpenLine } from "@remixicon/react";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import SiteIcon from "./SiteIcon";
+import RailTip from "./RailTip";
 
 interface Item {
   id: string;
@@ -147,36 +149,122 @@ function Group({ group, activeSiteId, activeFolderId, canReorder }: { group: Tre
   );
 }
 
+
+/**
+ * Workspace na barra recolhida: ícone de pasta com um triângulo no canto inferior direito (sinal de que há mais opções).
+ * Clique abre o workspace; botão direito (ou a tecla de menu / Shift+F10) abre a lista rápida dos sites dele.
+ */
+function RailWorkspace({ group, activeFolderId, activeSiteId }: { group: TreeGroup; activeFolderId?: string; activeSiteId?: string }) {
+  const [menu, setMenu] = useState<{ top: number; left: number } | null>(null);
+  const linkRef = useRef<HTMLAnchorElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const active = group.id === activeFolderId || group.sites.some((s) => s.id === activeSiteId);
+
+  useEffect(() => setMenu(null), [pathname]);
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    const onDown = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        close();
+        linkRef.current?.focus();
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", close);
+    const onScroll = (e: Event) => {
+      if (!menuRef.current?.contains(e.target as Node)) close(); // rolar a própria lista não fecha o menu
+    };
+    window.addEventListener("scroll", onScroll, true);
+    menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", onScroll, true);
+    };
+  }, [menu]);
+
+  function open(e: React.MouseEvent) {
+    e.preventDefault();
+    const r = linkRef.current?.getBoundingClientRect();
+    if (r) setMenu({ top: Math.max(8, Math.min(r.top, window.innerHeight - 340)), left: r.right + 10 });
+  }
+
+  const item = "flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-label-sm text-text-strong-950 hover:bg-bg-soft-200 focus-visible:bg-bg-soft-200 focus-visible:outline-none";
+
+  return (
+    <>
+      <RailTip label={group.name} hint="Botão direito: opções">
+        <Link
+          ref={linkRef}
+          href={`/workspace/${group.id}`}
+          onContextMenu={open}
+          aria-label={`Workspace ${group.name}. Botão direito para ver os sites.`}
+          aria-haspopup="menu"
+          aria-expanded={!!menu}
+          className={`relative flex h-10 items-center justify-center rounded-lg transition duration-200 ${active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
+        >
+          <RiFolderLine className="size-5" />
+          <span aria-hidden className="absolute bottom-1 right-1 h-0 w-0 border-b-[6px] border-l-[6px] border-solid border-b-text-soft-400 border-l-transparent" />
+        </Link>
+      </RailTip>
+      {menu &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            aria-label={`Opções de ${group.name}`}
+            style={{ position: "fixed", top: menu.top, left: menu.left }}
+            className="glass-strong z-[70] max-h-80 w-64 overflow-y-auto rounded-2xl p-2"
+          >
+            <p className="truncate px-2.5 pb-1 pt-1.5 text-label-xs uppercase tracking-wide text-text-soft-400">{group.name}</p>
+            <Link href={`/workspace/${group.id}`} role="menuitem" className={item}>
+              <RiFolderOpenLine className="size-4 flex-shrink-0 text-text-sub-600" />
+              Abrir workspace
+            </Link>
+            <div className="my-1 border-t border-stroke-soft-200" />
+            {group.sites.length === 0 && <p className="px-2.5 py-2 text-paragraph-xs text-text-sub-600">Nenhum site neste workspace.</p>}
+            {group.sites.map((s) => (
+              <Link key={s.id} href={`/site/${s.id}`} role="menuitem" className={`${item} ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : ""}`}>
+                <SiteIcon url={s.url} name={s.name} size={18} />
+                <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                <span className={`size-1.5 flex-shrink-0 rounded-full ${s.status === "no_ar" ? "bg-success-base" : "bg-warning-base"}`} aria-hidden />
+              </Link>
+            ))}
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 export default function WorkspaceTree({ groups, loose, canReorder = false }: { groups: TreeGroup[]; loose: Item[]; canReorder?: boolean }) {
   const pathname = usePathname();
   const activeSiteId = pathname.split("/")[1] === "site" ? pathname.split("/")[2] : undefined;
   const activeFolderId = pathname.split("/")[1] === "workspace" ? pathname.split("/")[2] : undefined;
   return (
     <>
-      {/* Barra recolhida: cada workspace e site solto vira um ícone com rótulo curto. */}
+      {/* Barra recolhida: cada workspace e cada site solto vira só um ícone (o nome aparece numa dica). */}
       <div className="hidden flex-col items-stretch gap-0.5 group-data-[collapsed=true]/sb:flex">
         {groups.map((g) => (
-          <Link
-            key={g.id}
-            href={`/workspace/${g.id}`}
-            title={`${g.name} (${g.sites.length} sites)`}
-            aria-label={`Workspace ${g.name}`}
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition duration-200 ${g.id === activeFolderId ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
-          >
-            <RiFolderLine className="size-5" />
-            <span className="max-w-full truncate text-[10px] leading-tight" aria-hidden>{g.name}</span>
-          </Link>
+          <RailWorkspace key={g.id} group={g} activeFolderId={activeFolderId} activeSiteId={activeSiteId} />
         ))}
         {loose.map((s) => (
-          <Link
-            key={s.id}
-            href={`/site/${s.id}`}
-            title={s.name}
-            aria-label={s.name}
-            className={`flex h-11 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : "hover:bg-bg-soft-200"}`}
-          >
-            <SiteIcon url={s.url} name={s.name} size={22} />
-          </Link>
+          <RailTip key={s.id} label={s.name}>
+            <Link
+              href={`/site/${s.id}`}
+              aria-label={s.name}
+              className={`flex h-10 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : "hover:bg-bg-soft-200"}`}
+            >
+              <SiteIcon url={s.url} name={s.name} size={22} />
+            </Link>
+          </RailTip>
         ))}
       </div>
     <div className="space-y-0.5 group-data-[collapsed=true]/sb:hidden">

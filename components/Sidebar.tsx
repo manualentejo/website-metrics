@@ -33,8 +33,8 @@ export default function Sidebar({
 
   return (
     <aside className="flex h-full w-60 flex-shrink-0 flex-col transition-[width] duration-200 group-data-[collapsed=true]/sb:w-[72px]">
-      <div className="flex items-center justify-between gap-2 px-4 pb-3 pt-4 group-data-[collapsed=true]/sb:flex-col group-data-[collapsed=true]/sb:px-2">
-        <Link href="/" aria-label="Métricas: início" className="flex min-w-0 items-center gap-2.5">
+      <div className="flex items-center justify-between gap-2 px-4 pb-3 pt-4 group-data-[collapsed=true]/sb:justify-center group-data-[collapsed=true]/sb:px-2">
+        <Link href="/" aria-label="Métricas: início" className="flex min-w-0 items-center gap-2.5 group-data-[collapsed=true]/sb:hidden">
           <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg bg-bg-strong-950 text-label-sm text-text-white-0">M</span>
           <span className="truncate text-label-md text-text-strong-950 group-data-[collapsed=true]/sb:hidden">Métricas</span>
         </Link>

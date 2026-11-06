@@ -255,9 +255,9 @@ export default function NumaChat({ email }: { email: string }) {
   );
 
   return (
-    <div className="absolute inset-0 flex bg-bg-white-0 lg:rounded-2xl">
+    <div className="ai-gradient absolute inset-0 flex lg:rounded-2xl">
       <aside
-        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-stroke-soft-200 bg-bg-white-0 md:static md:flex md:w-64 md:flex-shrink-0`}
+        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-white/60 bg-white/55 backdrop-blur-xl md:static md:flex md:w-64 md:flex-shrink-0`}
         aria-label="Conversas"
       >
         <div className="p-3">
@@ -287,7 +287,7 @@ export default function NumaChat({ email }: { email: string }) {
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex flex-shrink-0 items-center gap-3 border-b border-stroke-soft-200 px-4 py-3">
+        <header className="flex flex-shrink-0 items-center gap-3 border-b border-white/60 bg-white/40 px-4 py-3 backdrop-blur-md">
           <button type="button" onClick={() => setListOpen((o) => !o)} aria-label="Conversas" className="flex size-8 items-center justify-center rounded-lg text-text-sub-600 hover:bg-bg-soft-200 md:hidden">
             <RiHistoryLine className="size-5" />
           </button>
@@ -309,7 +309,7 @@ export default function NumaChat({ email }: { email: string }) {
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SUGGESTIONS.map((s) => (
-                  <button key={s} type="button" onClick={() => send(s)} className="rounded-xl bg-bg-white-0 px-3 py-2.5 text-left text-paragraph-sm text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 transition hover:bg-bg-soft-200 hover:ring-stroke-sub-300">
+                  <button key={s} type="button" onClick={() => send(s)} className="glass rounded-xl px-3 py-2.5 text-left text-paragraph-sm text-text-strong-950 transition hover:bg-white/90">
                     {s}
                   </button>
                 ))}
@@ -322,13 +322,13 @@ export default function NumaChat({ email }: { email: string }) {
                 {m.text}
               </div>
             ) : (
-              <div key={i} className="max-w-[95%] rounded-2xl rounded-bl-md bg-bg-weak-50 px-4 py-3 text-paragraph-sm text-text-strong-950 sm:max-w-[80%]">
+              <div key={i} className="max-w-[95%] glass rounded-2xl rounded-bl-md px-4 py-3 text-paragraph-sm text-text-strong-950 sm:max-w-[80%]">
                 <Markdown text={m.text} />
               </div>
             )
           )}
           {loading && (
-            <div className="flex w-fit items-center gap-1 rounded-2xl bg-bg-weak-50 px-4 py-3" aria-label="A Numa está escrevendo">
+            <div className="glass flex w-fit items-center gap-1 rounded-2xl px-4 py-3" aria-label="A Numa está escrevendo">
               {[0, 150, 300].map((d) => (
                 <span key={d} className="size-1.5 animate-bounce rounded-full bg-text-soft-400" style={{ animationDelay: `${d}ms` }} />
               ))}
@@ -342,9 +342,9 @@ export default function NumaChat({ email }: { email: string }) {
             e.preventDefault();
             void send(input);
           }}
-          className="flex-shrink-0 border-t border-stroke-soft-200 p-3 sm:p-4"
+          className="flex-shrink-0 border-t border-white/60 bg-white/30 p-3 backdrop-blur-md sm:p-4"
         >
-          <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-xl bg-bg-white-0 p-2 ring-1 ring-inset ring-stroke-soft-200 focus-within:ring-stroke-strong-950">
+          <div className="mx-auto flex max-w-3xl items-end gap-2 glass-strong rounded-xl p-2 focus-within:ring-2 focus-within:ring-stroke-strong-950">
             <textarea
               ref={inputRef}
               value={input}

@@ -401,6 +401,9 @@
     --primary-alpha-16: var(--gray-alpha-16);
     --primary-alpha-10: var(--gray-alpha-10);
 
+    /* Realce de item ativo (menu lateral, conversas). */
+    --accent-soft: var(--bg-sub-300);
+
     /* Tokens antigos (shadcn), mantidos até as telas serem migradas. */
     --background: 0 0% 97%;
     --foreground: 0 0% 9%;
@@ -443,4 +446,31 @@
 }
 *::-webkit-scrollbar {
   display: none;
+}
+
+/* Superfícies de vidro, gradientes de IA e brilho dos botões escuros. */
+@layer components {
+  .glass {
+    background: rgb(255 255 255 / 0.62);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(0 0 0 / 0.05), 0 10px 28px -14px rgb(0 0 0 / 0.16);
+  }
+  .glass-strong {
+    background: rgb(255 255 255 / 0.8);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    backdrop-filter: blur(18px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.85), 0 1px 2px rgb(0 0 0 / 0.06), 0 16px 40px -16px rgb(0 0 0 / 0.22);
+  }
+  .ai-gradient {
+    background:
+      radial-gradient(60% 90% at 8% 0%, rgb(255 228 205 / 0.85) 0%, transparent 62%),
+      radial-gradient(55% 80% at 96% 8%, rgb(214 224 255 / 0.9) 0%, transparent 62%),
+      radial-gradient(65% 90% at 58% 105%, rgb(250 218 240 / 0.8) 0%, transparent 62%),
+      rgb(255 255 255);
+  }
+  .btn-sheen {
+    background-image: linear-gradient(180deg, rgb(255 255 255 / 0.18), rgb(255 255 255 / 0) 58%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 1px 2px rgb(0 0 0 / 0.2);
+  }
 }
