@@ -3,6 +3,7 @@ import { RiAlertFill, RiArrowDownSLine, RiArrowRightLine, RiCheckboxCircleFill, 
 import Badge from "@/components/ui/Badge";
 import SiteIcon from "@/components/SiteIcon";
 import type { Alert, Severity } from "@/lib/insights";
+import { formatDay } from "@/lib/format";
 
 const SEVERITY = {
   critical: { label: "Crítico", tone: "destructive", icon: RiErrorWarningFill, tile: "bg-error-lighter text-error-base" },
@@ -10,7 +11,7 @@ const SEVERITY = {
   good: { label: "Melhorou", tone: "success", icon: RiCheckboxCircleFill, tile: "bg-success-lighter text-success-base" },
 } as const;
 
-const day = (d: Date) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: "America/Sao_Paulo" }).replace(".", "");
+const day = (d: Date) => formatDay(d);
 const rank: Record<Severity, number> = { critical: 0, warning: 1, good: 2 };
 
 interface SiteIssue {
