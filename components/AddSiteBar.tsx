@@ -39,7 +39,7 @@ export default function AddSiteBar({
   }
 
   return (
-    <div className="rounded-lg border border-stroke-soft-200 bg-bg-weak-50 p-4">
+    <div className="rounded-2xl bg-bg-white-0 p-4 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
       <p className="mb-2.5 flex items-center gap-2 text-paragraph-sm text-text-sub-600">
         <RiSparklingLine className="h-3.5 w-3.5" />
         Comece a monitorar um novo site: cole o endereço abaixo.

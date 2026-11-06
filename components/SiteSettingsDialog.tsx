@@ -6,7 +6,6 @@ import { RiDeleteBinLine, RiRefreshLine, RiSettings3Line } from "@remixicon/reac
 import Button from "@/components/ui/Button";
 import Modal, { Field } from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
-import CopyBox from "@/components/CopyBox";
 import { notification } from "@/hooks/use-notification";
 import { inputClass } from "@/components/ui/fields";
 
@@ -140,15 +139,6 @@ export default function SiteSettingsDialog({ site, folders, snippet, defaultOpen
                 ))}
               </Select>
             </Field>
-
-            <details className="rounded-md border border-stroke-soft-200 px-3 py-2 text-paragraph-xs text-text-sub-600">
-              <summary className="cursor-pointer font-medium text-text-strong-950">Contar visitas (opcional)</summary>
-              <p className="mt-2">
-                Só funciona em sites que você pode editar: o código precisa ser colado no site. Em sites de clientes, não instale sem
-                autorização deles.
-              </p>
-              <div className="mt-2"><CopyBox text={snippet} /></div>
-            </details>
 
             {error && <p role="alert" className="text-paragraph-xs text-error-base">{error}</p>}
 

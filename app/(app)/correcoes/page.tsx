@@ -18,7 +18,7 @@ export default async function FixQueuePage() {
     <AppShell active="correcoes">
       <Page
         title="Fila de correções"
-        subtitle="Problemas encontrados no computador, do que mais pesa na nota para o que menos pesa. Abra o site e use “Pergunte ao Gemini” para o passo a passo no Framer."
+        subtitle="Problemas encontrados no computador, do que mais pesa na nota para o que menos pesa. Abra o site e use “Falar com a Numa” para o passo a passo no Framer."
       >
         {items.length === 0 ? (
           <EmptyState title="Nada para corrigir agora">

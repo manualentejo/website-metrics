@@ -1,54 +1,45 @@
 import { notFound, redirect } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import OverviewContent from "@/components/OverviewContent";
+import AddSiteBar from "@/components/AddSiteBar";
+import WebsiteInventory from "@/components/overview/WebsiteInventory";
+import ShareWorkspaceButton from "@/components/ShareWorkspaceButton";
 import WorkspaceActions from "@/components/WorkspaceActions";
+import { Page } from "@/components/ui/Page";
 import { getViewer } from "@/lib/access";
-import { loadOverview } from "@/lib/overview";
+import { loadInventory } from "@/lib/inventory";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkspacePage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ status?: string }>;
-}) {
+// Um workspace: mesma lista e comparação da página Sites, só com os sites do grupo.
+export default async function WorkspacePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ d?: string }> }) {
   const { id } = await params;
-  const { status: statusFilter } = await searchParams;
+  const { d } = await searchParams;
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
-  const o = await loadOverview(viewer);
-  const folder = o.folders.find((f) => f.id === id);
+  const { rows: all, folders } = await loadInventory(viewer);
+  const folder = folders.find((f) => f.id === id);
   if (!folder) notFound();
-  const rows = o.rows.filter((r) => r.folderId === id);
+  const rows = all.filter((r) => r.folderId === id);
   if (!viewer.owner && rows.length === 0) notFound();
 
   return (
-    <AppShell activeFolderId={id}>
-      <OverviewContent
-        title={folder.name}
-        subtitle="Visão geral dos sites deste workspace."
-        rows={rows}
-        lastRun={o.lastRun}
-        owner={viewer.owner}
-        folders={o.folders}
-        defaultFolderId={id}
-        statusFilter={statusFilter}
-        folderNames={{}}
-        basePath={`/workspace/${id}`}
-        actions={
-          viewer.owner && (
+    <Page
+      title={folder.name}
+      subtitle="Sites deste workspace. Compare as notas por dispositivo."
+      actions={
+        viewer.owner && (
+          <div className="flex flex-wrap items-center gap-2">
+            <ShareWorkspaceButton folder={{ id, name: folder.name }} />
             <WorkspaceActions
               folder={{ id, name: folder.name }}
               siteCount={rows.length}
-              candidates={o.rows
-                .filter((r) => r.folderId !== id)
-                .map((r) => ({ id: r.id, name: r.name, url: r.url, folderName: o.folders.find((fo) => fo.id === r.folderId)?.name ?? null }))}
+              candidates={all.filter((r) => r.folderId !== id).map((r) => ({ id: r.id, name: r.name, url: r.url, folderName: r.folder }))}
             />
-          )
-        }
-      />
-    </AppShell>
+          </div>
+        )
+      }
+    >
+      {viewer.owner && <AddSiteBar folders={folders} defaultFolderId={id} />}
+      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={d === "mobile" ? "mobile" : "desktop"} />
+    </Page>
   );
 }

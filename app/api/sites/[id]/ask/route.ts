@@ -85,7 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const snapshotFor = (strategy: string) => siteSnapshots.find((s) => s.strategy === strategy)?.analysis;
 
-  const context = `Você é um consultor de performance web e SEO que ajuda uma pessoa leiga a entender os
+  const context = `Você é a Numa, consultora de performance web e SEO do painel, e ajuda uma pessoa leiga a entender os
 relatórios semanais do Google Lighthouse (PageSpeed Insights) do site "${site.name}" (${site.url}).
 
 Contexto importante: os sites são construídos no Framer (framer.com). Sempre que sugerir uma correção,

@@ -12,7 +12,7 @@ import DonutChart from "@/components/charts/DonutChart";
 import RunAuditButton from "@/components/overview/RunAuditButton";
 import IssueList from "@/components/overview/IssueList";
 import ActivityFeed from "@/components/overview/ActivityFeed";
-import AIInsightsPanel from "@/components/overview/AIInsightsPanel";
+import NumaPanel from "@/components/overview/NumaPanel";
 import TabbedPanel from "@/components/overview/TabbedPanel";
 import WebsitePerformanceTable from "@/components/overview/WebsitePerformanceTable";
 import { getViewer } from "@/lib/access";
@@ -25,7 +25,6 @@ const CHART_TABS = [
   { key: "seo", label: "SEO", tone: "green" },
   { key: "performance", label: "Desempenho", tone: "blue" },
   { key: "geo", label: "GEO", tone: "purple" },
-  { key: "visits", label: "Visitas", tone: "orange" },
 ] as const;
 
 /** Cartão do painel: altura limitada pelo grid, com o corpo rolando por dentro quando há muito conteúdo. */
@@ -86,9 +85,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const perfNow = lastValue(p.series.performance.current);
   const perfPrev = lastValue(p.series.performance.previous);
   const series: SeriesPair | null =
-    metric.key === "seo" ? p.series.seo : metric.key === "performance" ? p.series.performance : metric.key === "geo" ? (p.geo?.series ?? null) : p.series.visits;
-  const unit = metric.key === "visits" ? "count" : "score";
-  const label = { seo: "SEO médio", performance: "Desempenho médio", geo: "Nota GEO média", visits: "Visitas" }[metric.key];
+    metric.key === "seo" ? p.series.seo : metric.key === "performance" ? p.series.performance : (p.geo?.series ?? null);
+  const label = { seo: "SEO médio", performance: "Desempenho médio", geo: "Nota GEO média" }[metric.key];
   const seoCount = p.distribution.reduce((a, b) => a + b.count, 0);
   const band = (key: "performance" | "geo") => {
     const v = p.rows.map((r) => r[key]).filter((x): x is number => x !== null);
@@ -122,7 +120,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </ChartEmptyState>
       ) : (
         <>
-          <section aria-label="Indicadores principais" className="grid flex-shrink-0 grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
+          <section aria-label="Indicadores principais" className="grid flex-shrink-0 grid-cols-2 gap-2 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
             <MetricCard
               label="Sites"
               icon={RiGlobalLine}
@@ -188,18 +186,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               }
             >
               <div className="absolute inset-x-4 inset-y-0 bottom-2">
-                {metric.key === "visits" && p.visitsError ? (
-                  <ChartEmptyState kind="error" title="Não foi possível carregar as visitas" className="h-full">{viewer.owner ? p.visitsError : "Tente novamente em instantes."}</ChartEmptyState>
-                ) : !series ? (
+                {!series ? (
                   <ChartEmptyState
-                    title={metric.key === "geo" ? "Sem auditoria GEO ainda" : "Nenhum site com contagem de visitas"}
+                    title="Sem auditoria GEO ainda"
                     className="h-full"
                     action={{ href: "/sites", label: "Ver sites" }}
                   >
-                    {metric.key === "geo" ? "A nota GEO aparece depois da primeira auditoria, na aba GEO de um site." : "A contagem só existe em sites com o código de rastreio instalado."}
+                    A nota GEO aparece depois da primeira auditoria, na aba GEO de um site.
                   </ChartEmptyState>
                 ) : (
-                  <TimeSeriesChart current={series.current} previous={series.previous} unit={unit} label={label} tone={metric.tone as Tone} fill />
+                  <TimeSeriesChart current={series.current} previous={series.previous} unit="score" label={label} tone={metric.tone as Tone} fill />
                 )}
               </div>
             </Panel>
@@ -274,7 +270,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <TabbedPanel
                 tabs={[
                   { key: "atencao", label: "Atenção", node: <IssueList issues={p.attention} dense /> },
-                  { key: "resumo", label: "Resumo", node: <AIInsightsPanel insights={p.insights} compact /> },
+                  { key: "numa", label: "Numa", node: <NumaPanel insights={p.insights} issues={p.attention} /> },
                   { key: "atividade", label: "Atividade", node: <ActivityFeed items={p.activity} /> },
                 ]}
               />
@@ -283,7 +279,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <section className="hidden min-h-0 min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 2xl:col-span-3 2xl:flex">
               <TabbedPanel
                 tabs={[
-                  { key: "resumo", label: "Resumo", node: <AIInsightsPanel insights={p.insights} compact /> },
+                  { key: "numa", label: "Numa", node: <NumaPanel insights={p.insights} issues={p.attention} /> },
                   { key: "atividade", label: "Atividade", node: <ActivityFeed items={p.activity} /> },
                 ]}
               />

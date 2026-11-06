@@ -16,7 +16,7 @@ export default function SidebarUserFooter({
     <Link
       href="/perfil"
       aria-label="Abrir meu perfil"
-      className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-bg-weak-50 ${active ? "bg-bg-weak-50" : ""}`}
+      className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-bg-weak-50 ${active ? "bg-bg-soft-200" : ""}`}
     >
       <Avatar name={user.name} image={user.image} size={32} />
       <span className="min-w-0 flex-1">

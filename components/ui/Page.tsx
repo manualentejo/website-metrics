@@ -41,7 +41,7 @@ export function Segmented({
   onSelect?: (index: number) => void;
 }) {
   return (
-    <nav aria-label={label} className="inline-flex items-center gap-1 rounded-10 bg-bg-weak-50 p-1">
+    <nav aria-label={label} className="inline-flex items-center gap-1 rounded-10 bg-bg-soft-200 p-1">
       {items.map((i, idx) => {
         const cls = `inline-flex h-7 items-center whitespace-nowrap rounded-md px-3 text-label-sm transition duration-300 ${
           i.active ? "bg-bg-white-0 text-text-strong-950 shadow-toggle-switch" : "text-text-soft-400 hover:text-text-strong-950"

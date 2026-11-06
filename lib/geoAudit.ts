@@ -261,7 +261,7 @@ export async function auditSite(siteUrl: string): Promise<{ score: number; check
     weight: 15,
     found: types.length ? `Encontrados: ${[...new Set(types)].slice(0, 6).join(", ")}.` : "Nenhum dado estruturado encontrado.",
     why: "É uma “ficha técnica” em código que diz às IAs quem é a empresa, o que faz e onde fica. É um dos itens que mais ajuda a ser citado.",
-    fix: "No Framer: Configurações do site › Custom Code › Start of <head>, cole um bloco JSON-LD do tipo Organization (nome, logo, site, redes sociais, contato). Peça ao Gemini “Pergunte ao Gemini” para gerar para você.",
+    fix: "No Framer: Configurações do site › Custom Code › Start of <head>, cole um bloco JSON-LD do tipo Organization (nome, logo, site, redes sociais, contato). Peça à Numa (botão “Falar com a Numa”) para gerar o código para você.",
   });
 
   // 9. Open Graph

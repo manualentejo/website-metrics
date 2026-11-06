@@ -9,7 +9,7 @@ export default function AskGeminiButton() {
   return (
     <button type="button" onClick={() => openGemini()} className={buttonClass("primary", "md")}>
       <RiSparklingLine className="h-4 w-4" />
-      Pergunte ao Gemini
+      Falar com a Numa
     </button>
   );
 }

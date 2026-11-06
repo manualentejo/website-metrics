@@ -12,6 +12,10 @@ export interface Alert {
   siteId: string;
   siteName: string;
   siteUrl: string;
+  /** Tipo do problema, para agrupar o mesmo problema em vários sites. */
+  kind: "drop" | "low" | "lcp" | "rise";
+  /** Valor mais relevante (ex.: LCP em segundos) para o resumo. */
+  value?: number;
   strategy: "mobile" | "desktop";
   severity: Severity;
   title: string;
@@ -71,6 +75,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
           alerts.push({
             ...base,
             ...extra,
+            kind: "drop",
             severity: prev - cur >= 15 ? "critical" : "warning",
             title: `${c.label} caiu ${Math.round(prev - cur)} pontos`,
             detail: `De ${Math.round(prev)} para ${Math.round(cur)} no ${device}.`,
@@ -79,6 +84,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
           alerts.push({
             ...base,
             ...extra,
+            kind: "rise",
             severity: "good",
             title: `${c.label} subiu ${Math.round(cur - prev)} pontos`,
             detail: `De ${Math.round(prev)} para ${Math.round(cur)} no ${device}.`,
@@ -88,6 +94,7 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
           alerts.push({
             ...base,
             ...extra,
+            kind: "low",
             severity: "critical",
             title: `${c.label} abaixo de 50`,
             detail: `Nota ${Math.round(cur)} no ${device}. Veja o que corrigir na análise do site.`,
@@ -99,7 +106,10 @@ export async function loadAlerts(viewer: Viewer): Promise<Alert[]> {
           ...base,
           category: "Performance",
           href: hrefFor("performance"),
-          severity: "warning",
+          kind: "lcp",
+          value: now.lcpMs / 1000,
+          // Acima de 10 s a página praticamente não abre para quem visita: é crítico, não só atenção.
+          severity: now.lcpMs > 10000 ? "critical" : "warning",
           title: "Carregamento do conteúdo principal lento (LCP)",
           detail: `${(now.lcpMs / 1000).toFixed(1)} s no ${device}; o ideal é abaixo de 2,5 s.`,
         });

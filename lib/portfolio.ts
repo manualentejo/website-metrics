@@ -2,7 +2,6 @@ import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { reports } from "@/db/schema";
-import { ensureAnalyticsTable } from "@/lib/analytics";
 import { ensureGeoAuditTable } from "@/lib/geoAudit";
 import { loadAlerts, visibleSites, type Alert } from "@/lib/insights";
 import type { Viewer } from "@/lib/access";
@@ -15,7 +14,7 @@ import type { Status } from "@/lib/types";
 
 export const PERIODS = [7, 28, 90] as const;
 export type Period = (typeof PERIODS)[number];
-export type MetricKey = "seo" | "performance" | "visits";
+export type MetricKey = "seo" | "performance" | "geo";
 
 export interface Point {
   date: string;
@@ -36,7 +35,6 @@ export interface SiteSummary {
   seoDelta: number | null;
   performanceDelta: number | null;
   geo: number | null;
-  visits: number | null; // null = site sem código de rastreio / sem dados no período
   lastAudit: Date | null;
 }
 
@@ -101,31 +99,6 @@ export function lastValue(points: Point[]): number | null {
   return null;
 }
 
-async function loadVisits(ids: string[], days: number, endKey: string) {
-  if (!ids.length) return { cur: [] as Point[], prev: [] as Point[], perSite: new Map<string, number>() };
-  await ensureAnalyticsTable();
-  const list = sql.join(ids.map((i) => sql`${i}::uuid`), sql`, `);
-  const since = `${addDays(endKey, -(days * 2 - 1))}T03:00:00Z`;
-  const tz = sql.raw("'America/Sao_Paulo'");
-  const [daily, perSite] = await Promise.all([
-    db.execute(sql`SELECT to_char((at AT TIME ZONE ${tz})::date, 'YYYY-MM-DD') AS d, count(*)::int AS n
-      FROM pageviews WHERE site_id IN (${list}) AND at >= ${since}::timestamptz GROUP BY 1`),
-    db.execute(sql`SELECT site_id::text AS id, count(*)::int AS n FROM pageviews
-      WHERE site_id IN (${list}) AND at >= ${`${addDays(endKey, -(days - 1))}T03:00:00Z`}::timestamptz GROUP BY 1`),
-  ]);
-  const byDay = new Map((daily as unknown as { d: string; n: number }[]).map((r) => [String(r.d), Number(r.n)]));
-  const mk = (end: string): Point[] =>
-    Array.from({ length: days }, (_, i) => {
-      const d = addDays(end, -(days - 1 - i));
-      return { date: d, value: byDay.get(d) ?? 0 };
-    });
-  return {
-    cur: mk(endKey),
-    prev: mk(addDays(endKey, -days)),
-    perSite: new Map((perSite as unknown as { id: string; n: number }[]).map((r) => [String(r.id), Number(r.n)])),
-  };
-}
-
 /** Nota GEO técnica (auditoria sem IA) por site, com a série média do portfólio. */
 async function loadGeo(ids: string[], days: number, endKey: string, names: Map<string, string>) {
   if (!ids.length) return null;
@@ -187,14 +160,6 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
   const perfCur = scoreSeries(bySite, "performanceScore", endKey, days);
   const perfPrev = scoreSeries(bySite, "performanceScore", addDays(endKey, -days), days);
 
-  let visits: Awaited<ReturnType<typeof loadVisits>> | null = null;
-  let visitsError: string | null = null;
-  try {
-    visits = await loadVisits(ids, days, endKey);
-  } catch (e) {
-    visitsError = e instanceof Error ? e.message : String(e);
-  }
-  const trackedIds = new Set(visits?.perSite.keys() ?? []);
   let geo: Awaited<ReturnType<typeof loadGeo>> = null;
   try {
     geo = await loadGeo(ids, days, endKey, new Map(selected.map((s) => [s.id, s.name])));
@@ -217,7 +182,6 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
       seoDelta: d(last?.seoScore, before?.seoScore),
       performanceDelta: d(last?.performanceScore, before?.performanceScore),
       geo: geo?.sites.find((g) => g.id === s.id)?.score ?? null,
-      visits: trackedIds.has(s.id) ? (visits?.perSite.get(s.id) ?? 0) : null,
       lastAudit: last?.ranAt ?? null,
     };
   });
@@ -349,7 +313,6 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
   ];
 
   const lastUpdate = repRows.length ? repRows[repRows.length - 1].ranAt : null;
-  const hasVisitData = !!visits && trackedIds.size > 0;
 
   return {
     days,
@@ -368,11 +331,8 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
     series: {
       seo: { current: seoCur, previous: seoPrev } as SeriesPair,
       performance: { current: perfCur, previous: perfPrev } as SeriesPair,
-      visits: hasVisitData ? ({ current: visits!.cur, previous: visits!.prev } as SeriesPair) : null,
     },
-    visitsError,
     geo,
-    trackedSites: trackedIds.size,
     rows,
     distribution,
     seoMovers,

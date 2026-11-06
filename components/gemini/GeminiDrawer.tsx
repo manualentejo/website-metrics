@@ -90,7 +90,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Pergunte ao Gemini"
+        aria-label="Falar com a Numa"
         className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-stroke-soft-200 bg-bg-white-0 shadow-2xl transition-transform duration-200 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
@@ -101,7 +101,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
               <RiSparklingLine className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-text-strong-950">Pergunte ao Gemini</p>
+              <p className="text-sm font-semibold text-text-strong-950">Numa</p>
               <p className="text-paragraph-xs text-text-sub-600">Sobre os dados de {siteName}</p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
           {messages.length === 0 && (
             <div className="space-y-4">
               <p className="text-sm leading-relaxed text-text-sub-600">
-                A IA lê o histórico e a análise completa do Lighthouse deste site e responde em linguagem simples,
+                A Numa lê o histórico e a análise completa do Lighthouse deste site e responde em linguagem simples,
                 com soluções pensadas para sites feitos no Framer.
               </p>
               <div className="flex flex-col gap-2">
@@ -147,7 +147,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
             )
           )}
           {loading && (
-            <div className="flex w-fit items-center gap-1 rounded-2xl bg-bg-weak-50 px-4 py-3" aria-label="Gemini está escrevendo">
+            <div className="flex w-fit items-center gap-1 rounded-2xl bg-bg-weak-50 px-4 py-3" aria-label="A Numa está escrevendo">
               {[0, 150, 300].map((d) => (
                 <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: `${d}ms` }} />
               ))}
@@ -187,7 +187,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
               <RiArrowUpLine className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-2 text-center text-paragraph-xs text-text-sub-600">A IA pode errar. Confira antes de aplicar mudanças.</p>
+          <p className="mt-2 text-center text-paragraph-xs text-text-sub-600">A Numa pode errar. Confira antes de aplicar mudanças.</p>
         </form>
       </aside>
     </>

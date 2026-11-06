@@ -44,7 +44,7 @@ export default function Sidebar({
         <SidebarNav />
 
         <p className="px-3 pb-1.5 pt-5 text-subheading-xs uppercase text-text-soft-400">Workspaces</p>
-        <WorkspaceTree groups={groups} loose={loose} />
+        <WorkspaceTree groups={groups} loose={loose} canReorder={!!isOwner} />
         {isOwner && (
           <NewFolderForm
             sites={sites.map((x) => ({ id: x.id, name: x.name, url: x.url, folderName: folders.find((fo) => fo.id === x.folderId)?.name ?? null }))}

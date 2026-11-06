@@ -7,7 +7,7 @@ export default function TabbedPanel({ tabs }: { tabs: { key: string; label: stri
   const [active, setActive] = useState(tabs[0].key);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div role="tablist" className="mx-4 mb-2 mt-3 inline-flex flex-shrink-0 gap-1 self-start rounded-10 bg-bg-weak-50 p-1">
+      <div role="tablist" className="mx-4 mb-2 mt-3 inline-flex flex-shrink-0 gap-1 self-start rounded-10 bg-bg-soft-200 p-1">
         {tabs.map((t) => (
           <button
             key={t.key}

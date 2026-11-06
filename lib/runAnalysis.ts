@@ -1,4 +1,4 @@
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, lt, sql } from "drizzle-orm";
 import { runGeoAudit } from "@/lib/geoAudit";
 import { refreshSiteIcon } from "@/lib/siteIcons";
 import { db } from "@/db/client";
@@ -64,10 +64,19 @@ export async function analyzeSite(site: SiteRow, apiKey: string): Promise<SiteRe
   return results;
 }
 
+/**
+ * Prints e miniaturas do carregamento só existem para ilustrar o relatório da semana: cada análise nova
+ * os substitui, e aqui apagamos os que ficaram para trás (site parado, análise que falhou) após 8 dias.
+ */
+export async function purgeOldImages() {
+  await db.execute(sql`UPDATE snapshots SET final_screenshot = NULL, thumbnails = NULL WHERE captured_at < now() - interval '8 days' AND (final_screenshot IS NOT NULL OR thumbnails IS NOT NULL)`);
+}
+
 export async function runAnalysis(apiKey: string) {
   await saveSettings({ lastRunAt: new Date().toISOString() });
   const allSites = await db.select().from(sites);
   const results: SiteResult[] = [];
   for (const site of allSites) results.push(...(await analyzeSite(site, apiKey)));
+  await purgeOldImages().catch(() => {});
   return { ranAt: new Date().toISOString(), results };
 }
