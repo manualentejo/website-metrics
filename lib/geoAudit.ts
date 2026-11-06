@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 
-// Auditoria GEO técnica: verifica, só lendo o site (HTML, robots.txt, sitemap, llms.txt), se ele está
+// Auditoria GEO técnica: verifica, só lendo o site (HTML, robots.txt, sitemap), se ele está
 // pronto para ser entendido e citado por buscadores com IA. Não usa IA e não gasta crédito nenhum.
 // Não confundir com AI Visibility (se as IAs de fato citam a marca): isto mede preparo, não resultado.
 
@@ -35,6 +35,15 @@ export async function ensureGeoAuditTable() {
     checks jsonb NOT NULL
   )`);
   await db.execute(sql`CREATE INDEX IF NOT EXISTS geo_audits_site_at ON geo_audits (site_id, ran_at)`);
+  // Migração única e idempotente: tira FAQ, llms.txt e títulos das auditorias já salvas e refaz a nota.
+  await db.execute(sql`UPDATE geo_audits g SET checks = n.checks, score = n.score FROM (
+    SELECT a.id,
+      COALESCE(jsonb_agg(c) FILTER (WHERE c->>'id' NOT IN ('faq','llms','headings')), '[]'::jsonb) AS checks,
+      COALESCE(ROUND(100.0 * SUM((c->>'weight')::numeric * CASE c->>'status' WHEN 'ok' THEN 1 WHEN 'warn' THEN 0.5 ELSE 0 END) FILTER (WHERE c->>'id' NOT IN ('faq','llms','headings'))
+        / NULLIF(SUM((c->>'weight')::numeric) FILTER (WHERE c->>'id' NOT IN ('faq','llms','headings')), 0)), 0)::int AS score
+    FROM geo_audits a, jsonb_array_elements(a.checks) c
+    WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(a.checks) x WHERE x->>'id' IN ('faq','llms','headings'))
+    GROUP BY a.id) n WHERE g.id = n.id`);
   ensured = true;
 }
 
@@ -130,7 +139,7 @@ function jsonLdTypes(html: string): string[] {
 export async function auditSite(siteUrl: string): Promise<{ score: number; checks: GeoCheck[] }> {
   const base = new URL(/^https?:\/\//.test(siteUrl) ? siteUrl : `https://${siteUrl}`);
   const origin = base.origin;
-  const [page, robots, llms, sitemap] = await Promise.all([get(base.toString()), get(`${origin}/robots.txt`), get(`${origin}/llms.txt`), get(`${origin}/sitemap.xml`)]);
+  const [page, robots, sitemap] = await Promise.all([get(base.toString()), get(`${origin}/robots.txt`), get(`${origin}/sitemap.xml`)]);
 
   const checks: GeoCheck[] = [];
   const add = (c: GeoCheck) => checks.push(c);
@@ -202,18 +211,6 @@ export async function auditSite(siteUrl: string): Promise<{ score: number; check
     fix: "No Framer, o sitemap é gerado em Configurações do site › General › Sitemap. Ative e publique de novo.",
   });
 
-  // 4. llms.txt
-  const hasLlms = llms.ok && llms.text.trim().length > 20 && !/<html/i.test(llms.text.slice(0, 200));
-  add({
-    id: "llms",
-    title: "Guia para IAs (llms.txt)",
-    status: hasLlms ? "ok" : "warn",
-    weight: 4,
-    found: hasLlms ? "O arquivo llms.txt existe." : "Não há llms.txt. É opcional e ainda novo.",
-    why: "É um resumo do site escrito para IAs lerem. Ainda não é obrigatório, mas ajuda algumas ferramentas.",
-    fix: "Crie um texto curto em /llms.txt com o que a empresa faz, links das páginas principais e contato. No Framer, use um redirecionamento ou hospedagem do arquivo.",
-  });
-
   // 5. título
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? "";
   add({
@@ -236,19 +233,6 @@ export async function auditSite(siteUrl: string): Promise<{ score: number; check
     found: desc ? `${desc.length} caracteres: “${desc.slice(0, 90)}${desc.length > 90 ? "…" : ""}”` : "A página não tem descrição.",
     why: "É o resumo que buscadores e IAs usam para entender e apresentar o seu site.",
     fix: "No Framer: Configurações da página › SEO › Description. Escreva de 70 a 170 caracteres, em frase completa.",
-  });
-
-  // 7. H1 e estrutura
-  const h1s = html.match(/<h1\b[\s\S]*?<\/h1>/gi) ?? [];
-  const h2s = html.match(/<h[23]\b/gi) ?? [];
-  add({
-    id: "headings",
-    title: "Títulos e subtítulos organizados",
-    status: h1s.length === 1 && h2s.length >= 2 ? "ok" : h1s.length >= 1 ? "warn" : "fail",
-    weight: 10,
-    found: `${h1s.length} título principal (H1) e ${h2s.length} subtítulos (H2/H3).`,
-    why: "IAs dividem o texto pelos títulos para achar respostas. Um H1 e vários subtítulos deixam o conteúdo fácil de citar.",
-    fix: "Use exatamente um H1 por página (o assunto principal) e subtítulos H2/H3 para cada tópico. No Framer, defina o estilo de texto como Heading 1/2/3.",
   });
 
   // 8. dados estruturados
@@ -313,19 +297,6 @@ export async function auditSite(siteUrl: string): Promise<{ score: number; check
     fix: "Explique com texto: o que você faz, para quem, onde atua e por que escolher você. Mire em 300 palavras ou mais na página inicial.",
   });
 
-  // 13. perguntas e respostas
-  const questions = (html.match(/<h[1-6]\b[^>]*>[^<]*\?\s*<\/h[1-6]>/gi) ?? []).length;
-  const faq = types.some((t) => /FAQPage|Question/i.test(t));
-  add({
-    id: "faq",
-    title: "Perguntas e respostas",
-    status: faq || questions >= 3 ? "ok" : questions > 0 ? "warn" : "fail",
-    weight: 6,
-    found: faq ? "Há FAQ com dados estruturados." : questions ? `${questions} títulos em forma de pergunta.` : "Sem seção de perguntas frequentes.",
-    why: "As pessoas perguntam às IAs em forma de pergunta. Páginas que já trazem pergunta e resposta são as mais citadas.",
-    fix: "Crie uma seção “Perguntas frequentes” com 5 a 8 perguntas reais de clientes, cada uma com resposta curta. No Framer, use o componente Accordion.",
-  });
-
   // 14. alt das imagens
   const imgs = html.match(/<img\b[^>]*>/gi) ?? [];
   const withAlt = imgs.filter((t) => (attr(t, "alt") ?? "").trim().length > 0).length;
@@ -361,11 +332,25 @@ export async function runGeoAudit(siteId: string, siteUrl: string) {
 
 type Row = Record<string, unknown>;
 
+// Checagens que não entram mais na nota (nem aparecem), inclusive nas auditorias antigas já salvas.
+const REMOVED = new Set(["faq", "llms", "headings"]);
+function score(checks: GeoCheck[]) {
+  const total = checks.reduce((a, c) => a + c.weight, 0);
+  const got = checks.reduce((a, c) => a + c.weight * (c.status === "ok" ? 1 : c.status === "warn" ? 0.5 : 0), 0);
+  return total ? Math.round((got / total) * 100) : 0;
+}
+function clean(checks: GeoCheck[]) {
+  return (checks ?? []).filter((c) => !REMOVED.has(c.id));
+}
+
 /** Auditorias do site, da mais recente para a mais antiga. */
 export async function getGeoAudits(siteId: string, limit = 30): Promise<GeoAudit[]> {
   await ensureGeoAuditTable();
   const res = (await db.execute(sql`SELECT ran_at, score, checks FROM geo_audits WHERE site_id = ${siteId} AND NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY ran_at DESC LIMIT ${limit}`)) as unknown as Row[];
-  return res.map((r) => ({ ranAt: new Date(String(r.ran_at)), score: Number(r.score), checks: (r.checks as GeoCheck[]) ?? [] }));
+  return res.map((r) => {
+    const checks = clean(r.checks as GeoCheck[]);
+    return { ranAt: new Date(String(r.ran_at)), score: checks.length ? score(checks) : Number(r.score), checks };
+  });
 }
 
 /** Checagens da auditoria GEO mais recente de cada site. */
@@ -376,6 +361,6 @@ export async function getLatestGeoChecks(siteIds: string[]): Promise<Map<string,
   const res = (await db.execute(sql`SELECT DISTINCT ON (site_id) site_id, checks FROM geo_audits
     WHERE NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY site_id, ran_at DESC`)) as unknown as { site_id: string; checks: GeoCheck[] }[];
   const want = new Set(siteIds);
-  for (const r of res) if (want.has(r.site_id)) out.set(r.site_id, r.checks ?? []);
+  for (const r of res) if (want.has(r.site_id)) out.set(r.site_id, clean(r.checks));
   return out;
 }
