@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RiAddLine, RiArrowUpLine, RiDeleteBinLine, RiHistoryLine, RiPencilLine, RiSparklingLine, RiStarFill, RiStarLine } from "@remixicon/react";
+import { RiAddLine, RiAlarmWarningLine, RiArrowUpLine, RiDeleteBinLine, RiFileList3Line, RiHistoryLine, RiPencilLine, RiRobot2Line, RiStarFill, RiStarLine } from "@remixicon/react";
 import Markdown from "@/components/gemini/Markdown";
 import { notification } from "@/hooks/use-notification";
 import type { ChatMessage } from "@/lib/numaChat";
@@ -15,10 +15,9 @@ interface Chat {
 }
 
 const SUGGESTIONS = [
-  "Qual site precisa de atenção primeiro?",
-  "Resuma a semana dos meus sites",
-  "Explique a nota GEO em linguagem simples",
-  "O que é LCP e como melhorar no Framer?",
+  { icon: RiAlarmWarningLine, text: "Qual site precisa de atenção primeiro?" },
+  { icon: RiFileList3Line, text: "Resuma a semana dos meus sites" },
+  { icon: RiRobot2Line, text: "Explique a nota GEO" },
 ];
 
 const MAX_LOCAL_CHATS = 40;
@@ -30,7 +29,7 @@ const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? c
  * Chat com a Numa. As conversas ficam guardadas neste navegador (não ocupam o banco do painel).
  * Só as favoritas (estrela) são salvas na sua conta, para aparecerem em qualquer aparelho.
  */
-export default function NumaChat({ email }: { email: string }) {
+export default function NumaChat({ email, greeting }: { email: string; greeting: string }) {
   const storageKey = `numa-chats:${email.toLowerCase()}`;
   const [chats, setChats] = useState<Chat[]>([]);
   const [ready, setReady] = useState(false);
@@ -254,10 +253,43 @@ export default function NumaChat({ email }: { email: string }) {
     </li>
   );
 
+  const composer = (wrapper: string) => (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void send(input);
+      }}
+      className={wrapper}
+    >
+      <div className="glass-strong mx-auto flex w-full max-w-3xl items-end gap-2 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-stroke-strong-950">
+        <textarea
+          ref={inputRef}
+          value={input}
+          rows={1}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              void send(input);
+            }
+          }}
+          placeholder="Escreva sua pergunta para a Numa…"
+          aria-label="Mensagem para a Numa"
+          className="max-h-32 flex-1 resize-none bg-transparent px-2 py-1.5 text-paragraph-sm outline-none placeholder:text-text-soft-400"
+        />
+        <button type="submit" disabled={loading || !input.trim()} aria-label="Enviar" className="flex size-9 items-center justify-center rounded-xl bg-bg-strong-950 text-text-white-0 transition disabled:opacity-30">
+          <RiArrowUpLine className="size-4" />
+        </button>
+      </div>
+    </form>
+  );
+
+  const empty = messages.length === 0 && !loading;
+
   return (
-    <div className="ai-gradient absolute inset-0 flex lg:rounded-2xl">
+    <div className="ai-gradient-soft absolute inset-0 flex lg:rounded-2xl">
       <aside
-        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-white/60 bg-white/55 backdrop-blur-xl md:static md:flex md:w-64 md:flex-shrink-0`}
+        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-white/60 bg-white/70 backdrop-blur-xl md:static md:flex md:w-64 md:flex-shrink-0 md:bg-white/50`}
         aria-label="Conversas"
       >
         <div className="p-3">
@@ -281,90 +313,62 @@ export default function NumaChat({ email }: { email: string }) {
             </>
           )}
         </div>
-        <p className="border-t border-stroke-soft-200 px-3 py-2.5 text-paragraph-xs text-text-soft-400">
+        <p className="border-t border-white/60 px-3 py-2.5 text-paragraph-xs text-text-soft-400">
           As conversas ficam neste navegador. As favoritas (estrela) ficam salvas na sua conta.
         </p>
       </aside>
 
-      <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex flex-shrink-0 items-center gap-3 border-b border-white/60 bg-white/40 px-4 py-3 backdrop-blur-md">
-          <button type="button" onClick={() => setListOpen((o) => !o)} aria-label="Conversas" className="flex size-8 items-center justify-center rounded-lg text-text-sub-600 hover:bg-bg-soft-200 md:hidden">
-            <RiHistoryLine className="size-5" />
-          </button>
-          <span className="flex size-8 items-center justify-center rounded-lg bg-bg-strong-950 text-text-white-0">
-            <RiSparklingLine className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="truncate text-label-md text-text-strong-950">{active?.title ?? "Numa"}</h1>
-          </div>
-        </header>
+      <section className="relative flex min-w-0 flex-1 flex-col">
+        <button
+          type="button"
+          onClick={() => setListOpen((o) => !o)}
+          aria-label="Conversas"
+          className="glass absolute left-3 top-3 z-20 flex size-9 items-center justify-center rounded-lg text-text-sub-600 md:hidden"
+        >
+          <RiHistoryLine className="size-5" />
+        </button>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
-          {messages.length === 0 && !loading && (
-            <div className="mx-auto max-w-xl space-y-4 pt-6 sm:pt-12">
-              <div>
-                <p className="text-title-h6 text-text-strong-950">Oi, eu sou a Numa.</p>
-                <p className="mt-1 text-paragraph-sm text-text-sub-600">Pergunte sobre desempenho, SEO ou GEO dos seus sites. Eu explico em linguagem simples e digo como corrigir no Framer.</p>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {SUGGESTIONS.map((s) => (
-                  <button key={s} type="button" onClick={() => send(s)} className="glass rounded-xl px-3 py-2.5 text-left text-paragraph-sm text-text-strong-950 transition hover:bg-white/90">
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {messages.map((m, i) =>
-            m.role === "user" ? (
-              <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bg-strong-950 px-3.5 py-2 text-paragraph-sm text-text-white-0 sm:max-w-[70%]">
-                {m.text}
-              </div>
-            ) : (
-              <div key={i} className="max-w-[95%] glass rounded-2xl rounded-bl-md px-4 py-3 text-paragraph-sm text-text-strong-950 sm:max-w-[80%]">
-                <Markdown text={m.text} />
-              </div>
-            )
-          )}
-          {loading && (
-            <div className="glass flex w-fit items-center gap-1 rounded-2xl px-4 py-3" aria-label="A Numa está escrevendo">
-              {[0, 150, 300].map((d) => (
-                <span key={d} className="size-1.5 animate-bounce rounded-full bg-text-soft-400" style={{ animationDelay: `${d}ms` }} />
+        {empty ? (
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10">
+            <h1 className="max-w-3xl text-center text-title-h3 text-text-strong-950 sm:text-title-h2">{greeting}</h1>
+            <div className="mt-9 grid w-full max-w-3xl gap-3 sm:grid-cols-3">
+              {SUGGESTIONS.map(({ icon: Icon, text }) => (
+                <button key={text} type="button" onClick={() => send(text)} className="glass flex flex-col items-start gap-3 rounded-2xl p-4 text-left text-label-md text-text-strong-950 transition hover:bg-white/90">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-white/80 ring-1 ring-white">
+                    <Icon className="size-5 text-text-sub-600" />
+                  </span>
+                  {text}
+                </button>
               ))}
             </div>
-          )}
-          <div ref={endRef} />
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void send(input);
-          }}
-          className="flex-shrink-0 border-t border-white/60 bg-white/30 p-3 backdrop-blur-md sm:p-4"
-        >
-          <div className="mx-auto flex max-w-3xl items-end gap-2 glass-strong rounded-xl p-2 focus-within:ring-2 focus-within:ring-stroke-strong-950">
-            <textarea
-              ref={inputRef}
-              value={input}
-              rows={1}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void send(input);
-                }
-              }}
-              placeholder="Escreva sua pergunta para a Numa…"
-              aria-label="Mensagem para a Numa"
-              className="max-h-32 flex-1 resize-none bg-transparent px-1.5 py-1 text-paragraph-sm outline-none placeholder:text-text-soft-400"
-            />
-            <button type="submit" disabled={loading || !input.trim()} aria-label="Enviar" className="flex size-8 items-center justify-center rounded-lg bg-bg-strong-950 text-text-white-0 transition disabled:opacity-30">
-              <RiArrowUpLine className="size-4" />
-            </button>
+            {composer("mt-6 w-full max-w-3xl")}
           </div>
-          <p className="mt-2 text-center text-paragraph-xs text-text-soft-400">A Numa pode errar. Confira antes de aplicar mudanças.</p>
-        </form>
+        ) : (
+          <>
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-5 pt-14 sm:px-6 md:pt-6">
+              {messages.map((m, i) =>
+                m.role === "user" ? (
+                  <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bg-strong-950 px-3.5 py-2 text-paragraph-sm text-text-white-0 sm:max-w-[70%]">
+                    {m.text}
+                  </div>
+                ) : (
+                  <div key={i} className="glass max-w-[95%] rounded-2xl rounded-bl-md px-4 py-3 text-paragraph-sm text-text-strong-950 sm:max-w-[80%]">
+                    <Markdown text={m.text} />
+                  </div>
+                )
+              )}
+              {loading && (
+                <div className="glass flex w-fit items-center gap-1 rounded-2xl px-4 py-3" aria-label="A Numa está escrevendo">
+                  {[0, 150, 300].map((d) => (
+                    <span key={d} className="size-1.5 animate-bounce rounded-full bg-text-soft-400" style={{ animationDelay: `${d}ms` }} />
+                  ))}
+                </div>
+              )}
+              <div ref={endRef} />
+            </div>
+            {composer("flex-shrink-0 p-3 sm:p-4")}
+          </>
+        )}
       </section>
     </div>
   );

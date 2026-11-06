@@ -6,6 +6,8 @@ import WorkspaceActions from "@/components/WorkspaceActions";
 import { Page } from "@/components/ui/Page";
 import { getViewer } from "@/lib/access";
 import { loadInventory } from "@/lib/inventory";
+import { getFolderIcons } from "@/lib/folderIcons";
+import WorkspaceIcon from "@/components/WorkspaceIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const { d } = await searchParams;
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
-  const { rows: all, folders } = await loadInventory(viewer);
+  const [{ rows: all, folders }, folderIcons] = await Promise.all([loadInventory(viewer), getFolderIcons().catch(() => ({}) as Record<string, string>)]);
   const folder = folders.find((f) => f.id === id);
   if (!folder) notFound();
   const rows = all.filter((r) => r.folderId === id);
@@ -23,14 +25,19 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
 
   return (
     <Page
-      title={folder.name}
+      title={
+        <span className="flex items-center gap-2.5">
+          <WorkspaceIcon icon={folderIcons[id]} className="size-6 text-text-sub-600" />
+          {folder.name}
+        </span>
+      }
       subtitle="Sites deste workspace. Compare as notas por dispositivo."
       actions={
         viewer.owner && (
           <div className="flex flex-wrap items-center gap-2">
             <ShareWorkspaceButton folder={{ id, name: folder.name }} />
             <WorkspaceActions
-              folder={{ id, name: folder.name }}
+              folder={{ id, name: folder.name, icon: folderIcons[id] ?? "folder" }}
               siteCount={rows.length}
               candidates={all.filter((r) => r.folderId !== id).map((r) => ({ id: r.id, name: r.name, url: r.url, folderName: r.folder }))}
             />

@@ -6,6 +6,7 @@ import { RiAddLine, RiDeleteBinLine, RiPencilLine } from "@remixicon/react";
 import Button from "@/components/ui/Button";
 import Modal, { Field } from "@/components/ui/Modal";
 import { inputClass } from "@/components/ui/fields";
+import IconPicker from "@/components/IconPicker";
 import SiteChecklist, { type PickableSite } from "@/components/SiteChecklist";
 
 type Dialog = null | "add" | "rename" | "delete";
@@ -16,12 +17,13 @@ export default function WorkspaceActions({
   candidates,
   siteCount,
 }: {
-  folder: { id: string; name: string };
+  folder: { id: string; name: string; icon: string };
   candidates: PickableSite[]; // sites que ainda não estão neste workspace
   siteCount: number;
 }) {
   const [dialog, setDialog] = useState<Dialog>(null);
   const [name, setName] = useState(folder.name);
+  const [icon, setIcon] = useState(folder.icon);
   const [picked, setPicked] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,7 @@ export default function WorkspaceActions({
     setDialog(null);
     setPicked([]);
     setName(folder.name);
+    setIcon(folder.icon);
     setError(null);
   }
 
@@ -57,7 +60,7 @@ export default function WorkspaceActions({
           <RiAddLine className="h-4 w-4" />
           Adicionar sites
         </Button>
-        <Button variant="outline" size="icon" aria-label="Renomear workspace" title="Renomear" onClick={() => setDialog("rename")}>
+        <Button variant="outline" size="icon" aria-label="Editar workspace" title="Editar nome e ícone" onClick={() => setDialog("rename")}>
           <RiPencilLine className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="icon" aria-label="Excluir workspace" title="Excluir workspace" onClick={() => setDialog("delete")}>
@@ -86,12 +89,12 @@ export default function WorkspaceActions({
       <Modal
         open={dialog === "rename"}
         onClose={close}
-        title="Renomear workspace"
+        title="Editar workspace"
         footer={
           <>
             <Button variant="outline" onClick={close}>Cancelar</Button>
-            <Button disabled={!name.trim() || name.trim() === folder.name || saving} onClick={() => call("PATCH", { name })}>
-              {saving ? "Salvando…" : "Salvar nome"}
+            <Button disabled={!name.trim() || (name.trim() === folder.name && icon === folder.icon) || saving} onClick={() => call("PATCH", { name, icon })}>
+              {saving ? "Salvando…" : "Salvar"}
             </Button>
           </>
         }
@@ -101,11 +104,15 @@ export default function WorkspaceActions({
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && name.trim() && call("PATCH", { name })}
+            onKeyDown={(e) => e.key === "Enter" && name.trim() && call("PATCH", { name, icon })}
             maxLength={60}
             className={`${inputClass} w-full`}
           />
         </Field>
+        <div className="mt-4">
+          <p className="mb-1.5 text-label-sm text-text-strong-950">Ícone</p>
+          <IconPicker value={icon} onChange={setIcon} />
+        </div>
         {error && <p role="alert" className="mt-2 text-paragraph-xs text-error-base">{error}</p>}
       </Modal>
 

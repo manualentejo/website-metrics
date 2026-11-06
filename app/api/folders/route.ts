@@ -4,6 +4,8 @@ import { eq, inArray } from "drizzle-orm";
 import { authOptions, isOwner } from "@/lib/auth";
 import { db } from "@/db/client";
 import { folders, sites } from "@/db/schema";
+import { setFolderIcon } from "@/lib/folderIcons";
+import { isWorkspaceIcon } from "@/lib/workspaceIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +21,12 @@ export async function POST(req: NextRequest) {
   const denied = await guard();
   if (denied) return denied;
 
-  const { name, siteIds } = (await req.json()) as { name?: string; siteIds?: string[] };
+  const { name, siteIds, icon } = (await req.json()) as { name?: string; siteIds?: string[]; icon?: string };
   if (!name || name.trim().length === 0) {
     return NextResponse.json({ error: "Dê um nome ao workspace." }, { status: 400 });
   }
   const [folder] = await db.insert(folders).values({ name: name.trim().slice(0, 60) }).returning();
+  if (isWorkspaceIcon(icon)) await setFolderIcon(folder.id, icon);
   const toAdd = ids(siteIds);
   if (toAdd.length) await db.update(sites).set({ folderId: folder.id }).where(inArray(sites.id, toAdd));
   return NextResponse.json(folder);
@@ -34,13 +37,14 @@ export async function PATCH(req: NextRequest) {
   const denied = await guard();
   if (denied) return denied;
 
-  const b = (await req.json()) as { id?: string; name?: string; addSiteIds?: string[]; removeSiteIds?: string[] };
+  const b = (await req.json()) as { id?: string; icon?: string; name?: string; addSiteIds?: string[]; removeSiteIds?: string[] };
   if (!b.id) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
   if (b.name !== undefined) {
     if (!b.name.trim()) return NextResponse.json({ error: "Dê um nome ao workspace." }, { status: 400 });
     await db.update(folders).set({ name: b.name.trim().slice(0, 60) }).where(eq(folders.id, b.id));
   }
+  if (isWorkspaceIcon(b.icon)) await setFolderIcon(b.id, b.icon);
   const add = ids(b.addSiteIds);
   if (add.length) await db.update(sites).set({ folderId: b.id }).where(inArray(sites.id, add));
   const remove = ids(b.removeSiteIds);

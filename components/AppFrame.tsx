@@ -8,6 +8,7 @@ import SidebarFrame from "./SidebarFrame";
 import { SiteIconsProvider } from "./SiteIcon";
 import IconBackfill from "./IconBackfill";
 import { getIconMap, hostKey } from "@/lib/siteIcons";
+import { getFolderIcons } from "@/lib/folderIcons";
 import Sidebar from "./Sidebar";
 import { getViewer, getAccessibleSiteIds, canViewSite } from "@/lib/access";
 import { getProfile } from "@/lib/profile";
@@ -19,11 +20,12 @@ export default async function AppFrame({ children }: { children: ReactNode }) {
   if (!viewer) redirect("/login");
 
   const accessible = viewer.owner ? new Set<string>() : await getAccessibleSiteIds(viewer.email);
-  const [allSites, allFolders, profile, icons] = await Promise.all([
+  const [allSites, allFolders, profile, icons, folderIcons] = await Promise.all([
     db.select().from(sites).orderBy(asc(sites.sortOrder), asc(sites.createdAt)),
     db.select().from(folders).orderBy(asc(folders.sortOrder), asc(folders.createdAt)),
     getProfile(viewer.email),
     getIconMap().catch(() => ({}) as Record<string, string>),
+    getFolderIcons().catch(() => ({}) as Record<string, string>),
   ]);
   const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
 
@@ -37,7 +39,7 @@ export default async function AppFrame({ children }: { children: ReactNode }) {
       sidebar={
       <Sidebar
         sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}
-        folders={allFolders}
+        folders={allFolders.map((f) => ({ id: f.id, name: f.name, icon: folderIcons[f.id] ?? null }))}
         isOwner={viewer.owner}
         user={{
           email: viewer.email,

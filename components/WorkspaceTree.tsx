@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import SiteIcon from "./SiteIcon";
 import RailTip from "./RailTip";
+import WorkspaceIcon from "./WorkspaceIcon";
 
 interface Item {
   id: string;
@@ -18,6 +19,7 @@ interface Item {
 export interface TreeGroup {
   id: string;
   name: string;
+  icon?: string | null;
   sites: Item[];
 }
 
@@ -120,13 +122,12 @@ function SiteList({ sites, activeSiteId, canReorder }: { sites: Item[]; activeSi
 function Group({ group, activeSiteId, activeFolderId, canReorder }: { group: TreeGroup; activeSiteId?: string; activeFolderId?: string; canReorder: boolean }) {
   const containsActive = group.id === activeFolderId || group.sites.some((s) => s.id === activeSiteId);
   const [open, setOpen] = useState(containsActive);
-  const Icon = open ? RiFolderOpenLine : RiFolderLine;
 
   return (
     <div>
       <div className={`flex items-center ${row(group.id === activeFolderId)} !p-0 !h-9`}>
         <Link href={`/workspace/${group.id}`} className="flex h-9 flex-1 items-center gap-2 truncate px-3">
-          <Icon className="size-5 flex-shrink-0" />
+          {group.icon && group.icon !== "folder" ? <WorkspaceIcon icon={group.icon} className="size-5 flex-shrink-0" /> : open ? <RiFolderOpenLine className="size-5 flex-shrink-0" /> : <RiFolderLine className="size-5 flex-shrink-0" />}
           <span className="truncate">{group.name}</span>
         </Link>
         <button
@@ -210,7 +211,7 @@ function RailWorkspace({ group, activeFolderId, activeSiteId }: { group: TreeGro
           aria-expanded={!!menu}
           className={`relative flex h-10 items-center justify-center rounded-lg transition duration-200 ${active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
         >
-          <RiFolderLine className="size-5" />
+          <WorkspaceIcon icon={group.icon} className="size-5" />
           <span aria-hidden className="absolute bottom-1 right-1 h-0 w-0 border-b-[6px] border-l-[6px] border-solid border-b-text-soft-400 border-l-transparent" />
         </Link>
       </RailTip>

@@ -22,12 +22,12 @@ export default function Sidebar({
   user,
 }: {
   sites: SiteNavItem[];
-  folders: { id: string; name: string }[];
+  folders: { id: string; name: string; icon: string | null }[];
   isOwner?: boolean;
   user: { email: string; name: string; image: string | null };
 }) {
   const groups = folders
-    .map((f) => ({ id: f.id, name: f.name, sites: sites.filter((s) => s.folderId === f.id) }))
+    .map((f) => ({ id: f.id, name: f.name, icon: f.icon, sites: sites.filter((s) => s.folderId === f.id) }))
     .filter((g) => isOwner || g.sites.length > 0);
   const loose = sites.filter((s) => !s.folderId || !folders.some((f) => f.id === s.folderId));
 

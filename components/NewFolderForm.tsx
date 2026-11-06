@@ -6,6 +6,7 @@ import { RiFolderAddLine } from "@remixicon/react";
 import Button from "@/components/ui/Button";
 import Modal, { Field } from "@/components/ui/Modal";
 import { inputClass } from "@/components/ui/fields";
+import IconPicker from "@/components/IconPicker";
 import SiteChecklist, { type PickableSite } from "@/components/SiteChecklist";
 
 // "Novo workspace": cria um grupo (pasta), dá um nome e já escolhe quais sites entram nele.
@@ -13,6 +14,7 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
+  const [icon, setIcon] = useState("folder");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
   function close() {
     setOpen(false);
     setName("");
+    setIcon("folder");
     setPicked([]);
     setError(null);
   }
@@ -31,7 +34,7 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
     const res = await fetch("/api/folders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), siteIds: picked }),
+      body: JSON.stringify({ name: name.trim(), siteIds: picked, icon }),
     });
     const data = await res.json().catch(() => null);
     setSaving(false);
@@ -75,6 +78,10 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
               className={`${inputClass} w-full`}
             />
           </Field>
+          <div>
+            <p className="mb-1.5 text-label-sm text-text-strong-950">Ícone</p>
+            <IconPicker value={icon} onChange={setIcon} />
+          </div>
           <div>
             <p className="mb-1 text-paragraph-xs font-medium text-text-strong-950">Sites do grupo (opcional)</p>
             <SiteChecklist sites={sites} selected={picked} onChange={setPicked} emptyText="Adicione um site primeiro para poder agrupá-lo." />

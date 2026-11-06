@@ -197,7 +197,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </Panel>
 
-            <Panel className="lg:col-span-5 2xl:col-span-4" title="Sites por faixa de nota" description="Quantos sites em cada faixa" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
+            <Panel className="lg:col-span-5 2xl:col-span-4" title="Sites por faixa de nota" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
               {seoCount === 0 ? (
                 <ChartEmptyState title="Sem notas ainda" className="h-full min-h-[10rem]" />
               ) : (
@@ -251,7 +251,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               )}
             </Panel>
 
-            <Panel className="lg:col-span-6 2xl:col-span-5" title="Sites" description={`${p.rows.length} monitorados · ordene pelas colunas`} action={<Link href="/sites" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Gerenciar</Link>}>
+            <Panel className="lg:col-span-6 2xl:col-span-5" title="Sites" action={<Link href="/sites" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Gerenciar</Link>}>
               <div className="-mx-4 -mt-1">
                 <WebsitePerformanceTable rows={p.rows} />
               </div>
