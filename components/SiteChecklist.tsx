@@ -40,7 +40,7 @@ export default function SiteChecklist({
       <ul className="max-h-56 divide-y divide-stroke-soft-200 overflow-y-auto rounded-xl border border-stroke-soft-200">
         {shown.map((s) => (
           <li key={s.id}>
-            <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-bg-weak-50">
+            <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-bg-soft-200">
               <Checkbox.Root
                 checked={selected.includes(s.id)}
                 onCheckedChange={(v) => onChange(v === true ? [...selected, s.id] : selected.filter((x) => x !== s.id))}

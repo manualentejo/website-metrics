@@ -86,7 +86,7 @@ export default function AuditRow({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-6 py-3 text-left transition-colors hover:bg-bg-weak-50"
+        className="flex w-full items-center gap-3 px-6 py-3 text-left transition-colors hover:bg-bg-soft-200"
       >
         <StatusIcon status={status} />
         <span className="flex-1 text-sm text-text-strong-950">
@@ -161,7 +161,7 @@ export default function AuditRow({
                   }. Explique em linguagem simples o que isso significa e como corrigir no Framer, passo a passo.`
                 )
               }
-              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-paragraph-xs font-medium text-text-strong-950/80 ring-1 ring-border transition-colors hover:bg-bg-weak-50"
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-paragraph-xs font-medium text-text-strong-950/80 ring-1 ring-border transition-colors hover:bg-bg-soft-200"
             >
               <RiSparklingLine className="h-3.5 w-3.5" />
               Como corrigir no Framer?

@@ -21,7 +21,7 @@ export interface TreeGroup {
 
 const row = (active: boolean) =>
   `flex items-center gap-2 rounded-lg px-3 h-9 text-label-sm transition duration-200 ${
-    active ? "bg-bg-soft-200 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950"
+    active ? "bg-bg-sub-300 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
   }`;
 
 /**
@@ -152,7 +152,34 @@ export default function WorkspaceTree({ groups, loose, canReorder = false }: { g
   const activeSiteId = pathname.split("/")[1] === "site" ? pathname.split("/")[2] : undefined;
   const activeFolderId = pathname.split("/")[1] === "workspace" ? pathname.split("/")[2] : undefined;
   return (
-    <div className="space-y-0.5">
+    <>
+      {/* Barra recolhida: cada workspace e site solto vira um ícone com rótulo curto. */}
+      <div className="hidden flex-col items-stretch gap-0.5 group-data-[collapsed=true]/sb:flex">
+        {groups.map((g) => (
+          <Link
+            key={g.id}
+            href={`/workspace/${g.id}`}
+            title={`${g.name} (${g.sites.length} sites)`}
+            aria-label={`Workspace ${g.name}`}
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition duration-200 ${g.id === activeFolderId ? "bg-bg-sub-300 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
+          >
+            <RiFolderLine className="size-5" />
+            <span className="max-w-full truncate text-[10px] leading-tight" aria-hidden>{g.name}</span>
+          </Link>
+        ))}
+        {loose.map((s) => (
+          <Link
+            key={s.id}
+            href={`/site/${s.id}`}
+            title={s.name}
+            aria-label={s.name}
+            className={`flex h-11 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-bg-sub-300" : "hover:bg-bg-soft-200"}`}
+          >
+            <SiteIcon url={s.url} name={s.name} size={22} />
+          </Link>
+        ))}
+      </div>
+    <div className="space-y-0.5 group-data-[collapsed=true]/sb:hidden">
       {groups.map((g) => (
         <Group key={g.id} group={g} activeSiteId={activeSiteId} activeFolderId={activeFolderId} canReorder={canReorder} />
       ))}
@@ -161,5 +188,6 @@ export default function WorkspaceTree({ groups, loose, canReorder = false }: { g
       )}
       <SiteList sites={loose} activeSiteId={activeSiteId} canReorder={canReorder} />
     </div>
+    </>
   );
 }

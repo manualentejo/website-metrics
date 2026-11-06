@@ -56,7 +56,7 @@ export default function AIInsightsPanel({ insights, source = "rules", compact = 
           return (
             <li key={i.key} className={!compact && i.key === "next" ? "sm:col-span-2 xl:col-span-1" : ""}>
               {i.href ? (
-                <Link href={i.href} className={`${cls} h-full ${dark ? "hover:opacity-95" : "hover:bg-bg-weak-50"}`}>{body}</Link>
+                <Link href={i.href} className={`${cls} h-full ${dark ? "hover:opacity-95" : "hover:bg-bg-soft-200"}`}>{body}</Link>
               ) : (
                 <div className={`${cls} h-full`}>{body}</div>
               )}

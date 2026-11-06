@@ -45,7 +45,7 @@ export default function AuditSection({
   return (
     <div className="border-t border-stroke-soft-200 first:border-t-0">
       {collapsible ? (
-        <div className="flex items-center gap-1.5 px-6 py-3 hover:bg-bg-weak-50">
+        <div className="flex items-center gap-1.5 px-6 py-3 hover:bg-bg-soft-200">
           <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className={`text-left ${labelClass}`}>
             {label}
           </button>

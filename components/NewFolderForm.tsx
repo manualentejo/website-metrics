@@ -46,7 +46,7 @@ export default function NewWorkspace({ sites }: { sites: PickableSite[] }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-paragraph-sm text-text-sub-600 transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950"
+        className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-paragraph-sm text-text-sub-600 transition-colors hover:bg-bg-soft-200 hover:text-text-strong-950"
       >
         <RiFolderAddLine className="h-4 w-4" />
         Novo workspace

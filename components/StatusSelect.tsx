@@ -53,7 +53,7 @@ export default function StatusSelect({
   }
 
   return (
-    <label className={`relative ${base} transition duration-200 hover:bg-bg-weak-50 focus-within:shadow-button-important-focus focus-within:ring-stroke-strong-950`}>
+    <label className={`relative ${base} transition duration-200 hover:bg-bg-soft-200 focus-within:shadow-button-important-focus focus-within:ring-stroke-strong-950`}>
       {dot}
       <select
         value={current}

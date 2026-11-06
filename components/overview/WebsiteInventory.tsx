@@ -44,7 +44,6 @@ const SORTS = [
 type SortKey = (typeof SORTS)[number]["value"];
 
 const bare = (u: string) => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
-const day = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: "America/Sao_Paulo" }) : "—");
 
 function Score({ c, best }: { c: Cell; best?: boolean }) {
   if (c.v === null) return <span className="text-text-soft-400">—</span>;
@@ -67,7 +66,7 @@ function Score({ c, best }: { c: Cell; best?: boolean }) {
  * Lista e comparação de sites: busca, filtro de status, ordenação, notas por dispositivo (Computador/Celular)
  * com variação e a nota GEO. A troca de dispositivo atualiza a tabela na hora, sem recarregar.
  */
-export default function WebsiteInventory({ rows, owner, initialDevice = "desktop" }: { rows: InventoryRow[]; owner: boolean; initialDevice?: Device }) {
+export default function WebsiteInventory({ rows, owner, initialDevice = "desktop", showWorkspace = true }: { rows: InventoryRow[]; owner: boolean; initialDevice?: Device; showWorkspace?: boolean }) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"" | Status>("");
   const [sort, setSort] = useState<SortKey>("name");
@@ -158,22 +157,21 @@ export default function WebsiteInventory({ rows, owner, initialDevice = "desktop
         <div className="overflow-x-auto overscroll-x-contain">
           <table className="w-full min-w-[820px] text-left">
             <thead>
-              <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-subheading-xs uppercase text-text-soft-400">
-                <th className="sticky left-0 z-[1] bg-bg-weak-50 px-3 py-2 font-normal sm:px-4">Site</th>
+              <tr className="border-y border-stroke-soft-200 bg-bg-soft-200 text-subheading-xs uppercase text-text-soft-400">
+                <th className="sticky left-0 z-[1] bg-bg-soft-200 px-3 py-2 font-normal sm:px-4">Site</th>
                 {COLS.map((c) => (
                   <th key={c.key} className="px-3 py-2 font-normal">{c.label}</th>
                 ))}
                 <th className="px-3 py-2 font-normal">GEO</th>
-                <th className="hidden px-3 py-2 font-normal xl:table-cell">Workspace</th>
-                <th className="hidden px-3 py-2 font-normal xl:table-cell">Auditoria</th>
+                {showWorkspace && <th className="hidden px-3 py-2 font-normal xl:table-cell">Workspace</th>}
                 <th className="px-3 py-2 font-normal">Status</th>
                 <th className="px-3 py-2 text-right font-normal sm:px-4"><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody>
               {list.map((r) => (
-                <tr key={r.id} className="group border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
-                  <td className="sticky left-0 z-[1] bg-bg-white-0 px-3 py-2.5 group-hover:bg-bg-weak-50 sm:px-4">
+                <tr key={r.id} className="group border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-soft-200">
+                  <td className="sticky left-0 z-[1] bg-bg-white-0 px-3 py-2.5 group-hover:bg-bg-soft-200 sm:px-4">
                     <Link href={`/site/${r.id}`} className="flex items-center gap-3">
                       <SiteIcon url={r.url} name={r.name} size={32} className="ring-1 ring-inset ring-stroke-soft-200" />
                       <span className="min-w-0 max-w-[11rem]">
@@ -190,8 +188,7 @@ export default function WebsiteInventory({ rows, owner, initialDevice = "desktop
                   <td className="px-3 py-2.5 text-label-sm">
                     <Score c={{ v: r.geo, d: null }} best={list.length > 1 && r.geo !== null && r.geo === best.geo} />
                   </td>
-                  <td className="hidden px-3 py-2.5 text-paragraph-sm text-text-sub-600 xl:table-cell">{r.folder ?? "—"}</td>
-                  <td className="hidden px-3 py-2.5 text-paragraph-sm text-text-sub-600 xl:table-cell">{day(r.m[device].at)}</td>
+                  {showWorkspace && <td className="hidden px-3 py-2.5 text-paragraph-sm text-text-sub-600 xl:table-cell">{r.folder ?? "—"}</td>}
                   <td className="px-3 py-2.5"><StatusSelect siteId={r.id} status={r.status} readOnly={!owner} /></td>
                   <td className="px-3 py-2.5 sm:px-4">
                     <div className="flex items-center justify-end gap-1">

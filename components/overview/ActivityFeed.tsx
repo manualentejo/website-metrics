@@ -35,7 +35,7 @@ export default function ActivityFeed({ items, showSite = true }: { items: Activi
               const Icon = m.icon;
               return (
                 <li key={it.id} className="relative">
-                  <Link href={it.href} className="flex items-start gap-3 rounded-xl p-1.5 transition duration-200 hover:bg-bg-weak-50">
+                  <Link href={it.href} className="flex items-start gap-3 rounded-xl p-1.5 transition duration-200 hover:bg-bg-soft-200">
                     <span className={`relative z-[1] flex size-8 flex-shrink-0 items-center justify-center rounded-full ring-4 ring-bg-white-0 ${m.tile}`}>
                       <Icon className="size-4" aria-hidden />
                     </span>

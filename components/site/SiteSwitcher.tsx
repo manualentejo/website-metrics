@@ -13,7 +13,7 @@ export default function SiteSwitcher({ sites, currentId, tab }: { sites: { id: s
       <select
         value={currentId}
         onChange={(e) => router.push(`/site/${e.target.value}${tab}`)}
-        className="h-9 max-w-[12rem] appearance-none rounded-lg bg-bg-white-0 pl-3 pr-8 text-label-sm text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 hover:bg-bg-weak-50 focus-visible:outline-none focus-visible:ring-stroke-strong-950"
+        className="h-9 max-w-[12rem] appearance-none rounded-lg bg-bg-white-0 pl-3 pr-8 text-label-sm text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 hover:bg-bg-soft-200 focus-visible:outline-none focus-visible:ring-stroke-strong-950"
       >
         {sites.map((s) => (
           <option key={s.id} value={s.id}>{s.name}</option>

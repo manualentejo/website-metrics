@@ -41,7 +41,7 @@ export default async function AlertsPage() {
                 <Link
                   key={i}
                   href={a.href}
-                  className="flex items-start gap-3 px-5 py-3 hover:bg-bg-weak-50"
+                  className="flex items-start gap-3 px-5 py-3 hover:bg-bg-soft-200"
                 >
                   <m.icon className={`mt-0.5 h-4 w-4 flex-shrink-0 ${m.color}`} />
                   <span className="min-w-0 flex-1">

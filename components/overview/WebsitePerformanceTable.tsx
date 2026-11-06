@@ -46,7 +46,7 @@ export default function WebsitePerformanceTable({ rows }: { rows: SiteSummary[] 
   }, [rows, sort]);
 
   const Th = ({ k, children }: { k: Key; children: string }) => (
-    <th scope="col" aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className="sticky top-0 z-[1] bg-bg-white-0 px-2 py-2 font-normal sm:px-3">
+    <th scope="col" aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className="sticky top-0 z-[1] bg-bg-soft-200 px-2 py-2 font-normal sm:px-3">
       <button
         type="button"
         onClick={() => setSort((s) => (s.key === k ? { key: k, dir: (-s.dir) as 1 | -1 } : { key: k, dir: k === "name" ? 1 : -1 }))}
@@ -71,7 +71,7 @@ export default function WebsitePerformanceTable({ rows }: { rows: SiteSummary[] 
       </thead>
       <tbody>
         {sorted.map((r) => (
-          <tr key={r.id} className="border-t border-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50">
+          <tr key={r.id} className="border-t border-stroke-soft-200 transition duration-200 hover:bg-bg-soft-200">
             <td className="px-2 py-2 sm:px-3">
               <Link href={`/site/${r.id}`} className="flex min-w-0 items-center gap-2.5 focus-visible:outline-none focus-visible:underline">
                 <SiteIcon url={r.url} name={r.name} size={24} />

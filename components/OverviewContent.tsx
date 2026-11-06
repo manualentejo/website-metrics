@@ -73,7 +73,7 @@ export function SitesTable({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[820px] text-left">
           <thead>
-            <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-subheading-xs uppercase text-text-soft-400">
+            <tr className="border-y border-stroke-soft-200 bg-bg-soft-200 text-subheading-xs uppercase text-text-soft-400">
               <th className="px-5 py-2">Site</th>
               <th className="px-3 py-2">Desempenho</th>
               <th className="px-3 py-2">Acessib.</th>
@@ -85,7 +85,7 @@ export function SitesTable({
           </thead>
           <tbody>
             {filtered.map((site) => (
-              <tr key={site.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-weak-50">
+              <tr key={site.id} className="border-b border-stroke-soft-200 last:border-b-0 hover:bg-bg-soft-200">
                 <td className="px-5 py-2.5">
                   <Link href={`/site/${site.id}`} className="flex items-center gap-3">
                     <ScoreGauge score={site.desktop?.performanceScore ?? null} label="" size={40} />
@@ -111,7 +111,7 @@ export function SitesTable({
                         href={`/site/${site.id}?config=1`}
                         aria-label={`Configurar ${site.name}`}
                         title="Configurar site"
-                        className="flex size-8 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-weak-50 hover:text-text-strong-950"
+                        className="flex size-8 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-soft-200 hover:text-text-strong-950"
                       >
                         <RiSettings3Line className="size-5" />
                       </Link>

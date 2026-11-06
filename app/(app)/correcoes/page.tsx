@@ -30,7 +30,7 @@ export default async function FixQueuePage() {
               <Link
                 key={`${it.siteId}-${it.auditId}`}
                 href={`/site/${it.siteId}?strategy=desktop`}
-                className="flex items-start gap-4 px-5 py-3 hover:bg-bg-weak-50"
+                className="flex items-start gap-4 px-5 py-3 hover:bg-bg-soft-200"
               >
                 <span className="w-5 flex-shrink-0 pt-0.5 text-paragraph-xs tabular-nums text-text-sub-600">{i + 1}</span>
                 <span className="min-w-0 flex-1">

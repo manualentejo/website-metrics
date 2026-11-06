@@ -45,7 +45,7 @@ export default function SiteFilter({ sites, selected }: { sites: { id: string; n
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-9 max-w-[14rem] items-center gap-2 rounded-lg bg-bg-white-0 px-3 text-label-sm text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 transition duration-200 hover:bg-bg-weak-50 focus-visible:outline-none focus-visible:ring-stroke-strong-950"
+        className="inline-flex h-9 max-w-[14rem] items-center gap-2 rounded-lg bg-bg-white-0 px-3 text-label-sm text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200 transition duration-200 hover:bg-bg-soft-200 focus-visible:outline-none focus-visible:ring-stroke-strong-950"
       >
         <RiGlobalLine className="size-4 flex-shrink-0 text-text-sub-600" />
         <span className="truncate">{label}</span>
@@ -66,7 +66,7 @@ export default function SiteFilter({ sites, selected }: { sites: { id: string; n
                       const base = draft.length === 0 ? sites.map((x) => x.id) : draft;
                       setDraft(base.includes(s.id) ? base.filter((i) => i !== s.id) : [...base, s.id]);
                     }}
-                    className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-label-sm text-text-strong-950 hover:bg-bg-weak-50"
+                    className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-label-sm text-text-strong-950 hover:bg-bg-soft-200"
                   >
                     <span className={`flex size-4 flex-shrink-0 items-center justify-center rounded ${on ? "bg-bg-strong-950 text-text-white-0" : "ring-1 ring-inset ring-stroke-sub-300"}`}>
                       {on && <RiCheckLine className="size-3" />}

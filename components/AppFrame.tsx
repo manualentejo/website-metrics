@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sites, folders } from "@/db/schema";
@@ -26,11 +27,13 @@ export default async function AppFrame({ children }: { children: ReactNode }) {
   ]);
   const visible = allSites.filter((s) => canViewSite(viewer, s, accessible, s.id));
 
+  const initialCollapsed = (await cookies()).get("sidebar")?.value === "collapsed";
   const missingIcons = viewer.owner && visible.some((s) => !icons[hostKey(s.url)]);
 
   return (
     <SiteIconsProvider icons={icons}>
     <SidebarFrame
+      initialCollapsed={initialCollapsed}
       sidebar={
       <Sidebar
         sites={visible.map((s) => ({ id: s.id, name: s.name, url: s.url, status: s.status as Status, folderId: s.folderId }))}

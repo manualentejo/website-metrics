@@ -72,7 +72,7 @@ export default function AnalysisView({
               role="tab"
               onClick={() => setTab(key)}
               aria-selected={tab === key}
-              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-bg-weak-50 ${
+              className={`flex flex-col items-center gap-1 px-4 pb-3 pt-5 transition-colors hover:bg-bg-soft-200 ${
                 tab === key ? "bg-bg-weak-50" : "bg-bg-white-0"
               }`}
             >

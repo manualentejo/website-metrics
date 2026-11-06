@@ -78,7 +78,7 @@ export default function RunAuditButton({
                   type="button"
                   role="menuitem"
                   onClick={() => run(s)}
-                  className="flex h-9 w-full items-center rounded-lg px-2 text-left text-label-sm text-text-strong-950 hover:bg-bg-weak-50"
+                  className="flex h-9 w-full items-center rounded-lg px-2 text-left text-label-sm text-text-strong-950 hover:bg-bg-soft-200"
                 >
                   <span className="truncate">{s.name}</span>
                 </button>

@@ -124,7 +124,7 @@ export default function GeoManager({ siteId, initial, configured, prompts, engin
                 type="button"
                 aria-label={`Remover prompt: ${p.prompt}`}
                 onClick={() => run("add", async () => { await call("removePrompt", { promptId: p.id }); router.refresh(); })}
-                className="flex size-7 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 hover:bg-bg-weak-50 hover:text-error-base"
+                className="flex size-7 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 hover:bg-bg-soft-200 hover:text-error-base"
               >
                 <RiCloseLine className="size-4" />
               </button>

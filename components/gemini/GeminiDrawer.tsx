@@ -108,7 +108,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
           <button
             onClick={() => setOpen(false)}
             aria-label="Fechar"
-            className="rounded-md p-1.5 text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950/80"
+            className="rounded-md p-1.5 text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950/80"
           >
             <RiCloseLine className="h-4 w-4" />
           </button>
@@ -126,7 +126,7 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
                   <button
                     key={s}
                     onClick={() => send(s)}
-                    className="rounded-lg border border-stroke-soft-200 px-3 py-2 text-left text-sm text-text-strong-950/80 transition-colors hover:bg-bg-weak-50"
+                    className="rounded-lg border border-stroke-soft-200 px-3 py-2 text-left text-sm text-text-strong-950/80 transition-colors hover:bg-bg-soft-200"
                   >
                     {s}
                   </button>

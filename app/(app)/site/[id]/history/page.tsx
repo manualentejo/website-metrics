@@ -37,7 +37,7 @@ export default async function SiteHistoryPage({ params, searchParams }: { params
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-paragraph-sm">
               <thead>
-                <tr className="border-y border-stroke-soft-200 bg-bg-weak-50 text-subheading-xs uppercase text-text-soft-400">
+                <tr className="border-y border-stroke-soft-200 bg-bg-soft-200 text-subheading-xs uppercase text-text-soft-400">
                   <th className="px-5 py-2 font-normal">Data</th>
                   <th className="px-3 py-2 font-normal">Desemp.</th>
                   <th className="px-3 py-2 font-normal">Acessib.</th>

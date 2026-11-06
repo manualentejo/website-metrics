@@ -39,7 +39,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
       }
     >
       {viewer.owner && <AddSiteBar folders={folders} defaultFolderId={id} />}
-      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={d === "mobile" ? "mobile" : "desktop"} />
+      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={d === "mobile" ? "mobile" : "desktop"} showWorkspace={false} />
     </Page>
   );
 }

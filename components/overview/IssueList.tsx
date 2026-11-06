@@ -105,7 +105,7 @@ export default function IssueList({ issues, showSite = true, dense = false }: { 
             const extra = lcpText(a);
             return (
               <li key={r.item.key}>
-                <Link href={a.href} className={`group flex items-center gap-3 ${card} ${pad} hover:bg-bg-weak-50`}>
+                <Link href={a.href} className={`group flex items-center gap-3 ${card} ${pad} hover:bg-bg-soft-200`}>
                   <span className={`flex flex-shrink-0 items-center justify-center rounded-xl ${tileSize} ${sev.tile}`}>
                     <Icon className="size-5" aria-hidden />
                   </span>
@@ -170,7 +170,7 @@ export default function IssueList({ issues, showSite = true, dense = false }: { 
                     const extra = lcpText(a);
                     return (
                       <li key={i.key}>
-                        <Link href={a.href} className="flex items-center gap-2.5 px-3 py-2 text-paragraph-sm hover:bg-bg-weak-50">
+                        <Link href={a.href} className="flex items-center gap-2.5 px-3 py-2 text-paragraph-sm hover:bg-bg-soft-200">
                           <SiteIcon url={a.siteUrl} name={a.siteName} size={18} />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-text-strong-950">{a.siteName}</span>
