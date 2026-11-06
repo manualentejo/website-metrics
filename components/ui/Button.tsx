@@ -17,7 +17,7 @@ const SIZE: Record<Size, "small" | "xsmall"> = { sm: "xsmall", md: "small", icon
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", extra = "") {
   const { variant: v, mode } = MAP[variant];
-  return buttonVariants({ variant: v, mode, size: SIZE[size] }).root({ class: `${size === "icon" ? "w-8 px-0" : ""} ${variant === "primary" ? "btn-sheen" : ""} ${extra}` });
+  return buttonVariants({ variant: v, mode, size: SIZE[size] }).root({ class: `${size === "icon" ? "w-8 px-0" : ""} ${extra}` });
 }
 
 export default function Button({
@@ -34,7 +34,7 @@ export default function Button({
       variant={v}
       mode={mode}
       size={SIZE[size]}
-      className={`${size === "icon" ? "w-8 px-0" : ""} ${variant === "primary" ? "btn-sheen" : ""} ${className}`}
+      className={`${size === "icon" ? "w-8 px-0" : ""} ${className}`}
       {...props}
     />
   );

@@ -4,7 +4,6 @@ import ProfileForm from "@/components/ProfileForm";
 import SettingsForm from "@/components/SettingsForm";
 import { Page, Segmented } from "@/components/ui/Page";
 import Avatar from "@/components/ui/Avatar";
-import DbUsageCard from "@/components/DbUsageCard";
 import { getViewer } from "@/lib/access";
 import { getProfile } from "@/lib/profile";
 import { getSettings } from "@/lib/settings";
@@ -49,7 +48,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         {tab === "dados" && (
           <ProfileForm email={viewer.email} initial={{ name, role: profile.role ?? "", image }} />
         )}
-        {tab === "dados" && viewer.owner && <DbUsageCard />}
         {tab === "analises" && settings && (
           <>
             <p className="text-paragraph-sm text-text-sub-600">Quando o relatório semanal é gerado.</p>

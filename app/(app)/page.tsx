@@ -99,10 +99,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <div className="flex flex-col gap-3 p-3 sm:p-4 lg:absolute lg:inset-0 lg:overflow-hidden">
       <header className="flex flex-shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-title-h6 text-text-strong-950">Visão geral</h1>
-          <p className="text-paragraph-xs text-text-sub-600">
-            Todos os seus sites em um só lugar{p.lastUpdate ? ` · última auditoria ${formatDateTime(p.lastUpdate)}` : ""}
-          </p>
+          <h1 className="text-title-h5 text-text-strong-950">Visão geral</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Segmented label="Período" items={PERIODS.map((d) => ({ label: `${d} dias`, href: href({ d: d === 28 ? null : String(d) }), active: days === d }))} />

@@ -19,7 +19,7 @@ export function Page({
     <div className={`mx-auto space-y-6 px-4 py-6 sm:px-8 sm:py-8 ${width}`}>
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-title-h6 text-text-strong-950">{title}</h1>
+          <h1 className="text-title-h5 text-text-strong-950">{title}</h1>
           {subtitle && <p className="mt-1 text-paragraph-sm text-text-sub-600">{subtitle}</p>}
         </div>
         {actions}

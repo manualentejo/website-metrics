@@ -1,5 +1,5 @@
 "use client";
-import { RiBarChartLine, RiFileTextLine, RiSpeedUpLine } from "@remixicon/react";
+import { RiFileTextLine, RiRobot2Line, RiSpeedUpLine } from "@remixicon/react";
 
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -8,7 +8,7 @@ import { buttonClass } from "@/components/ui/Button";
 
 const FEATURES = [
   { icon: RiSpeedUpLine, title: "Notas do Lighthouse", text: "Desempenho, acessibilidade, boas práticas e SEO de cada site, no computador e no celular." },
-  { icon: RiBarChartLine, title: "Visitas por página e aparelho", text: "Quantas pessoas visitam, quais páginas e de que aparelho, sem cookies." },
+  { icon: RiRobot2Line, title: "Preparo para IAs (GEO)", text: "Veja se o site está pronto para ser entendido e citado por ChatGPT, Gemini e Perplexity." },
   { icon: RiFileTextLine, title: "Relatório semanal em PDF", text: "Todos os sites em um arquivo, com o que fazer no Framer para melhorar." },
 ];
 
@@ -67,13 +67,13 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <section className="hidden flex-col justify-center bg-bg-weak-50 p-12 lg:flex">
+      <section className="ai-gradient hidden flex-col justify-center p-12 lg:flex">
         <div className="mx-auto w-full max-w-md">
           <h2 className="text-title-h5 text-text-strong-950">Saiba como seus sites estão indo, sem precisar ser especialista.</h2>
           <ul className="mt-8 space-y-3">
             {FEATURES.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex gap-4 rounded-2xl bg-bg-white-0 p-4 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
-                <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">
+              <li key={title} className="glass flex gap-4 rounded-2xl p-4">
+                <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-white/70 ring-1 ring-inset ring-white">
                   <Icon className="size-5 text-text-sub-600" />
                 </span>
                 <span>

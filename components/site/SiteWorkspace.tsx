@@ -83,7 +83,7 @@ export default async function SiteWorkspace({
           <div className="flex min-w-0 items-center gap-3">
             <SiteIcon url={site.url} name={site.name} size={44} className="p-1.5 ring-1 ring-inset ring-stroke-soft-200" />
             <div className="min-w-0">
-              <h1 className="truncate text-title-h6 text-text-strong-950">{site.name}</h1>
+              <h1 className="truncate text-title-h5 text-text-strong-950">{site.name}</h1>
               <a href={site.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-paragraph-xs text-text-sub-600 hover:text-text-strong-950">
                 {domain}
                 <RiExternalLinkLine className="size-3.5" />
