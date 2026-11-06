@@ -13,7 +13,7 @@ export function SidebarCollapseButton() {
   const Icon = collapsed ? RiMenuUnfoldLine : RiMenuFoldLine;
   const label = collapsed ? "Expandir barra lateral" : "Recolher barra lateral";
   return (
-    <RailTip label={label}>
+    <RailTip label={collapsed ? "Expandir" : "Recolher"}>
       <button
         type="button"
         onClick={toggle}

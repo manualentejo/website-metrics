@@ -296,7 +296,6 @@ export default function NumaChat({ email }: { email: string }) {
           </span>
           <div className="min-w-0">
             <h1 className="truncate text-label-md text-text-strong-950">{active?.title ?? "Numa"}</h1>
-            <p className="text-paragraph-xs text-text-sub-600">Sabe das notas e dos alertas dos seus sites</p>
           </div>
         </header>
 

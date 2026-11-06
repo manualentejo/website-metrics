@@ -14,7 +14,7 @@ export default function SidebarUserFooter({
 }) {
   const active = usePathname().startsWith("/perfil");
   return (
-    <RailTip label={user.name} hint="Meu perfil">
+    <RailTip label={user.name}>
     <Link
       href="/perfil"
       aria-label="Abrir meu perfil"

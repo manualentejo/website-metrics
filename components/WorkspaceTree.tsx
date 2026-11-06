@@ -200,7 +200,7 @@ function RailWorkspace({ group, activeFolderId, activeSiteId }: { group: TreeGro
 
   return (
     <>
-      <RailTip label={group.name} hint="Botão direito: opções">
+      <RailTip label={group.name}>
         <Link
           ref={linkRef}
           href={`/workspace/${group.id}`}
