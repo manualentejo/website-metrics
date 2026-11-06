@@ -21,7 +21,7 @@ export interface TreeGroup {
 
 const row = (active: boolean) =>
   `flex items-center gap-2 rounded-lg px-3 h-9 text-label-sm transition duration-200 ${
-    active ? "bg-bg-sub-300 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
+    active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
   }`;
 
 /**
@@ -161,7 +161,7 @@ export default function WorkspaceTree({ groups, loose, canReorder = false }: { g
             href={`/workspace/${g.id}`}
             title={`${g.name} (${g.sites.length} sites)`}
             aria-label={`Workspace ${g.name}`}
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition duration-200 ${g.id === activeFolderId ? "bg-bg-sub-300 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-1 transition duration-200 ${g.id === activeFolderId ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
           >
             <RiFolderLine className="size-5" />
             <span className="max-w-full truncate text-[10px] leading-tight" aria-hidden>{g.name}</span>
@@ -173,7 +173,7 @@ export default function WorkspaceTree({ groups, loose, canReorder = false }: { g
             href={`/site/${s.id}`}
             title={s.name}
             aria-label={s.name}
-            className={`flex h-11 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-bg-sub-300" : "hover:bg-bg-soft-200"}`}
+            className={`flex h-11 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : "hover:bg-bg-soft-200"}`}
           >
             <SiteIcon url={s.url} name={s.name} size={22} />
           </Link>

@@ -30,7 +30,7 @@ export default function SidebarNav() {
             aria-label={label}
             aria-current={active ? "page" : undefined}
             className={`flex h-9 items-center gap-2 rounded-lg px-3 text-label-sm transition duration-200 group-data-[collapsed=true]/sb:h-14 group-data-[collapsed=true]/sb:flex-col group-data-[collapsed=true]/sb:justify-center group-data-[collapsed=true]/sb:gap-0.5 group-data-[collapsed=true]/sb:px-1 ${
-              active ? "bg-bg-sub-300 text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
+              active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
             }`}
           >
             <Icon className="size-5 flex-shrink-0" />

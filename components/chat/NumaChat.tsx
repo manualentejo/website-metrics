@@ -210,7 +210,7 @@ export default function NumaChat({ email }: { email: string }) {
               setDraftTitle(c.title);
             }}
             aria-current={activeId === c.id ? "true" : undefined}
-            className={`flex w-full flex-col rounded-lg px-3 py-2 pr-[5.5rem] text-left transition ${activeId === c.id ? "bg-bg-sub-300" : "hover:bg-bg-soft-200"}`}
+            className={`flex w-full flex-col rounded-lg px-3 py-2 pr-[5.5rem] text-left transition ${activeId === c.id ? "bg-[color:var(--accent-soft)]" : "hover:bg-bg-soft-200"}`}
           >
             <span className="truncate text-label-sm text-text-strong-950">{c.title}</span>
             <span className="text-paragraph-xs text-text-soft-400">{when(c.updatedAt)}</span>
