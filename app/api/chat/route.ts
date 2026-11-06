@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const who = profile.nickname?.trim() ? `
 
 A pessoa pede para ser chamada de "${profile.nickname.trim()}". Use esse apelido de vez em quando, sem exagero.` : "";
-    const answer = await askGemini(`${NUMA_PERSONA}\n\nDados do portfólio (JSON):\n${facts}`, text, safeHistory);
+    const answer = await askGemini(`${NUMA_PERSONA}${who}\n\nDados do portfólio (JSON):\n${facts}`, text, safeHistory);
     return NextResponse.json({ answer });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Erro ao consultar a Numa" }, { status: 500 });
