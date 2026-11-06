@@ -6,15 +6,16 @@ import WorkspaceActions from "@/components/WorkspaceActions";
 import { Page } from "@/components/ui/Page";
 import { getViewer } from "@/lib/access";
 import { loadInventory } from "@/lib/inventory";
+import { getDevice } from "@/lib/device";
 import { getFolderIcons } from "@/lib/folderIcons";
 import WorkspaceIcon from "@/components/WorkspaceIcon";
 
 export const dynamic = "force-dynamic";
 
 // Um workspace: mesma lista e comparação da página Sites, só com os sites do grupo.
-export default async function WorkspacePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ d?: string }> }) {
+export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+  const device = await getDevice();
   const { id } = await params;
-  const { d } = await searchParams;
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   const [{ rows: all, folders }, folderIcons] = await Promise.all([loadInventory(viewer), getFolderIcons().catch(() => ({}) as Record<string, string>)]);
@@ -46,7 +47,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
       }
     >
       {viewer.owner && <AddSiteBar folders={folders} defaultFolderId={id} />}
-      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={d === "mobile" ? "mobile" : "desktop"} showWorkspace={false} />
+      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={device} showWorkspace={false} />
     </Page>
   );
 }

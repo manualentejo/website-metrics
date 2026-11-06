@@ -126,7 +126,6 @@ export default async function SiteGeoPage({ params, searchParams }: { params: Pr
                   <TimeSeriesChart current={auditSeries} unit="score" label="Nota de preparo" height={180} tone="purple" />
                 </div>
               )}
-              {audit && <p className="text-paragraph-xs text-text-soft-400">Última auditoria: {formatDateTime(audit.ranAt)}. Mede o preparo técnico, não quantas vezes as IAs citam você.</p>}
             </div>
           </Card>
           <Card>

@@ -4,13 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 import RailTip from "./RailTip";
-import { RiCalendarLine, RiDashboardLine, RiGlobalLine, RiNotification3Line, RiSparklingLine, RiToolsLine } from "@remixicon/react";
+import { RiCalendarLine, RiDashboardLine, RiGlobalLine, RiNotification3Line, RiSparklingLine } from "@remixicon/react";
 
 const NAV: { href: string; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { href: "/", label: "Visão geral", icon: RiDashboardLine },
   { href: "/sites", label: "Sites", icon: RiGlobalLine },
   { href: "/alertas", label: "Alertas", icon: RiNotification3Line },
-  { href: "/correcoes", label: "Fila de correções", icon: RiToolsLine },
   { href: "/relatorios", label: "Relatórios", icon: RiCalendarLine },
   { href: "/chat", label: "Numa AI", icon: RiSparklingLine },
 ];

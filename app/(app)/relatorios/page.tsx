@@ -6,6 +6,10 @@ import AppShell from "@/components/AppShell";
 import { Card } from "@/components/ui/Card";
 import { buttonClass } from "@/components/ui/Button";
 import { Page } from "@/components/ui/Page";
+import CopyReportLink from "@/components/CopyReportLink";
+import TrendIndicator from "@/components/charts/TrendIndicator";
+import { getDevice } from "@/lib/device";
+import { formatDay } from "@/lib/format";
 import { getViewer } from "@/lib/access";
 import { getSettings } from "@/lib/settings";
 import { loadReportLog } from "@/lib/insights";
@@ -37,6 +41,28 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     return times.some((t) => t <= end && t > end - 7 * DAY);
   };
 
+  // Último relatório disponível e o que mudou desde o anterior (mesma regra do PDF: última análise de cada site).
+  const device = await getDevice();
+  let latestDate: string | null = null;
+  for (let i = 0; i < 60 && !latestDate; i++) {
+    const key = new Date(Date.parse(today) - i * DAY).toISOString().slice(0, 10);
+    if (new Date(`${key}T12:00:00Z`).getUTCDay() === settings.weekday && available(key)) latestDate = key;
+  }
+  const changes: { siteId: string; name: string; what: string; from: number; to: number }[] = [];
+  const bySite = new Map<string, typeof log>();
+  for (const r of log) if (r.strategy === device) bySite.set(r.siteId, [...(bySite.get(r.siteId) ?? []), r]);
+  for (const list of bySite.values()) {
+    const [now] = list;
+    const before = list.find((r) => now.ranAt.getTime() - r.ranAt.getTime() >= 6 * DAY);
+    if (!now || !before) continue;
+    for (const [key, what] of [["performanceScore", "Desempenho"], ["seoScore", "SEO"]] as const) {
+      const a = now[key];
+      const b = before[key];
+      if (typeof a === "number" && typeof b === "number" && Math.abs(a - b) >= 3) changes.push({ siteId: now.siteId, name: now.site.name, what, from: b, to: a });
+    }
+  }
+  changes.sort((x, y) => Math.abs(y.to - y.from) - Math.abs(x.to - x.from));
+
   const cells: (number | null)[] = [...Array(firstWeekday).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
   while (cells.length % 7) cells.push(null);
 
@@ -58,6 +84,40 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         }
         width="max-w-5xl"
       >
+        {latestDate && (
+          <Card className="p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-label-md text-text-strong-950">Relatório de {formatDay(`${latestDate}T12:00:00Z`)}</h2>
+                <p className="mt-0.5 text-paragraph-xs text-text-sub-600">Gerado às {String(settings.hour).padStart(2, "0")}:00 (Brasília)</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <CopyReportLink date={latestDate} label />
+                <a href={`/api/reports/pdf?date=${latestDate}`} className={buttonClass("primary", "sm")}>
+                  <RiDownloadLine className="h-3.5 w-3.5" />
+                  PDF
+                </a>
+              </div>
+            </div>
+            {changes.length > 0 && (
+              <div className="mt-4 border-t border-stroke-soft-200 pt-3">
+                <p className="mb-2 text-label-xs uppercase tracking-wide text-text-soft-400">Mudou desde o relatório anterior</p>
+                <ul className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                  {changes.slice(0, 8).map((c) => (
+                    <li key={`${c.siteId}-${c.what}`}>
+                      <Link href={`/site/${c.siteId}/performance${c.what === "SEO" ? "?cat=seo" : ""}`} className="flex items-center justify-between gap-3 rounded-md py-1 text-paragraph-sm hover:bg-[color:var(--accent-soft)]">
+                        <span className="min-w-0 truncate text-text-strong-950">
+                          {c.name} <span className="text-text-sub-600">· {c.what}</span>
+                        </span>
+                        <TrendIndicator current={c.to} previous={c.from} goodWhen="up" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Card>
+        )}
         <Card className="overflow-hidden">
           <div className="grid grid-cols-7 border-b border-stroke-soft-200 bg-bg-weak-50 text-paragraph-xs font-medium uppercase tracking-wider text-text-sub-600">
             {WEEKDAYS.map((w) => (
@@ -78,10 +138,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <span className={`text-paragraph-xs tabular-nums ${date === today ? "font-semibold text-text-strong-950" : "text-text-sub-600"}`}>{day}</span>
                   {isReportDay &&
                     (ready ? (
-                      <a href={`/api/reports/pdf?date=${date}`} className={buttonClass("primary", "sm", "w-full")}>
-                        <RiDownloadLine className="h-3.5 w-3.5" />
-                        PDF
-                      </a>
+                      <div className="flex items-center gap-1">
+                        <a href={`/api/reports/pdf?date=${date}`} className={buttonClass("primary", "sm", "flex-1")}>
+                          <RiDownloadLine className="h-3.5 w-3.5" />
+                          PDF
+                        </a>
+                        <CopyReportLink date={date} />
+                      </div>
                     ) : date > today ? (
                       <>
                         <span className="text-paragraph-xs text-text-sub-600">Agendado</span>
@@ -100,9 +163,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             })}
           </div>
         </Card>
-        <p className="text-paragraph-xs text-text-sub-600">
-          O PDF traz as notas de cada site (computador primeiro, depois celular), a mudança desde a análise anterior e o que fazer no Framer para cada ponto ruim ou que pode melhorar.
-        </p>
       </Page>
     </AppShell>
   );

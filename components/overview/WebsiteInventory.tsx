@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RiArrowRightUpLine, RiSearchLine, RiSettings3Line } from "@remixicon/react";
 import SiteIcon from "@/components/SiteIcon";
+import { saveDevice } from "@/components/DeviceToggle";
 import StatusSelect from "@/components/StatusSelect";
 import { inputClass } from "@/components/ui/fields";
 import { Segmented } from "@/components/ui/Page";
@@ -66,11 +67,12 @@ function Score({ c, best }: { c: Cell; best?: boolean }) {
  * Lista e comparação de sites: busca, filtro de status, ordenação, notas por dispositivo (Computador/Celular)
  * com variação e a nota GEO. A troca de dispositivo atualiza a tabela na hora, sem recarregar.
  */
-export default function WebsiteInventory({ rows, owner, initialDevice = "desktop", showWorkspace = true }: { rows: InventoryRow[]; owner: boolean; initialDevice?: Device; showWorkspace?: boolean }) {
+export default function WebsiteInventory({ rows, owner, initialDevice = "desktop", showWorkspace: showWs = true }: { rows: InventoryRow[]; owner: boolean; initialDevice?: Device; showWorkspace?: boolean }) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"" | Status>("");
   const [sort, setSort] = useState<SortKey>("name");
   const [device, setDevice] = useState<Device>(initialDevice);
+  const showWorkspace = showWs && new Set(rows.map((r) => r.folder).filter(Boolean)).size > 1;
 
   const avg = (r: InventoryRow) => {
     const v = COLS.map((c) => r.m[device][c.key].v).filter((n): n is number => n !== null);
@@ -102,6 +104,7 @@ export default function WebsiteInventory({ rows, owner, initialDevice = "desktop
 
   function pickDevice(d: Device) {
     setDevice(d);
+    saveDevice(d);
     try {
       const u = new URL(window.location.href);
       if (d === "mobile") u.searchParams.set("d", "mobile");
@@ -213,9 +216,6 @@ export default function WebsiteInventory({ rows, owner, initialDevice = "desktop
           </table>
         </div>
       )}
-      <p className="border-t border-stroke-soft-200 px-4 py-2.5 text-paragraph-xs text-text-sub-600">
-        {list.length} de {rows.length} sites · notas do Lighthouse no {device === "desktop" ? "computador" : "celular"} (▲▼ = variação desde a auditoria anterior; em verde, a melhor nota de cada coluna). GEO é a auditoria técnica para IAs.
-      </p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { RiAlertFill, RiArrowRightLine, RiArrowRightUpLine, RiArrowRightDownLine, RiLightbulbFlashLine, RiSparklingLine } from "@remixicon/react";
+import { RiAlertFill, RiArrowRightLine, RiArrowRightUpLine, RiArrowRightDownLine, RiLightbulbFlashLine } from "@remixicon/react";
 import type { WeeklyInsight } from "@/lib/portfolio";
 import ChartEmptyState from "@/components/charts/ChartEmptyState";
 
@@ -64,12 +64,6 @@ export default function AIInsightsPanel({ insights, source = "rules", compact = 
           );
         })}
       </ul>
-      <p className="mt-3 flex items-center gap-1.5 text-paragraph-xs text-text-soft-400">
-        <RiSparklingLine className="size-3.5" />
-        {source === "ai"
-          ? "Gerado por IA a partir dos dados acima."
-          : "Resumo automático por regras, calculado só com os dados do painel. Uma análise por IA pode ser ligada aqui depois."}
-      </p>
     </div>
   );
 }

@@ -28,15 +28,28 @@ export function shortenUrl(url: string): string {
   }
 }
 
+const TZ = "America/Sao_Paulo";
+const dayKey = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: TZ });
+
+/** "hoje, 10:02", "ontem, 10:02" ou "6 nov, 10:02" (com o ano só quando não é o atual). */
 export function formatDateTime(iso: string | Date): string {
-  return new Date(iso).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "America/Sao_Paulo",
-  });
+  const d = new Date(iso);
+  const now = new Date();
+  const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: TZ });
+  const k = dayKey(d);
+  if (k === dayKey(now)) return `hoje, ${time}`;
+  if (k === dayKey(new Date(now.getTime() - 86400000))) return `ontem, ${time}`;
+  return `${formatDay(d)}, ${time}`;
+}
+
+/** "6 nov" (ou "6 nov 2025" se for de outro ano). */
+export function formatDay(iso: string | Date): string {
+  const d = new Date(iso);
+  const sameYear = dayKey(d).slice(0, 4) === dayKey(new Date()).slice(0, 4);
+  return d
+    .toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: sameYear ? undefined : "numeric", timeZone: TZ })
+    .replace(/\./g, "")
+    .replace(/ de /g, " ");
 }
 
 export function scoreColor(score: number | null) {

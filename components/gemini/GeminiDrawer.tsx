@@ -187,7 +187,6 @@ export default function GeminiDrawer({ siteId, siteName }: { siteId: string; sit
               <RiArrowUpLine className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-2 text-center text-paragraph-xs text-text-sub-600">A Numa pode errar. Confira antes de aplicar mudanças.</p>
         </form>
       </aside>
     </>

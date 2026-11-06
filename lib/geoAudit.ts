@@ -367,3 +367,15 @@ export async function getGeoAudits(siteId: string, limit = 30): Promise<GeoAudit
   const res = (await db.execute(sql`SELECT ran_at, score, checks FROM geo_audits WHERE site_id = ${siteId} AND NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY ran_at DESC LIMIT ${limit}`)) as unknown as Row[];
   return res.map((r) => ({ ranAt: new Date(String(r.ran_at)), score: Number(r.score), checks: (r.checks as GeoCheck[]) ?? [] }));
 }
+
+/** Checagens da auditoria GEO mais recente de cada site. */
+export async function getLatestGeoChecks(siteIds: string[]): Promise<Map<string, GeoCheck[]>> {
+  await ensureGeoAuditTable();
+  const out = new Map<string, GeoCheck[]>();
+  if (!siteIds.length) return out;
+  const res = (await db.execute(sql`SELECT DISTINCT ON (site_id) site_id, checks FROM geo_audits
+    WHERE NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY site_id, ran_at DESC`)) as unknown as { site_id: string; checks: GeoCheck[] }[];
+  const want = new Set(siteIds);
+  for (const r of res) if (want.has(r.site_id)) out.set(r.site_id, r.checks ?? []);
+  return out;
+}

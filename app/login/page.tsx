@@ -83,7 +83,6 @@ export default function LoginPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 text-paragraph-xs text-text-soft-400">Lighthouse via PageSpeed Insights</p>
         </div>
       </section>
     </main>

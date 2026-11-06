@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { RiErrorWarningLine, RiFileChartLine, RiGlobalLine, RiRobot2Line, RiSearchEyeLine, RiSpeedUpLine } from "@remixicon/react";
 import { Segmented } from "@/components/ui/Page";
+import DeviceToggle from "@/components/DeviceToggle";
+import { getDevice } from "@/lib/device";
 import { buttonClass } from "@/components/ui/Button";
 import MetricCard from "@/components/charts/MetricCard";
 import TrendIndicator from "@/components/charts/TrendIndicator";
@@ -72,7 +74,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const days = (PERIODS.find((p) => String(p) === sp.d) ?? 28) as Period;
   const metric = CHART_TABS.find((t) => t.key === sp.m) ?? CHART_TABS[0];
-  const p = await loadPortfolio(viewer, { days });
+  const device = await getDevice();
+  const p = await loadPortfolio(viewer, { days, device });
 
   const href = (over: Record<string, string | null>) => {
     const q = new URLSearchParams();
@@ -102,6 +105,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <h1 className="text-title-h5 text-text-strong-950">Visão geral</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <DeviceToggle value={device} />
           <Segmented label="Período" items={PERIODS.map((d) => ({ label: `${d} dias`, href: href({ d: d === 28 ? null : String(d) }), active: days === d }))} />
           <Link href="/relatorios" className={buttonClass("outline", "md")}>
             <RiFileChartLine className="size-4" />
@@ -197,7 +201,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </Panel>
 
-            <Panel className="lg:col-span-5 2xl:col-span-4" title="Sites por faixa de nota" action={<Link href="/comparativo" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Comparar</Link>}>
+            <Panel className="lg:col-span-5 2xl:col-span-4" title="Sites por faixa de nota">
               {seoCount === 0 ? (
                 <ChartEmptyState title="Sem notas ainda" className="h-full min-h-[10rem]" />
               ) : (
@@ -243,10 +247,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       />
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-4 border-t border-stroke-soft-200 pt-3">
-                    <Movers title="SEO melhorou" items={p.seoMovers.up} up />
-                    <Movers title="SEO piorou" items={p.seoMovers.down} up={false} />
-                  </div>
+                  {(p.seoMovers.up.length > 0 || p.seoMovers.down.length > 0) && (
+                    <div className="grid grid-cols-2 gap-4 border-t border-stroke-soft-200 pt-3">
+                      {p.seoMovers.up.length > 0 && <Movers title="SEO melhorou" items={p.seoMovers.up} up />}
+                      {p.seoMovers.down.length > 0 && <Movers title="SEO piorou" items={p.seoMovers.down} up={false} />}
+                    </div>
+                  )}
                 </div>
               )}
             </Panel>
@@ -258,7 +264,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </Panel>
 
             <div className="hidden min-h-0 min-w-0 2xl:col-span-4 2xl:flex *:w-full">
-              <Panel title="Precisa da sua atenção" description="Do mais grave ao menos grave" action={<Link href="/alertas" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Todos</Link>}>
+              <Panel title="Precisa da sua atenção" action={<Link href="/alertas" className="text-label-xs text-text-sub-600 underline underline-offset-2 hover:text-text-strong-950">Todos</Link>}>
                 <IssueList issues={p.attention} dense />
               </Panel>
             </div>

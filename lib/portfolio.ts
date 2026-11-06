@@ -137,8 +137,10 @@ async function loadGeo(ids: string[], days: number, endKey: string, names: Map<s
   };
 }
 
-export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteIds?: string[] | null }) {
+export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteIds?: string[] | null; device?: "desktop" | "mobile" }) {
   const { days } = opts;
+  const device = opts.device ?? "desktop";
+  const deviceLabel = device === "mobile" ? "celular" : "computador";
   const all = await visibleSites(viewer);
   const selected = opts.siteIds?.length ? all.filter((s) => opts.siteIds!.includes(s.id)) : all;
   const ids = selected.map((s) => s.id);
@@ -148,7 +150,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
     ? await db
         .select()
         .from(reports)
-        .where(and(inArray(reports.siteId, ids), eq(reports.strategy, "desktop"), isNull(reports.error)))
+        .where(and(inArray(reports.siteId, ids), eq(reports.strategy, device), isNull(reports.error)))
         .orderBy(asc(reports.ranAt))
         .limit(6000)
     : [];
@@ -186,7 +188,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
     };
   });
 
-  const alerts = (await loadAlerts(viewer)).filter((a) => ids.includes(a.siteId));
+  const alerts = (await loadAlerts(viewer)).filter((a) => ids.includes(a.siteId) && a.strategy === device);
   const problems = alerts.filter((a) => a.severity !== "good");
   const critical = problems.filter((a) => a.severity === "critical");
 
@@ -224,7 +226,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
       siteName: nameOf.get(r.siteId) ?? "",
       kind: "audit",
       title: "Auditoria concluída",
-      detail: `Desempenho ${Math.round(r.performanceScore ?? 0)} · SEO ${Math.round(r.seoScore ?? 0)} (computador)`,
+      detail: `Desempenho ${Math.round(r.performanceScore ?? 0)} · SEO ${Math.round(r.seoScore ?? 0)} (${deviceLabel})`,
       href: `/site/${r.siteId}/history`,
     });
     if (seenAudit.size >= 12) break;
@@ -270,25 +272,25 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
     const f = [...(lastRep?.failedSeoAudits ?? [])].sort((a, b) => b.weight - a.weight)[0];
     if (f) opportunity = { title: f.title, siteId: lowSeo.id };
   }
-  const insights: WeeklyInsight[] = [
+  const insightList: (WeeklyInsight | null)[] = [
     best
       ? {
           key: "improvement",
           label: "Principal melhoria",
           text: `${best.siteName}: ${best.what} subiu ${Math.round(best.delta)} pontos (${Math.round(best.from)} → ${Math.round(best.to)}) entre as duas últimas auditorias.`,
           href: `/site/${best.siteId}/${best.what === "SEO" ? "seo" : "performance"}`,
-          evidence: "Lighthouse · computador",
+          evidence: `Lighthouse · ${deviceLabel}`,
         }
-      : { key: "improvement", label: "Principal melhoria", text: "Nenhuma nota subiu entre as duas últimas auditorias.", href: null, evidence: null },
+      : null,
     worst
       ? {
           key: "regression",
           label: "Principal regressão",
           text: `${worst.siteName}: ${worst.what} caiu ${Math.abs(Math.round(worst.delta))} pontos (${Math.round(worst.from)} → ${Math.round(worst.to)}).`,
           href: `/site/${worst.siteId}/${worst.what === "SEO" ? "seo" : "performance"}`,
-          evidence: "Lighthouse · computador",
+          evidence: `Lighthouse · ${deviceLabel}`,
         }
-      : { key: "regression", label: "Principal regressão", text: "Nenhuma nota caiu entre as duas últimas auditorias.", href: null, evidence: null },
+      : null,
     top
       ? {
           key: "priority",
@@ -297,7 +299,7 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
           href: top.href,
           evidence: `Alerta de ${top.category}`,
         }
-      : { key: "priority", label: "Problema prioritário", text: "Nenhum alerta aberto.", href: null, evidence: null },
+      : null,
     opportunity
       ? {
           key: "opportunity",
@@ -306,11 +308,12 @@ export async function loadPortfolio(viewer: Viewer, opts: { days: Period; siteId
           href: `/site/${opportunity.siteId}/performance?cat=seo`,
           evidence: "Auditorias de SEO do Lighthouse",
         }
-      : { key: "opportunity", label: "Oportunidade", text: "Sem auditorias de SEO reprovadas nos dados atuais.", href: null, evidence: null },
+      : null,
     top
       ? { key: "next", label: "Próxima ação", text: `Abrir a análise de ${top.siteName} e corrigir “${top.title}”.`, href: top.href, evidence: null }
-      : { key: "next", label: "Próxima ação", text: "Nada urgente. Rode uma nova auditoria depois de publicar mudanças.", href: null, evidence: null },
+      : null,
   ];
+  const insights = insightList.filter((i): i is WeeklyInsight => i !== null);
 
   const lastUpdate = repRows.length ? repRows[repRows.length - 1].ranAt : null;
 

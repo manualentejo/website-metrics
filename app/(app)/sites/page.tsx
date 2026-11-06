@@ -4,12 +4,13 @@ import WebsiteInventory from "@/components/overview/WebsiteInventory";
 import { Page } from "@/components/ui/Page";
 import { getViewer } from "@/lib/access";
 import { loadInventory } from "@/lib/inventory";
+import { getDevice } from "@/lib/device";
 
 export const dynamic = "force-dynamic";
 
 // Lista e comparação de todos os sites: cadastrar, achar, configurar e comparar notas por dispositivo.
-export default async function SitesPage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
-  const { d } = await searchParams;
+export default async function SitesPage() {
+  const device = await getDevice();
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   const { rows, folders } = await loadInventory(viewer);
@@ -17,7 +18,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   return (
     <Page title="Sites" subtitle="Adicione, compare e configure os sites monitorados. Abra um site para ver desempenho, SEO e GEO.">
       {viewer.owner && <AddSiteBar folders={folders} />}
-      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={d === "mobile" ? "mobile" : "desktop"} />
+      <WebsiteInventory rows={rows} owner={viewer.owner} initialDevice={device} />
     </Page>
   );
 }

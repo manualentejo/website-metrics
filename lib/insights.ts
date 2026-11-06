@@ -172,3 +172,98 @@ export async function loadFixQueue(viewer: Viewer, onlySiteId?: string): Promise
   }
   return items.sort((x, y) => y.impact - x.impact);
 }
+
+export type TaskTab = "performance" | "accessibility" | "geo";
+
+export interface Task {
+  key: string; // siteId|aba|auditoria (identifica a tarefa para status e responsável)
+  siteId: string;
+  siteName: string;
+  siteUrl: string;
+  tab: TaskTab;
+  title: string;
+  detail: string | null;
+  plain: string | null;
+  severity: "critical" | "warning";
+  impact: number;
+  href: string;
+}
+
+/**
+ * Fila unificada de correções, por aba (Desempenho já inclui SEO e boas práticas), do que mais pesa na nota
+ * para o que menos pesa. GEO vem da auditoria técnica mais recente de cada site.
+ */
+export async function loadTasks(viewer: Viewer, strategy: "desktop" | "mobile"): Promise<Task[]> {
+  const visible = await visibleSites(viewer);
+  if (!visible.length) return [];
+  const byId = new Map(visible.map((s) => [s.id, s]));
+  const snaps = await db
+    .select()
+    .from(snapshots)
+    .where(and(inArray(snapshots.siteId, visible.map((s) => s.id)), eq(snapshots.strategy, strategy)));
+
+  const tasks: Task[] = [];
+  for (const snap of snaps) {
+    const a = snap.analysis;
+    const site = byId.get(snap.siteId);
+    if (!a || !site) continue;
+    const weights = new Map<string, number>();
+    const inAccessibility = new Set<string>();
+    for (const [catKey, cat] of Object.entries(a.categories)) {
+      for (const ref of cat.auditRefs) {
+        weights.set(ref.id, Math.max(ref.weight, weights.get(ref.id) ?? 0));
+        if (catKey === "accessibility" && ref.weight > 0) inAccessibility.add(ref.id);
+      }
+    }
+    for (const [id, audit] of Object.entries(a.audits)) {
+      const status = auditStatus(audit);
+      if (status !== "fail" && status !== "average") continue;
+      const weight = weights.get(id) ?? 0;
+      const savingsMs = Math.max(0, ...Object.values(audit.metricSavings ?? {}).filter((v) => typeof v === "number"));
+      const impact = weight * (1 - (audit.score ?? 0)) + savingsMs / 1000;
+      if (impact <= 0) continue;
+      const tab: TaskTab = inAccessibility.has(id) ? "accessibility" : "performance";
+      tasks.push({
+        key: `${site.id}|${tab}|${id}`,
+        siteId: site.id,
+        siteName: site.name,
+        siteUrl: site.url,
+        tab,
+        title: audit.title,
+        detail: audit.displayValue,
+        plain: AUDIT_PLAIN[id] ?? null,
+        severity: status === "fail" ? "critical" : "warning",
+        impact,
+        href: `/site/${site.id}/performance?strategy=${strategy}${tab === "accessibility" ? "&cat=accessibility" : ""}`,
+      });
+    }
+  }
+
+  try {
+    const { getLatestGeoChecks } = await import("@/lib/geoAudit");
+    const geo = await getLatestGeoChecks(visible.map((s) => s.id));
+    for (const [siteId, checks] of geo) {
+      const site = byId.get(siteId);
+      if (!site) continue;
+      for (const c of checks) {
+        if (c.status === "ok") continue;
+        tasks.push({
+          key: `${siteId}|geo|${c.id}`,
+          siteId,
+          siteName: site.name,
+          siteUrl: site.url,
+          tab: "geo",
+          title: c.title,
+          detail: c.found,
+          plain: c.fix,
+          severity: c.status === "fail" ? "critical" : "warning",
+          impact: c.weight * (c.status === "fail" ? 1 : 0.5),
+          href: `/site/${siteId}/geo`,
+        });
+      }
+    }
+  } catch {
+    /* sem GEO não derruba os alertas */
+  }
+  return tasks.sort((x, y) => y.impact - x.impact);
+}

@@ -313,9 +313,6 @@ export default function NumaChat({ email, greeting }: { email: string; greeting:
             </>
           )}
         </div>
-        <p className="border-t border-white/60 px-3 py-2.5 text-paragraph-xs text-text-soft-400">
-          As conversas ficam neste navegador. As favoritas (estrela) ficam salvas na sua conta.
-        </p>
       </aside>
 
       <section className="relative flex min-w-0 flex-1 flex-col">
