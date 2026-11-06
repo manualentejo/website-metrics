@@ -30,7 +30,7 @@ const CHART_TABS = [
 /** Cartão do painel: altura limitada pelo grid, com o corpo rolando por dentro quando há muito conteúdo. */
 function Panel({ title, description, action, children, className = "", scroll = true }: { title: ReactNode; description?: ReactNode; action?: ReactNode; children: ReactNode; className?: string; scroll?: boolean }) {
   return (
-    <section className={`flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:min-h-0 ${className}`}>
+    <section className={`flex min-h-[18rem] min-w-0 flex-col rounded-2xl panel-edge bg-bg-white-0 lg:min-h-0 ${className}`}>
       <header className="flex flex-shrink-0 items-start justify-between gap-3 px-4 pb-2 pt-3.5">
         <div className="min-w-0">
           <h2 className="truncate text-label-md text-text-strong-950">{title}</h2>
@@ -263,7 +263,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </Panel>
             </div>
 
-            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 lg:col-span-6 lg:min-h-0 2xl:hidden">
+            <section className="flex min-h-[18rem] min-w-0 flex-col rounded-2xl panel-edge bg-bg-white-0 lg:col-span-6 lg:min-h-0 2xl:hidden">
               <TabbedPanel
                 tabs={[
                   { key: "atencao", label: "Atenção", node: <IssueList issues={p.attention} dense /> },
@@ -273,7 +273,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               />
             </section>
 
-            <section className="hidden min-h-0 min-w-0 flex-col rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 2xl:col-span-3 2xl:flex">
+            <section className="hidden min-h-0 min-w-0 flex-col rounded-2xl panel-edge bg-bg-white-0 2xl:col-span-3 2xl:flex">
               <TabbedPanel
                 tabs={[
                   { key: "numa", label: "Numa", node: <NumaPanel insights={p.insights} issues={p.attention} /> },

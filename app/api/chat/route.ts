@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getViewer } from "@/lib/access";
 import { askGemini } from "@/lib/gemini";
 import { NUMA_PERSONA, portfolioFacts } from "@/lib/numa";
+import { getProfile } from "@/lib/profile";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -22,7 +23,10 @@ export async function POST(req: NextRequest) {
     .map((t) => ({ role: t.role as "user" | "assistant", text: t.text.slice(0, 6000) }));
 
   try {
-    const { text: facts } = await portfolioFacts(viewer);
+    const [{ text: facts }, profile] = await Promise.all([portfolioFacts(viewer), getProfile(viewer.email).catch(() => ({}) as { nickname?: string | null })]);
+    const who = profile.nickname?.trim() ? `
+
+A pessoa pede para ser chamada de "${profile.nickname.trim()}". Use esse apelido de vez em quando, sem exagero.` : "";
     const answer = await askGemini(`${NUMA_PERSONA}\n\nDados do portfólio (JSON):\n${facts}`, text, safeHistory);
     return NextResponse.json({ answer });
   } catch (e) {

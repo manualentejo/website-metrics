@@ -46,7 +46,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         actions={<Segmented label="Seções do perfil" items={tabs} />}
       >
         {tab === "dados" && (
-          <ProfileForm email={viewer.email} initial={{ name, role: profile.role ?? "", image }} />
+          <ProfileForm email={viewer.email} initial={{ name, role: profile.role ?? "", nickname: profile.nickname ?? "", image }} />
         )}
         {tab === "analises" && settings && (
           <>

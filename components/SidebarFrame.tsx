@@ -17,7 +17,7 @@ export function SidebarCollapseButton() {
         onClick={toggle}
         aria-label={label}
         aria-expanded={!collapsed}
-        className="hidden size-8 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-bg-soft-200 hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950 lg:flex group-data-[collapsed=true]/sb:size-10"
+        className="hidden size-8 flex-shrink-0 items-center justify-center rounded-lg text-text-sub-600 transition duration-200 hover:bg-[color:var(--accent-soft)] hover:text-text-strong-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stroke-strong-950 lg:flex group-data-[collapsed=true]/sb:size-10"
       >
         <Icon className="size-5" />
       </button>
@@ -66,7 +66,7 @@ export default function SidebarFrame({ sidebar, children, initialCollapsed = fal
             aria-label="Abrir menu"
             aria-expanded={open}
             onClick={() => setOpen(true)}
-            className="flex size-9 items-center justify-center rounded-lg text-text-strong-950 hover:bg-bg-soft-200"
+            className="flex size-9 items-center justify-center rounded-lg text-text-strong-950 hover:bg-[color:var(--accent-soft)]"
           >
             <RiMenuLine className="size-5" />
           </button>
@@ -82,7 +82,7 @@ export default function SidebarFrame({ sidebar, children, initialCollapsed = fal
                 type="button"
                 aria-label="Fechar menu"
                 onClick={() => setOpen(false)}
-                className="absolute right-2 top-3 flex size-8 items-center justify-center rounded-lg text-text-sub-600 hover:bg-bg-soft-200"
+                className="absolute right-2 top-3 flex size-8 items-center justify-center rounded-lg text-text-sub-600 hover:bg-[color:var(--accent-soft)]"
               >
                 <RiCloseLine className="size-5" />
               </button>

@@ -18,7 +18,7 @@ export default function SidebarUserFooter({
     <Link
       href="/perfil"
       aria-label="Abrir meu perfil"
-      className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-bg-soft-200 group-data-[collapsed=true]/sb:justify-center group-data-[collapsed=true]/sb:p-1.5 ${active ? "bg-[color:var(--accent-soft)]" : ""}`}
+      className={`m-2 flex items-center gap-3 rounded-xl p-2 transition duration-200 hover:bg-[color:var(--accent-soft)] group-data-[collapsed=true]/sb:justify-center group-data-[collapsed=true]/sb:p-1.5 ${active ? "bg-[color:var(--accent-soft)]" : ""}`}
     >
       <Avatar name={user.name} image={user.image} size={32} />
       <span className="min-w-0 flex-1 group-data-[collapsed=true]/sb:hidden">

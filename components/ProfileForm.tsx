@@ -47,24 +47,25 @@ export default function ProfileForm({
   initial,
 }: {
   email: string;
-  initial: { name: string; role: string; image: string | null };
+  initial: { name: string; role: string; nickname: string; image: string | null };
 }) {
   const [name, setName] = useState(initial.name);
   const [role, setRole] = useState(initial.role);
+  const [nickname, setNickname] = useState(initial.nickname);
   const [image, setImage] = useState(initial.image);
   const [msg, setMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const dirty = name !== initial.name || role !== initial.role || image !== initial.image;
+  const dirty = name !== initial.name || role !== initial.role || nickname !== initial.nickname || image !== initial.image;
 
   async function save() {
     setSaving(true);
     const res = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, role, image }),
+      body: JSON.stringify({ name, role, nickname, image }),
     });
     setSaving(false);
     const data = await res.json().catch(() => null);
@@ -86,6 +87,9 @@ export default function ProfileForm({
       <Card>
         <Row title="Nome" description="Como seu nome aparece na barra lateral.">
           <input value={name} onChange={(e) => setName(e.target.value)} className={`${inputClass} w-full`} maxLength={80} />
+        </Row>
+        <Row title="Apelido" description="Como o app e a Numa vão te chamar.">
+          <input value={nickname} onChange={(e) => setNickname(e.target.value)} className={`${inputClass} w-full`} maxLength={40} placeholder="Ex.: Manu" />
         </Row>
         <Row title="Cargo" description="Opcional. Aparece abaixo do seu nome.">
           <input value={role} onChange={(e) => setRole(e.target.value)} className={`${inputClass} w-full`} maxLength={80} placeholder="Ex.: Designer" />
@@ -126,6 +130,7 @@ export default function ProfileForm({
           onClick={() => {
             setName(initial.name);
             setRole(initial.role);
+            setNickname(initial.nickname);
             setImage(initial.image);
             setMsg(null);
           }}

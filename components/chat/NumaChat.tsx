@@ -29,7 +29,7 @@ const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? c
  * Chat com a Numa. As conversas ficam guardadas neste navegador (não ocupam o banco do painel).
  * Só as favoritas (estrela) são salvas na sua conta, para aparecerem em qualquer aparelho.
  */
-export default function NumaChat({ email, greeting }: { email: string; greeting: string }) {
+export default function NumaChat({ email, greeting }: { email: string; greeting: [string, string] }) {
   const storageKey = `numa-chats:${email.toLowerCase()}`;
   const [chats, setChats] = useState<Chat[]>([]);
   const [ready, setReady] = useState(false);
@@ -330,7 +330,10 @@ export default function NumaChat({ email, greeting }: { email: string; greeting:
 
         {empty ? (
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10">
-            <h1 className="max-w-3xl text-center text-title-h3 text-text-strong-950 sm:text-title-h2">{greeting}</h1>
+            <h1 className="max-w-3xl text-center text-title-h3 tracking-[-1px] text-text-strong-950 sm:text-title-h2 sm:tracking-[-1px]">
+              <span className="block">{greeting[0]}</span>
+              <span className="block text-balance">{greeting[1]}</span>
+            </h1>
             <div className="mt-9 grid w-full max-w-3xl gap-3 sm:grid-cols-3">
               {SUGGESTIONS.map(({ icon: Icon, text }) => (
                 <button key={text} type="button" onClick={() => send(text)} className="glass flex flex-col items-start gap-3 rounded-2xl p-4 text-left text-label-md text-text-strong-950 transition hover:bg-white/90">
@@ -348,11 +351,11 @@ export default function NumaChat({ email, greeting }: { email: string; greeting:
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-5 pt-14 sm:px-6 md:pt-6">
               {messages.map((m, i) =>
                 m.role === "user" ? (
-                  <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bg-strong-950 px-3.5 py-2 text-paragraph-sm text-text-white-0 sm:max-w-[70%]">
+                  <div key={i} className="ml-auto w-fit max-w-[min(800px,88%)] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-bg-strong-950 px-3.5 py-2 text-paragraph-sm text-text-white-0">
                     {m.text}
                   </div>
                 ) : (
-                  <div key={i} className="glass max-w-[95%] rounded-2xl rounded-bl-md px-4 py-3 text-paragraph-sm text-text-strong-950 sm:max-w-[80%]">
+                  <div key={i} className="glass w-fit max-w-[min(800px,95%)] break-words rounded-2xl rounded-bl-md px-4 py-3 text-paragraph-sm text-text-strong-950">
                     <Markdown text={m.text} />
                   </div>
                 )

@@ -25,7 +25,7 @@ export interface TreeGroup {
 
 const row = (active: boolean) =>
   `flex items-center gap-2 rounded-lg px-3 h-9 text-label-sm transition duration-200 ${
-    active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"
+    active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-[color:var(--accent-soft)] hover:text-text-strong-950"
   }`;
 
 /**
@@ -135,7 +135,7 @@ function Group({ group, activeSiteId, activeFolderId, canReorder }: { group: Tre
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label={`${open ? "Recolher" : "Expandir"} ${group.name}`}
-          className="mr-1 rounded-md p-1 hover:bg-bg-soft-200"
+          className="mr-1 rounded-md p-1 hover:bg-[color:var(--accent-soft)]"
         >
           <RiArrowDownSLine className={`size-4 transition-transform ${open ? "" : "-rotate-90"}`} />
         </button>
@@ -197,7 +197,7 @@ function RailWorkspace({ group, activeFolderId, activeSiteId }: { group: TreeGro
     if (r) setMenu({ top: Math.max(8, Math.min(r.top, window.innerHeight - 340)), left: r.right + 10 });
   }
 
-  const item = "flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-label-sm text-text-strong-950 hover:bg-bg-soft-200 focus-visible:bg-bg-soft-200 focus-visible:outline-none";
+  const item = "flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-label-sm text-text-strong-950 hover:bg-[color:var(--accent-soft)] focus-visible:bg-[color:var(--accent-soft)] focus-visible:outline-none";
 
   return (
     <>
@@ -209,7 +209,7 @@ function RailWorkspace({ group, activeFolderId, activeSiteId }: { group: TreeGro
           aria-label={`Workspace ${group.name}. Botão direito para ver os sites.`}
           aria-haspopup="menu"
           aria-expanded={!!menu}
-          className={`relative flex h-10 items-center justify-center rounded-lg transition duration-200 ${active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-bg-soft-200 hover:text-text-strong-950"}`}
+          className={`relative flex h-10 items-center justify-center rounded-lg transition duration-200 ${active ? "bg-[color:var(--accent-soft)] text-text-strong-950" : "text-text-sub-600 hover:bg-[color:var(--accent-soft)] hover:text-text-strong-950"}`}
         >
           <WorkspaceIcon icon={group.icon} className="size-5" />
           <span aria-hidden className="absolute bottom-1 right-1 h-0 w-0 border-b-[6px] border-l-[6px] border-solid border-b-text-soft-400 border-l-transparent" />
@@ -261,7 +261,7 @@ export default function WorkspaceTree({ groups, loose, canReorder = false }: { g
             <Link
               href={`/site/${s.id}`}
               aria-label={s.name}
-              className={`flex h-10 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : "hover:bg-bg-soft-200"}`}
+              className={`flex h-10 items-center justify-center rounded-lg transition duration-200 ${s.id === activeSiteId ? "bg-[color:var(--accent-soft)]" : "hover:bg-[color:var(--accent-soft)]"}`}
             >
               <SiteIcon url={s.url} name={s.name} size={22} />
             </Link>
