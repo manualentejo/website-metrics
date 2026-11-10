@@ -334,7 +334,7 @@ type Row = Record<string, unknown>;
 
 // Checagens que não entram mais na nota (nem aparecem), inclusive nas auditorias antigas já salvas.
 const REMOVED = new Set(["faq", "llms", "headings"]);
-function score(checks: GeoCheck[]) {
+export function geoScoreOf(checks: GeoCheck[]) {
   const total = checks.reduce((a, c) => a + c.weight, 0);
   const got = checks.reduce((a, c) => a + c.weight * (c.status === "ok" ? 1 : c.status === "warn" ? 0.5 : 0), 0);
   return total ? Math.round((got / total) * 100) : 0;
@@ -349,7 +349,7 @@ export async function getGeoAudits(siteId: string, limit = 30): Promise<GeoAudit
   const res = (await db.execute(sql`SELECT ran_at, score, checks FROM geo_audits WHERE site_id = ${siteId} AND NOT (score = 0 AND jsonb_array_length(checks) = 1) ORDER BY ran_at DESC LIMIT ${limit}`)) as unknown as Row[];
   return res.map((r) => {
     const checks = clean(r.checks as GeoCheck[]);
-    return { ranAt: new Date(String(r.ran_at)), score: checks.length ? score(checks) : Number(r.score), checks };
+    return { ranAt: new Date(String(r.ran_at)), score: checks.length ? geoScoreOf(checks) : Number(r.score), checks };
   });
 }
 

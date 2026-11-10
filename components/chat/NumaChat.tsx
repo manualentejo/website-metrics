@@ -289,7 +289,7 @@ export default function NumaChat({ email, greeting }: { email: string; greeting:
   return (
     <div className="ai-gradient-soft absolute inset-0 flex lg:rounded-2xl">
       <aside
-        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-white/60 bg-white/70 backdrop-blur-xl md:static md:flex md:w-64 md:flex-shrink-0 md:bg-white/50`}
+        className={`${listOpen ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-72 flex-col border-r border-white/60 bg-white/80 backdrop-blur-[40px] md:static md:flex md:w-64 md:flex-shrink-0 md:bg-white/60`}
         aria-label="Conversas"
       >
         <div className="p-3">

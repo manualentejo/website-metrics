@@ -7,6 +7,7 @@ import { auditStatus } from "@/lib/analysis";
 import { AUDIT_PLAIN } from "@/lib/glossary";
 import { CATEGORY_TIPS, METRIC_LABEL, METRIC_TIPS, metricLevel, scoreLevel, type MetricKey, type Tip } from "@/lib/framerTips";
 import type { Viewer } from "@/lib/access";
+import { getLatestGeoChecks, geoScoreOf, type GeoCheck } from "@/lib/geoAudit";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -112,6 +113,9 @@ function delta(cur: number | null, prev: number | null | undefined) {
   return d === 0 ? " (=)" : d > 0 ? ` (+${d})` : ` (${d})`;
 }
 
+type Strategy = "desktop" | "mobile";
+const DEVICE_LABEL: Record<Strategy, string> = { desktop: "computador", mobile: "celular" };
+
 export async function buildReportPdf(viewer: Viewer, date: string): Promise<Uint8Array> {
   const { visible, rows } = await loadWeek(viewer, date);
   const end = endOfDayBrt(date).getTime();
@@ -122,116 +126,166 @@ export async function buildReportPdf(viewer: Viewer, date: string): Promise<Uint
 
   const [yy, mm, dd] = date.split("-");
   d.text("Relatório semanal de sites", { size: 20, bold: true });
-  d.text(`Semana encerrada em ${dd}/${mm}/${yy}. Foco no computador, depois celular.`, { size: 10, color: C.mute });
+  d.text(`Semana encerrada em ${dd}/${mm}/${yy}. Análise completa do computador e do celular.`, { size: 10, color: C.mute });
   d.gap(6);
   d.rule();
 
   const pick = (siteId: string, strategy: string, before = Infinity) =>
     rows.find((r) => r.siteId === siteId && r.strategy === strategy && r.ranAt.getTime() < before);
+  const inWeek = (r: Rep | undefined): r is Rep => !!r && r.ranAt.getTime() > weekStart;
 
-  // Resumo
-  d.text("Resumo", { size: 13, bold: true });
-  d.gap(2);
-  const cols = [M, 190, 250, 310, 380, 450];
-  ["Site", "Desemp.", "Acessib.", "Boas prát.", "SEO", "Celular"].forEach((h, i) => {
-    d.page.drawText(h, { x: cols[i], y: d.y - 9, size: 8, font: d.bold, color: C.mute });
-  });
-  d.y -= 16;
-  for (const s of visible) {
-    const cur = pick(s.id, "desktop");
-    if (!cur || cur.ranAt.getTime() <= weekStart) continue;
-    const prev = pick(s.id, "desktop", cur.ranAt.getTime() - 3 * DAY);
-    const mob = pick(s.id, "mobile");
-    d.ensure(16);
-    d.page.drawText(clean(s.name).slice(0, 26), { x: cols[0], y: d.y - 9, size: 10, font: d.bold, color: C.ink });
-    const vals: [number | null, number | null | undefined][] = [
-      [cur.performanceScore, prev?.performanceScore],
-      [cur.accessibilityScore, prev?.accessibilityScore],
-      [cur.bestPracticesScore, prev?.bestPracticesScore],
-      [cur.seoScore, prev?.seoScore],
-      [mob?.performanceScore ?? null, undefined],
-    ];
-    vals.forEach(([v, p], i) =>
-      d.page.drawText(`${fmt(v)}${delta(v, p)}`, { x: cols[i + 1], y: d.y - 9, size: 10, font: d.reg, color: levelColor(scoreLevel(v)) })
-    );
-    d.y -= 16;
+  // GEO: a auditoria técnica lê o site uma vez e vale para os dois dispositivos.
+  let geoChecks = new Map<string, GeoCheck[]>();
+  try {
+    geoChecks = await getLatestGeoChecks(visible.map((s) => s.id));
+  } catch {
+    /* sem GEO o relatório continua */
   }
+  const geoOf = (id: string) => {
+    const c = geoChecks.get(id);
+    return c && c.length ? geoScoreOf(c) : null;
+  };
+
+  // Resumo: uma tabela por dispositivo
+  d.text("Resumo", { size: 13, bold: true });
+  const cols = [M, 210, 280, 350, 410, 470];
+  const strategies: Strategy[] = ["desktop", "mobile"];
+  for (const st of strategies) {
+    const list = visible.filter((s) => inWeek(pick(s.id, st)));
+    if (!list.length) continue;
+    d.gap(6);
+    d.text(`No ${DEVICE_LABEL[st]}`, { size: 10, bold: true, color: C.mute });
+    d.ensure(30);
+    ["Site", "Desemp.", "Acessib.", "Boas prát.", "SEO", "GEO"].forEach((h, i) => {
+      d.page.drawText(h, { x: cols[i], y: d.y - 9, size: 8, font: d.bold, color: C.mute });
+    });
+    d.y -= 16;
+    for (const s of list) {
+      const cur = pick(s.id, st)!;
+      const prev = pick(s.id, st, cur.ranAt.getTime() - 3 * DAY);
+      d.ensure(16);
+      d.page.drawText(clean(s.name).slice(0, 30), { x: cols[0], y: d.y - 9, size: 10, font: d.bold, color: C.ink });
+      const geo = geoOf(s.id);
+      const vals: [number | null, number | null | undefined][] = [
+        [cur.performanceScore, prev?.performanceScore],
+        [cur.accessibilityScore, prev?.accessibilityScore],
+        [cur.bestPracticesScore, prev?.bestPracticesScore],
+        [cur.seoScore, prev?.seoScore],
+        [geo, undefined],
+      ];
+      vals.forEach(([v, p], i) =>
+        d.page.drawText(`${fmt(v)}${delta(v, p)}`, { x: cols[i + 1], y: d.y - 9, size: 10, font: d.reg, color: levelColor(scoreLevel(v)) })
+      );
+      d.y -= 16;
+    }
+  }
+  d.gap(4);
   d.text("Valores entre parênteses mostram a mudança desde a análise anterior.", { size: 8, color: C.mute });
 
-  // Detalhe por site
+  // Detalhe por site: computador e celular, com a mesma profundidade
   const snaps = visible.length
-    ? await db.select().from(snapshots).where(and(inArray(snapshots.siteId, visible.map((s) => s.id)), eq(snapshots.strategy, "desktop")))
+    ? await db.select().from(snapshots).where(inArray(snapshots.siteId, visible.map((s) => s.id)))
     : [];
 
   for (const s of visible) {
-    const cur = pick(s.id, "desktop");
-    if (!cur || cur.ranAt.getTime() <= weekStart) continue;
+    const hasAny = strategies.some((st) => inWeek(pick(s.id, st)));
+    if (!hasAny) continue;
     d.newPage();
     d.text(s.name, { size: 16, bold: true });
     d.text(s.url, { size: 9, color: C.mute });
     d.gap(4);
     d.rule();
 
-    const cats: [string, number | null][] = [
-      ["Desempenho", cur.performanceScore],
-      ["Acessibilidade", cur.accessibilityScore],
-      ["Boas práticas", cur.bestPracticesScore],
-      ["SEO", cur.seoScore],
-    ];
-    d.text("Notas no computador", { size: 11, bold: true });
-    cats.forEach(([label, v]) => d.text(`${label}: ${fmt(v)}`, { size: 10, color: levelColor(scoreLevel(v)) }));
-    const mob = pick(s.id, "mobile");
-    if (mob) d.text(`Celular: desempenho ${fmt(mob.performanceScore)}, SEO ${fmt(mob.seoScore)}`, { size: 10, color: C.mute });
-    d.gap(6);
+    for (const st of strategies) {
+      const cur = pick(s.id, st);
+      const label = DEVICE_LABEL[st];
+      if (!inWeek(cur)) {
+        d.text(`Sem análise do ${label} nesta semana.`, { size: 10, color: C.mute });
+        d.gap(6);
+        continue;
+      }
+      d.ensure(120);
+      d.text(`${label[0].toUpperCase()}${label.slice(1)}`, { size: 14, bold: true });
+      d.gap(2);
 
-    const metrics: [MetricKey, number | null, string][] = [
-      ["lcp", cur.lcpMs, sec(cur.lcpMs)],
-      ["fcp", cur.fcpMs, sec(cur.fcpMs)],
-      ["tbt", cur.tbtMs, cur.tbtMs === null ? "-" : `${Math.round(cur.tbtMs)} ms`],
-      ["cls", cur.cls, cur.cls === null ? "-" : cur.cls.toFixed(3)],
-      ["si", cur.speedIndexMs, sec(cur.speedIndexMs)],
-    ];
-    d.text("Métricas de velocidade", { size: 11, bold: true });
-    metrics.forEach(([k, v, label]) => d.text(`${METRIC_LABEL[k]}: ${label}`, { size: 10, color: levelColor(metricLevel(k, v)) }));
-    d.gap(6);
+      const cats: [string, number | null][] = [
+        ["Desempenho", cur.performanceScore],
+        ["Acessibilidade", cur.accessibilityScore],
+        ["Boas práticas", cur.bestPracticesScore],
+        ["SEO", cur.seoScore],
+      ];
+      d.text(`Notas no ${label}`, { size: 11, bold: true });
+      cats.forEach(([name, v]) => d.text(`${name}: ${fmt(v)}`, { size: 10, color: levelColor(scoreLevel(v)) }));
+      d.gap(6);
 
-    // O que fazer no Framer
-    const tips: { tip: Tip; why: string }[] = [];
-    for (const [k, v] of metrics) {
-      const lv = metricLevel(k, v);
-      if (lv && lv !== "good") tips.push({ tip: METRIC_TIPS[k], why: lv === "poor" ? "Ruim" : "Pode melhorar" });
-    }
-    const catTips: [number | null, keyof typeof CATEGORY_TIPS][] = [
-      [cur.seoScore, "seo"],
-      [cur.accessibilityScore, "accessibility"],
-      [cur.bestPracticesScore, "bestPractices"],
-    ];
-    for (const [v, k] of catTips) {
-      const lv = scoreLevel(v);
-      if (lv && lv !== "good") tips.push({ tip: CATEGORY_TIPS[k], why: `${lv === "poor" ? "Ruim" : "Pode melhorar"}, nota ${fmt(v)}` });
-    }
+      const metrics: [MetricKey, number | null, string][] = [
+        ["lcp", cur.lcpMs, sec(cur.lcpMs)],
+        ["fcp", cur.fcpMs, sec(cur.fcpMs)],
+        ["tbt", cur.tbtMs, cur.tbtMs === null ? "-" : `${Math.round(cur.tbtMs)} ms`],
+        ["cls", cur.cls, cur.cls === null ? "-" : cur.cls.toFixed(3)],
+        ["si", cur.speedIndexMs, sec(cur.speedIndexMs)],
+      ];
+      d.text("Métricas de velocidade", { size: 11, bold: true });
+      metrics.forEach(([k, v, text]) => d.text(`${METRIC_LABEL[k]}: ${text}`, { size: 10, color: levelColor(metricLevel(k, v)) }));
+      d.gap(6);
 
-    d.text("O que fazer no Framer", { size: 12, bold: true });
-    if (!tips.length) d.wrap("Nenhum ponto crítico esta semana. Continue acompanhando.", { color: C.mute });
-    for (const { tip, why } of tips) {
-      d.gap(3);
-      d.text(`${tip.title}  [${why}]`, { size: 10, bold: true });
-      for (const step of tip.steps) d.wrap(`- ${step}`, { size: 9.5, x: M + 8 });
-    }
+      // O que fazer no Framer
+      const tips: { tip: Tip; why: string }[] = [];
+      for (const [k, v] of metrics) {
+        const lv = metricLevel(k, v);
+        if (lv && lv !== "good") tips.push({ tip: METRIC_TIPS[k], why: lv === "poor" ? "Ruim" : "Pode melhorar" });
+      }
+      const catTips: [number | null, keyof typeof CATEGORY_TIPS][] = [
+        [cur.seoScore, "seo"],
+        [cur.accessibilityScore, "accessibility"],
+        [cur.bestPracticesScore, "bestPractices"],
+      ];
+      for (const [v, k] of catTips) {
+        const lv = scoreLevel(v);
+        if (lv && lv !== "good") tips.push({ tip: CATEGORY_TIPS[k], why: `${lv === "poor" ? "Ruim" : "Pode melhorar"}, nota ${fmt(v)}` });
+      }
 
-    // Auditorias reprovadas na análise mais recente
-    const snap = snaps.find((x) => x.siteId === s.id);
-    if (snap?.analysis && snap.capturedAt.getTime() <= end && snap.capturedAt.getTime() > weekStart) {
-      const failing = Object.entries(snap.analysis.audits)
-        .filter(([, a]) => auditStatus(a) === "fail")
-        .slice(0, 6);
-      if (failing.length) {
-        d.gap(8);
-        d.text("Principais problemas encontrados", { size: 12, bold: true });
-        for (const [id, a] of failing) {
-          d.wrap(`- ${a.title}${a.displayValue ? ` (${a.displayValue})` : ""}`, { size: 9.5, x: M + 8, bold: true });
-          if (AUDIT_PLAIN[id]) d.wrap(AUDIT_PLAIN[id], { size: 9, x: M + 16, color: C.mute });
+      d.text(`O que fazer no Framer (${label})`, { size: 12, bold: true });
+      if (!tips.length) d.wrap("Nenhum ponto crítico esta semana. Continue acompanhando.", { color: C.mute });
+      for (const { tip, why } of tips) {
+        d.gap(3);
+        d.text(`${tip.title}  [${why}]`, { size: 10, bold: true });
+        for (const step of tip.steps) d.wrap(`- ${step}`, { size: 9.5, x: M + 8 });
+      }
+
+      // Auditorias reprovadas na análise mais recente deste dispositivo
+      const snap = snaps.find((x) => x.siteId === s.id && x.strategy === st);
+      if (snap?.analysis && snap.capturedAt.getTime() <= end && snap.capturedAt.getTime() > weekStart) {
+        const failing = Object.entries(snap.analysis.audits)
+          .filter(([, a]) => auditStatus(a) === "fail")
+          .slice(0, 6);
+        if (failing.length) {
+          d.gap(8);
+          d.text(`Principais problemas encontrados (${label})`, { size: 12, bold: true });
+          for (const [id, a] of failing) {
+            d.wrap(`- ${a.title}${a.displayValue ? ` (${a.displayValue})` : ""}`, { size: 9.5, x: M + 8, bold: true });
+            if (AUDIT_PLAIN[id]) d.wrap(AUDIT_PLAIN[id], { size: 9, x: M + 16, color: C.mute });
+          }
         }
+      }
+      d.gap(10);
+      d.rule();
+    }
+
+    // GEO (vale para os dois dispositivos)
+    const checks = geoChecks.get(s.id);
+    if (checks && checks.length) {
+      d.ensure(60);
+      const g = geoScoreOf(checks);
+      d.text("GEO: preparo para IAs (computador e celular)", { size: 14, bold: true });
+      d.text(`Nota GEO: ${g}`, { size: 10, color: levelColor(scoreLevel(g)) });
+      const todo = checks.filter((c) => c.status !== "ok").sort((a, b) => b.weight - a.weight).slice(0, 6);
+      if (!todo.length) d.wrap("Tudo certo nas checagens técnicas.", { color: C.mute });
+      for (const c of todo) {
+        d.gap(3);
+        d.text(`${c.title}  [${c.status === "fail" ? "Ruim" : "Pode melhorar"}]`, { size: 10, bold: true });
+        d.wrap(c.found, { size: 9, x: M + 8, color: C.mute });
+        d.wrap(`Como corrigir: ${c.fix}`, { size: 9.5, x: M + 8 });
       }
     }
   }
